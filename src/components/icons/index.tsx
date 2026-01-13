@@ -3,3 +3,7 @@ export { PdfIcon } from "./PdfIcon";
 export { FolderIcon } from "./FolderIcon";
 export { UserIcon } from "./UserIcon";
 export { LockIcon } from "./LockIcon";
+export { LogoutIcon } from "./LogoutIcon";
+export { SunIcon } from "./SunIcon";
+export { MoonIcon } from "./MoonIcon";
+export { VaultIcon } from "./VaultIcon";

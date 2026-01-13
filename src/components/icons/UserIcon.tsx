@@ -2,7 +2,7 @@ import type { IconProps } from "./Icon.types";
 
 export const UserIcon = ({ size = 24, ...props }: IconProps) => (
   <svg
-    fill="white"
+    fill="currentColor"
     width={size}
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
