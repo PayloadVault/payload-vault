@@ -14,7 +14,7 @@ export const TotalIncomeCard = ({
         {subtitle && <p>{subtitle}</p>}
       </div>
       <div className="flex justify-center">
-        <IncomeIcon size={70} />
+        <IncomeIcon className="w-14 lg:w-18" />
       </div>
     </div>
   );
