@@ -7,3 +7,7 @@ export { LogoutIcon } from "./LogoutIcon";
 export { SunIcon } from "./SunIcon";
 export { MoonIcon } from "./MoonIcon";
 export { VaultIcon } from "./VaultIcon";
+export { ArrowIcon } from "./ArrowIcon";
+export { CardIcon } from "./CardIcon";
+export { SearchIcon } from "./SearchIcon";
+export { UploadIcon } from "./UploadIcon";
