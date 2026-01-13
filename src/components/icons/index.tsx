@@ -1,0 +1,1 @@
+export { IncomeIcon } from "./IncomeIcon";
