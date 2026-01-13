@@ -91,34 +91,23 @@
   }
 
   h1 {
-    @apply text-4xl
-      font-bold
-      tracking-tight
-      text-color-text-main;
+    @apply text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-color-text-main;
   }
 
   h2 {
-    @apply text-3xl
-      font-semibold
-      tracking-tight
-      text-color-text-main;
+    @apply text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-color-text-main;
   }
 
   h3 {
-    @apply text-2xl
-      font-semibold
-      text-color-text-main;
+    @apply text-xl sm:text-2xl lg:text-3xl font-semibold text-color-text-main;
   }
 
   h4 {
-    @apply text-xl
-      font-medium;
+    @apply text-lg sm:text-xl lg:text-2xl font-medium;
   }
 
   p {
-    @apply text-base
-      text-color-text-subtle
-      leading-relaxed;
+    @apply text-base sm:text-lg text-color-text-subtle leading-relaxed;
   }
 
   small {
@@ -143,35 +132,44 @@
 
 @layer components {
   .text-body {
-    @apply text-base
+    @apply text-sm
+      sm:text-base
       leading-relaxed
       text-color-text-main;
   }
 
   .text-muted {
-    @apply text-sm
+    @apply text-xs
+      sm:text-sm
       text-color-text-subtle;
   }
 
   .text-h1 {
-    @apply text-4xl
+    @apply text-2xl
+      sm:text-3xl
+      lg:text-4xl
       font-bold
       tracking-tight;
   }
 
   .text-h2 {
-    @apply text-3xl
+    @apply text-xl
+      sm:text-2xl
+      lg:text-3xl
       font-semibold
       tracking-tight;
   }
 
   .text-h3 {
-    @apply text-2xl
+    @apply text-lg
+      sm:text-xl
+      lg:text-2xl
       font-semibold;
   }
 
   .text-label {
-    @apply text-sm
+    @apply text-xs
+      sm:text-sm
       font-medium
       uppercase
       tracking-wide;
