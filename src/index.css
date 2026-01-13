@@ -49,6 +49,9 @@
 }
 
 @theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+
   --color-color-primary: var(--color-primary);
   --color-color-primary-dark: var(--color-primary-dark);
   --color-color-primary-light: var(--color-primary-light);
@@ -121,6 +124,20 @@
   small {
     @apply text-sm
       text-color-text-subtle;
+  }
+
+  a {
+    @apply text-color-text-accent underline-offset-4 hover:underline;
+  }
+
+  ::selection {
+    background: var(--color-primary);
+    color: var(--color-black);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
   }
 }
 
