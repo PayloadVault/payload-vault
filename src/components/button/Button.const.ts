@@ -9,29 +9,29 @@ const sizeClasses: Record<ButtonSize, string> = {
 const variantClasses: Record<ButtonVariant, string> = {
   primary: "bg-color-primary text-white",
   secondary: "bg-color-text-subtle/20 text-white",
-  approve: "border-2 border-(--success-emphasis) text-(--grey-1)",
-  decline: "border-2 border-(--danger-emphasis) text-(--grey-1)",
+  approve: "border-2 border-color-success bg-color-success/80 text-white",
+  decline: "border-2 border-color-error bg-color-error/80 text-white",
 };
 
 const onHover: Record<ButtonVariant, string> = {
   primary: "hover:bg-color-primary/80",
   secondary: "hover:bg-color-text-subtle/40",
-  decline: "hover:bg-(--danger)",
-  approve: "hover:bg-(--success)",
+  decline: "hover:bg-color-error/60",
+  approve: "hover:bg-color-success/60",
 };
 
 const iconColorByVariant: Record<ButtonVariant, string> = {
   primary: "text-white",
   secondary: "text-white",
-  approve: "text-(--success-emphasis)",
-  decline: "text-(--danger-emphasis)",
+  approve: "text-white",
+  decline: "text-white",
 };
 
 const spinnerColors: Record<ButtonVariant, string> = {
   primary: "white",
   secondary: "white",
-  approve: "var(--success-emphasis)",
-  decline: "var(--danger-emphasis)",
+  approve: "white",
+  decline: "white",
 };
 
 export {
