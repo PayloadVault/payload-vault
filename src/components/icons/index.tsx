@@ -1,2 +1,14 @@
 export { IncomeIcon } from "./IncomeIcon";
+export { PdfIcon } from "./PdfIcon";
+export { FolderIcon } from "./FolderIcon";
+export { UserIcon } from "./UserIcon";
+export { LockIcon } from "./LockIcon";
+export { LogoutIcon } from "./LogoutIcon";
+export { SunIcon } from "./SunIcon";
+export { MoonIcon } from "./MoonIcon";
+export { VaultIcon } from "./VaultIcon";
+export { ArrowIcon } from "./ArrowIcon";
+export { CardIcon } from "./CardIcon";
+export { SearchIcon } from "./SearchIcon";
+export { UploadIcon } from "./UploadIcon";
 export { CloseIcon } from "./CloseIcon";

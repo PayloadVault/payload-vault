@@ -2,7 +2,7 @@ import type { IconProps } from "./Icon.types";
 
 export const IncomeIcon = ({ size = 32, ...props }: IconProps) => (
   <svg
-    fill="#00c4b3"
+    fill="currentColor"
     width={size}
     viewBox="0 0 1024 1024"
     xmlns="http://www.w3.org/2000/svg"
