@@ -33,6 +33,20 @@ function App() {
         isLoading={true}
         onClick={() => {}}
       />
+      <Button
+        icon={MoonIcon}
+        text="Approve"
+        variant="approve"
+        size="medium"
+        onClick={() => {}}
+      />
+      <Button
+        icon={MoonIcon}
+        text="Decline"
+        variant="decline"
+        size="medium"
+        onClick={() => {}}
+      />
     </div>
   );
 }
