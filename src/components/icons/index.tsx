@@ -11,3 +11,4 @@ export { ArrowIcon } from "./ArrowIcon";
 export { CardIcon } from "./CardIcon";
 export { SearchIcon } from "./SearchIcon";
 export { UploadIcon } from "./UploadIcon";
+export { CloseIcon } from "./CloseIcon";
