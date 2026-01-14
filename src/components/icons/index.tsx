@@ -13,3 +13,4 @@ export { SearchIcon } from "./SearchIcon";
 export { UploadIcon } from "./UploadIcon";
 export { LoadingIcon } from "./LoadingIcon";
 export { CloseIcon } from "./CloseIcon";
+export { EyeIcon } from "./EyeIcon";
