@@ -7,9 +7,11 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "types": "npx supabase gen types typescript --local > src/types/supabase.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.90.1",
     "@tailwindcss/vite": "^4.1.18",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
