@@ -73,13 +73,17 @@ export const Dropdown = ({
           id={id}
           type="button"
           onClick={handleToggle}
-          className={`flex w-full cursor-pointer items-center justify-between px-4 py-3 ${
-            radiusVariants[variant]
-          } ${isOpen ? "ring-2 ring-color-bg-accent" : "border"} ${
-            error
-              ? "border border-color-error-border bg-color-error/10"
-              : "border-color-border-light bg-black"
-          }`}
+          className={`
+            flex w-full cursor-pointer items-center justify-between
+            px-4 py-3
+            ${radiusVariants[variant]}
+            ring-2 ring-transparent
+            ${isOpen ? "ring-color-bg-accent" : ""}
+            ${
+              error
+                ? "border border-color-error-border bg-color-error/10"
+                : "border border-color-border-light bg-black"
+            }`}
         >
           <div className="flex items-center gap-3">
             {MainIcon && <MainIcon />}
