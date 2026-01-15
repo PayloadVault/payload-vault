@@ -39,7 +39,6 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
-          profile_image_url: string | null
           updated_at: string | null
           username: string | null
         }
@@ -47,7 +46,6 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
-          profile_image_url?: string | null
           updated_at?: string | null
           username?: string | null
         }
@@ -55,7 +53,6 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
-          profile_image_url?: string | null
           updated_at?: string | null
           username?: string | null
         }

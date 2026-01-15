@@ -3,7 +3,6 @@ create table public.profiles (
   updated_at timestamptz default now(),
   username text unique,
   full_name text,
-  profile_image_url text,
   email text,
 
   constraint username_length check (char_length(username) >= 3)
@@ -27,11 +26,10 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, full_name, profile_image_url, email)
+  insert into public.profiles (id, full_name, email)
   values (
     new.id, 
-    new.raw_user_meta_data->>'full_name', 
-    new.raw_user_meta_data->>'profile_image_url',
+    new.raw_user_meta_data->>'full_name',
     new.email
   );
   return new;
