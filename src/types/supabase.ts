@@ -34,7 +34,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      pdf_records: {
+        Row: {
+          category: Database["public"]["Enums"]["document_category"]
+          created_at: string
+          date_created: string
+          date_uploaded: string
+          file_name: string
+          id: string
+          pdf_url: string
+          profit: number
+          user_id: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["document_category"]
+          created_at?: string
+          date_created: string
+          date_uploaded?: string
+          file_name: string
+          id?: string
+          pdf_url: string
+          profit?: number
+          user_id: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["document_category"]
+          created_at?: string
+          date_created?: string
+          date_uploaded?: string
+          file_name?: string
+          id?: string
+          pdf_url?: string
+          profit?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -43,7 +78,12 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      document_category:
+        | "Strom & Gas"
+        | "Barmenia Abrechnung"
+        | "IKK Abrechnung"
+        | "Adcuri Abschlussprovision"
+        | "Adcuri Bestandsprovision"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -173,7 +213,15 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      document_category: [
+        "Strom & Gas",
+        "Barmenia Abrechnung",
+        "IKK Abrechnung",
+        "Adcuri Abschlussprovision",
+        "Adcuri Bestandsprovision",
+      ],
+    },
   },
 } as const
 
