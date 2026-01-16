@@ -1,11 +1,17 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { categories } from "../../data/Categories";
+import { useState } from "react";
+import { UserIcon } from "../icons";
+import { ProfileDropdown } from "../profile/ProfileDropdown";
 
 export const Navigation = () => {
   const { user, signOut } = useAuth();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   if (!user) return null;
+
+  const toggleDropdown = () => setIsDropdownOpen((prev) => !prev);
 
   return (
     <nav
@@ -28,18 +34,26 @@ export const Navigation = () => {
           </Link>
         ))}
 
-      <button
-        onClick={() => signOut()}
-        style={{
-          marginLeft: "auto",
-          cursor: "pointer",
-          background: "none",
-          color: "red",
-          border: "none",
-        }}
-      >
-        Sign Out
-      </button>
+      <div style={{ marginLeft: "auto" }} className="relative">
+        <button
+          onClick={toggleDropdown}
+          className={`flex items-center justify-center p-2 rounded-full transition-all ${
+            isDropdownOpen ? "bg-zinc-800" : "hover:bg-zinc-900"
+          }`}
+        >
+          <UserIcon className="h-6 w-6 text-white cursor-pointer" />
+        </button>
+
+        {isDropdownOpen && (
+          <div className="absolute right-0 top-12 z-50">
+            <ProfileDropdown
+              userEmail={user.email}
+              onSignOut={signOut}
+              onClose={() => setIsDropdownOpen(false)}
+            />
+          </div>
+        )}
+      </div>
     </nav>
   );
 };
