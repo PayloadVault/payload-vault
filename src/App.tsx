@@ -8,6 +8,7 @@ import { CategoryPdfsPage } from "./pages/categoryPdfs/CategoryPdfsPage";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./context/ProtectedRoutes";
 import { Navigation } from "./components/navbar/Navigation";
+import { SignUpPage } from "./pages/signup/SignupPage";
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
 
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
 
         <Route
           path="/"
