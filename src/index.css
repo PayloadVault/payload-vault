@@ -52,8 +52,9 @@ select:-webkit-autofill:focus {
   --color-bg-main: #0d0d0d;
   --color-bg-alt: #111111;
   --color-bg-dark: #111111;
+  --color-bg-card: #2e2e2e;
   --color-bg-accent: var(--color-primary);
-  --color-border-light: #2e2e2e;
+  --color-border-light: #545454;
   --color-border-dark: #1f2937;
   --color-success: #4fa866;
   --color-success-border: #16a34a;
@@ -61,9 +62,9 @@ select:-webkit-autofill:focus {
   --color-error: #c45b61;
   --color-error-border: #dc2626;
   --color-error-text: #f87171;
-  --shadow-soft: 0 4px 8px rgba(0, 0, 0, 0.05);
-  --shadow-medium: 0 6px 12px rgba(0, 0, 0, 0.1);
-  --shadow-strong: 0 8px 16px rgba(0, 0, 0, 0.15);
+  --shadow-soft: 0 4px 8px rgba(255, 255, 255, 0.05);
+  --shadow-medium: 0 6px 12px rgba(255, 255, 255, 0.1);
+  --shadow-strong: 0 8px 16px rgba(255, 255, 255, 0.15);
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
@@ -83,8 +84,9 @@ select:-webkit-autofill:focus {
   --color-bg-main: #ffffff;
   --color-bg-alt: #f7f7f7;
   --color-bg-dark: #e5e7eb;
+  --color-bg-card: #dfdfdf;
   --color-bg-accent: var(--color-primary);
-  --color-border-light: #e5e7eb;
+  --color-border-light: rgb(208, 209, 212);
   --color-border-dark: #d1d5db;
   --color-success: #4fa866;
   --color-success-border: #16a34a;
@@ -120,6 +122,7 @@ select:-webkit-autofill:focus {
   --color-color-bg-main: var(--color-bg-main);
   --color-color-bg-alt: var(--color-bg-alt);
   --color-color-bg-dark: var(--color-bg-dark);
+  --color-color-bg-card: var(--color-bg-card);
   --color-color-bg-accent: var(--color-bg-accent);
 
   --color-color-border-light: var(--color-border-light);

@@ -17,3 +17,5 @@ export { EyeIcon } from "./EyeIcon";
 export { ExcelIcon } from "./ExcelIcon";
 export { ExcelPaper } from "./ExcelPaper";
 export { ArrowBackIcon } from "./ArrowBackIcon";
+export { OpenIcon } from "./OpenIcon";
+export { DownloadIcon } from "./DownloadIcon";

@@ -7,6 +7,11 @@ export const paycheckFilterOptions: Option[] = [
   { id: "low", label: "Low To High" },
 ];
 
+export const categorySortOptions: Option[] = [
+  { label: "High To Low", id: "descending" },
+  { label: "Low To High", id: "ascending" },
+];
+
 export const monthOptions: Option[] = [
   { id: "all", label: "All Months" },
   { id: "january", label: "January" },
@@ -26,6 +31,7 @@ export const monthOptions: Option[] = [
 export const dropdownOptions = {
   paycheckFilter: paycheckFilterOptions,
   month: monthOptions,
+  categorySort: categorySortOptions,
 } as const;
 
 export type DropdownOptions = typeof dropdownOptions;
