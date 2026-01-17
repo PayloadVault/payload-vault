@@ -35,7 +35,9 @@ export const DropdownList = ({
 
       <ul className="max-h-60 overflow-y-auto">
         {filtered.length === 0 && (
-          <li className="p-2 text-center text-white">No results found</li>
+          <li className="p-2 text-center text-color-text-secondary">
+            No results found
+          </li>
         )}
 
         {filtered.map((option) => (

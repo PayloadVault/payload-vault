@@ -63,9 +63,13 @@ export const Dropdown = ({
           className="flex h-6 cursor-pointer items-center font-semibold tracking-[-0.15px]"
         >
           {isRequired && (
-            <span className="text-[24px] leading-none text-white">*</span>
+            <span className="text-[24px] leading-none text-color-text-secondary">
+              *
+            </span>
           )}
-          <span className="ml-1 text-sm text-white">{label}</span>
+          <span className="ml-1 text-sm text-color-text-secondary">
+            {label}
+          </span>
         </label>
       )}
       <div className="relative w-full">
@@ -82,14 +86,16 @@ export const Dropdown = ({
             ${
               error
                 ? "border border-color-error-border bg-color-error/10"
-                : "border border-color-border-light bg-black"
+                : "border border-color-border-light bg-main-color-bg-main "
             }`}
         >
           <div className="flex items-center gap-3">
             {MainIcon && <MainIcon />}
             <p
               className={`align-middle leading-6 ${
-                isPlaceholderActive ? "text-color-text-subtle" : "text-white"
+                isPlaceholderActive
+                  ? "text-color-text-subtle"
+                  : "text-color-text-secondary"
               }`}
             >
               {displayText}
@@ -97,7 +103,7 @@ export const Dropdown = ({
           </div>
 
           <ArrowIcon
-            className={`text-white transition-transform duration-400 ease-in-out ${
+            className={`text-color-text-secondary transition-transform duration-400 ease-in-out ${
               isOpen ? "rotate-90" : "-rotate-90"
             }`}
           />

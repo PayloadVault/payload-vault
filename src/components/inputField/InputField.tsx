@@ -23,10 +23,12 @@ export const InputField = ({
     <div className="relative flex w-full flex-col">
       <label
         htmlFor={inputId}
-        className="mb-1 flex h-6 items-center font-semibold text-white"
+        className="mb-1 flex h-6 items-center font-semibold text-color-text-secondary"
       >
         {isRequired && <span className="text-[24px] leading-none">*</span>}
-        <span className="ml-1 text-[14px] text-white">{label}</span>
+        <span className="ml-1 text-[14px] text-color-text-secondary">
+          {label}
+        </span>
       </label>
 
       <input

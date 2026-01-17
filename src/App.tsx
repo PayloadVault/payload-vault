@@ -5,8 +5,20 @@ import { LoginPage } from "./pages/login/LoginPage";
 import { AllPdfsPage } from "./pages/allPdfs/AllPdfsPage";
 import { CategoryPage } from "./pages/category/CategoryPage";
 import { CategoryPdfsPage } from "./pages/categoryPdfs/CategoryPdfsPage";
+import { useEffect } from "react";
 
 export default function App() {
+  useEffect(() => {
+    const saved = localStorage.getItem("theme") as "light" | "dark" | null;
+
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+    const theme = saved ?? (prefersDark ? "dark" : "light");
+
+    document.documentElement.dataset.theme = theme;
+  }, []);
+
   return (
     <>
       <Routes>

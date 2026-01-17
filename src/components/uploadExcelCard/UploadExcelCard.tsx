@@ -99,7 +99,7 @@ export const ExcelUploadCard = ({
     const base =
       "flex w-[50%] max-w-[420px] aspect-square flex-col items-center justify-center gap-4 rounded-lg border border-dashed p-10 text-center transition-colors";
     if (isDragOver) {
-      return `${base} bg-black text-white`;
+      return `${base} bg-black text-color-text-secondary`;
     }
     return `${base} border-color-border-light bg-transparent text-inherit`;
   }, [isDragOver]);
@@ -124,7 +124,7 @@ export const ExcelUploadCard = ({
 
       <h5
         className={`text-2xl leading-[120%] font-bold ${
-          isDragOver ? "text-white" : ""
+          isDragOver ? "text-color-text-secondary" : ""
         }`}
       >
         {title}
@@ -132,7 +132,7 @@ export const ExcelUploadCard = ({
 
       <p
         className={`text-[16px] leading-6 font-medium ${
-          isDragOver ? "text-white/90" : "text-color-text-subtle"
+          isDragOver ? "text-color-text-secondary/90" : "text-color-text-subtle"
         }`}
       >
         {description}
@@ -151,7 +151,7 @@ export const ExcelUploadCard = ({
           <div className="flex items-center gap-2 overflow-hidden">
             <ExcelPaper size={32} className="text-color-primary" />
 
-            <span className="truncate text-[16px] leading-6 font-medium text-white">
+            <span className="truncate text-[16px] leading-6 font-medium text-color-text-secondary">
               {file.name}
             </span>
           </div>
@@ -159,7 +159,7 @@ export const ExcelUploadCard = ({
           <button
             type="button"
             onClick={removeFile}
-            className="ml-3 inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded text-white hover:bg-white/5"
+            className="ml-3 inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded text-color-text-secondary hover:bg-white/5"
           >
             ✕
           </button>

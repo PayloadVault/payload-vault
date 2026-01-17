@@ -1,6 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Dropdown } from "../dropdown/Dropdown";
-import { LockIcon, LogoutIcon, SunIcon, UserIcon, VaultIcon } from "../icons";
+import {
+  LockIcon,
+  LogoutIcon,
+  MoonIcon,
+  SunIcon,
+  UserIcon,
+  VaultIcon,
+} from "../icons";
 
 export const Header = () => {
   const options = [
@@ -11,6 +18,20 @@ export const Header = () => {
 
   const [selectedYear, setSelectedYear] = useState(options[0]);
   const [isOpen, setIsOpen] = useState(false);
+  type Theme = "light" | "dark";
+
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window === "undefined") return "dark";
+    return (document.documentElement.dataset.theme as Theme) ?? "dark";
+  });
+
+  const toggleTheme = () => {
+    const next: Theme = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem("theme", next);
+  };
 
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -80,8 +101,7 @@ export const Header = () => {
             <button
               className="
             cursor-pointer p-2 rounded-radius-md
-            hover:bg-color-primary/20
-            text-white hover:text-color-primary
+            hover:bg-color-primary/20 hover:text-color-primary
           "
               aria-label="User menu"
               aria-haspopup="menu"
@@ -122,12 +142,16 @@ export const Header = () => {
                   role="menuitem"
                   className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2"
                   onClick={() => {
+                    toggleTheme();
                     setIsOpen(false);
-                    // toggle theme action
                   }}
                 >
-                  <SunIcon className="w-4 h-4" />
-                  Light Mode
+                  {theme === "dark" ? (
+                    <SunIcon className="w-4 h-4" />
+                  ) : (
+                    <MoonIcon className="w-4 h-4" />
+                  )}
+                  {theme === "dark" ? "Light Mode" : "Dark Mode"}
                 </button>
 
                 <button
