@@ -1,5 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { categories } from "../../data/Categories";
+import { useOutletContext } from "react-router-dom";
 
 export function CategoryPage() {
   const { slug, subSlug } = useParams();
@@ -17,6 +18,14 @@ export function CategoryPage() {
   });
 
   const hasChildren = directChildren.length > 0;
+
+  const { setTitle, setSubtitle } = useOutletContext<{
+    setTitle: (title: string) => void;
+    setSubtitle: (subtitle: string) => void;
+  }>();
+
+  setTitle(category.title);
+  setSubtitle("year");
 
   return (
     <div>

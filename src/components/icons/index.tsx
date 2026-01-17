@@ -16,3 +16,4 @@ export { CloseIcon } from "./CloseIcon";
 export { EyeIcon } from "./EyeIcon";
 export { ExcelIcon } from "./ExcelIcon";
 export { ExcelPaper } from "./ExcelPaper";
+export { ArrowBackIcon } from "./ArrowBackIcon";
