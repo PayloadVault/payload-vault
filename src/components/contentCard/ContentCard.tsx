@@ -22,17 +22,21 @@ export const ContentCard = (props: CombinedContentCardProps) => {
   const Icon = cardIcon[props.variant];
 
   const handleNavigate = () => {
-    if (link) {
+    if (link && variant !== "document") {
       navigate(link);
     }
   };
 
-  const handleDownloadClick = () => {
-    // Download the document -> downloadLink
+  const handleDownloadClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!downloadLink) return;
+    window.open(downloadLink, "_blank", "noopener,noreferrer");
   };
 
-  const handleOpenClick = () => {
-    // Open the document -> openLink
+  const handleOpenClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!openLink) return;
+    window.open(openLink, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -47,7 +51,7 @@ export const ContentCard = (props: CombinedContentCardProps) => {
         }`}
       onClick={handleNavigate}
     >
-      <div className="flex justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <TitleSide
           variant={variant}
           title={title}
@@ -55,25 +59,34 @@ export const ContentCard = (props: CombinedContentCardProps) => {
           date={date}
           Icon={Icon}
         />
-        <div className="flex items-center gap-5">
+
+        <div className="flex w-full items-center justify-end gap-3 sm:w-auto sm:justify-end sm:gap-5">
           {profit && (
-            <h4 className="font-bold text-color-primary">
+            <h4 className="font-bold text-color-primary whitespace-nowrap">
               {normalizeProfit(profit)} €
             </h4>
           )}
+
           {variant === "document" ? (
-            <div className="flex gap-5">
+            <div className="flex items-center gap-2 sm:gap-5">
               <button
-                className="cursor-pointer p-1 items-center justify-center flex hover:text-color-primary rounded-radius-sm hover:bg-color-primary/10
-                transition-colors duration-200 ease-in-out"
+                type="button"
+                className="cursor-pointer p-2 sm:p-1 items-center justify-center flex
+                  hover:text-color-primary rounded-radius-sm hover:bg-color-primary/10
+                  transition-colors duration-200 ease-in-out"
                 onClick={handleDownloadClick}
+                aria-label="Download"
               >
                 <DownloadIcon className="w-6 h-6 text-color-icon shrink-0" />
               </button>
+
               <button
-                className="cursor-pointer p-1 items-center justify-center flex hover:text-color-primary rounded-radius-sm hover:bg-color-primary/10
-                transition-colors duration-200 ease-in-out"
+                type="button"
+                className="cursor-pointer p-2 sm:p-1 items-center justify-center flex
+                  hover:text-color-primary rounded-radius-sm hover:bg-color-primary/10
+                  transition-colors duration-200 ease-in-out"
                 onClick={handleOpenClick}
+                aria-label="Open"
               >
                 <OpenIcon className="w-6 h-6 text-color-icon shrink-0" />
               </button>
