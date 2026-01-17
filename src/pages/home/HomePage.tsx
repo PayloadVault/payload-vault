@@ -13,6 +13,49 @@ export const HomePage = () => {
     DropdownOptions["categorySort"][number]
   >(categorySortOptions[0]);
 
+  const contentCardData = {
+    totalIncome: 12300,
+    allPdfs: {
+      title: "All PDFs",
+      subtitle: "Browse all your PDF documents",
+      link: "/all-pdfs",
+    },
+    categories: [
+      {
+        title: "Storm & Gas",
+        subtitle: "12 documents",
+        profit: 5400,
+        link: "/category/strom-gas",
+      },
+      {
+        title: "Barmenia Abrechnung",
+        subtitle: "12 documents",
+        profit: 13400,
+        link: "/category/barmenia-abrechnung",
+      },
+      {
+        title: "IKK Abrechnung",
+        subtitle: "12 documents",
+        profit: 504400,
+        link: "/category/ikk-abrechnung",
+      },
+      {
+        title: "Adcuri",
+        subtitle: "12 documents",
+        profit: 504400,
+        link: "/category/adcuri",
+      },
+    ],
+  };
+
+  const sortedCategories = [...contentCardData.categories].sort((a, b) => {
+    if (sortSelected.id === "ascending") {
+      return a.profit - b.profit;
+    }
+
+    return b.profit - a.profit;
+  });
+
   return (
     <div className="min-h-screen bg-color-bg">
       <HeaderHome />
@@ -20,13 +63,13 @@ export const HomePage = () => {
         <TotalIncomeCard
           title="Total income"
           subtitle="5 paychecks"
-          totalIncome={12300}
+          totalIncome={contentCardData.totalIncome}
         />
         <ContentCard
           variant="allPdf"
-          title="All PDFs"
-          subtitle="Browse all your PDF documents"
-          link="/all-pdfs"
+          title={contentCardData.allPdfs.title}
+          subtitle={contentCardData.allPdfs.subtitle}
+          link={contentCardData.allPdfs.link}
         />
         <Dropdown
           label="Sort Categories"
@@ -34,34 +77,18 @@ export const HomePage = () => {
           onSelect={setSortSelected}
           value={sortSelected}
         />
-        <ContentCard
-          variant="category"
-          title="Storm & Gas"
-          subtitle="12 documents"
-          profit={5400}
-          link="/category/strom-gas"
-        />
-        <ContentCard
-          variant="category"
-          title="Barmenia Abrechnung"
-          subtitle="12 documents"
-          profit={13400}
-          link="/category/barmenia-abrechnung"
-        />
-        <ContentCard
-          variant="category"
-          title="IKK Abrechnung"
-          subtitle="12 documents"
-          profit={504400}
-          link="/category/ikk-abrechnung"
-        />
-        <ContentCard
-          variant="category"
-          title="Adcuri"
-          subtitle="12 documents"
-          profit={504400}
-          link="/category/adcuri"
-        />
+        <div className="flex flex-col gap-6">
+          {sortedCategories.map((category) => (
+            <ContentCard
+              key={category.title}
+              variant="category"
+              title={category.title}
+              subtitle={category.subtitle}
+              profit={category.profit}
+              link={category.link}
+            />
+          ))}
+        </div>
       </main>
     </div>
   );
