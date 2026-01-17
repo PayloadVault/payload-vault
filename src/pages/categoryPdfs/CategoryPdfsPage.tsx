@@ -1,6 +1,6 @@
-import { useParams } from "react-router-dom";
+import { useParams, useOutletContext } from "react-router-dom";
 import { categories } from "../../data/Categories";
-import { useOutletContext } from "react-router-dom";
+import { useLayoutEffect } from "react";
 
 export function CategoryPdfsPage() {
   const { slug, subSlug } = useParams();
@@ -14,8 +14,10 @@ export function CategoryPdfsPage() {
     setSubtitle: (subtitle: string) => void;
   }>();
 
-  setTitle(category.title + " — PDF");
-  setSubtitle("year");
+  useLayoutEffect(() => {
+    setTitle(`${category.title} — PDF`);
+    setSubtitle("year");
+  }, [setTitle, setSubtitle, category.title]);
 
   return (
     <div>
