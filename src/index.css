@@ -91,7 +91,7 @@ select:-webkit-autofill:focus {
   --color-success-text: #4ade80;
   --color-error: #c45b61;
   --color-error-border: #dc2626;
-  --color-error-text: #f87171;
+  --color-error-text: #c31313;
   --shadow-soft: 0 2px 6px rgba(0, 0, 0, 0.06);
   --shadow-medium: 0 4px 10px rgba(0, 0, 0, 0.08);
   --shadow-strong: 0 8px 20px rgba(0, 0, 0, 0.12);

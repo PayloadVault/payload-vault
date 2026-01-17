@@ -1,13 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Dropdown } from "../dropdown/Dropdown";
-import {
-  LockIcon,
-  LogoutIcon,
-  MoonIcon,
-  SunIcon,
-  UserIcon,
-  VaultIcon,
-} from "../icons";
+import { UserIcon, VaultIcon } from "../icons";
+import { MenuDropdown } from "./MenuDropdown";
 
 export const Header = () => {
   const options = [
@@ -112,61 +106,12 @@ export const Header = () => {
               <UserIcon className="w-7 h-7 sm:w-8 sm:h-8 text-color-text-secondary" />
             </button>
 
-            {isOpen && (
-              <div
-                role="menu"
-                className="
-              absolute right-0 top-full mt-2
-              min-w-55
-              rounded-radius-md
-              border border-color-border-light
-              bg-color-bg-dark
-              shadow-lg
-              z-50
-              overflow-hidden
-            "
-              >
-                <button
-                  role="menuitem"
-                  className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2"
-                  onClick={() => {
-                    setIsOpen(false);
-                    // do change password action
-                  }}
-                >
-                  <LockIcon className="w-4 h-4" />
-                  Change Password
-                </button>
-
-                <button
-                  role="menuitem"
-                  className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2"
-                  onClick={() => {
-                    toggleTheme();
-                    setIsOpen(false);
-                  }}
-                >
-                  {theme === "dark" ? (
-                    <SunIcon className="w-4 h-4" />
-                  ) : (
-                    <MoonIcon className="w-4 h-4" />
-                  )}
-                  {theme === "dark" ? "Light Mode" : "Dark Mode"}
-                </button>
-
-                <button
-                  role="menuitem"
-                  className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2"
-                  onClick={() => {
-                    setIsOpen(false);
-                    // logout action
-                  }}
-                >
-                  <LogoutIcon className="w-4 h-4" />
-                  Logout
-                </button>
-              </div>
-            )}
+            <MenuDropdown
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+              theme={theme}
+              toggleTheme={toggleTheme}
+            />
           </div>
         </div>
       </div>
