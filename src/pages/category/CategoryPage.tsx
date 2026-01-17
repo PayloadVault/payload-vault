@@ -1,12 +1,11 @@
 import { Link, useParams } from "react-router-dom";
 import { categories } from "../../data/Categories";
 import { useOutletContext } from "react-router-dom";
+import { useLayoutEffect } from "react";
 
 export function CategoryPage() {
   const { slug, subSlug } = useParams();
-
   const fullSlug = subSlug ? `${slug}/${subSlug}` : slug;
-
   const category = categories.find((c) => c.slug === fullSlug);
   if (!category) return <h1>Category not found: {fullSlug}</h1>;
 
@@ -24,8 +23,10 @@ export function CategoryPage() {
     setSubtitle: (subtitle: string) => void;
   }>();
 
-  setTitle(category.title);
-  setSubtitle("year");
+  useLayoutEffect(() => {
+    setTitle(category.title);
+    setSubtitle("year");
+  }, [setTitle, setSubtitle, category.title]);
 
   return (
     <div>
