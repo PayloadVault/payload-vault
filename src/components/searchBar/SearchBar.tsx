@@ -49,7 +49,7 @@ export const SearchBar = ({
       {title && (
         <label
           htmlFor="search"
-          className="cursor-pointer text-sm font-semibold text-white"
+          className="cursor-pointer text-sm font-semibold text-color-text-secondary"
         >
           {title}
         </label>
@@ -62,7 +62,7 @@ export const SearchBar = ({
           placeholder={placeholder}
           value={searchValue}
           onChange={handleInputChange}
-          className="w-full rounded-lg border border-color-border-light px-4 py-3 pl-12 text-white placeholder-color-text-subtle focus:border-transparent focus:outline-3 focus:outline-color-bg-accent"
+          className="w-full rounded-lg border border-color-border-light px-4 py-3 pl-12 text-color-text-secondary placeholder-color-text-subtle focus:border-transparent focus:outline-3 focus:outline-color-bg-accent"
         />
         {searchValue && (
           <button

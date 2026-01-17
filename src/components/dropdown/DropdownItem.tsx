@@ -11,11 +11,13 @@ export const DropdownItem = ({ option, onClick }: DropdownItemProps) => {
 
   return (
     <button
-      className="flex h-12 w-full cursor-pointer items-center gap-4 px-4 py-2 hover:bg-color-primary"
+      className="flex h-12 w-full cursor-pointer items-center gap-4 hover:bg-color-primary"
       onClick={handleClick}
     >
       {Icon && <Icon />}
-      <p className="align-middle leading-6 text-white">{option.label}</p>
+      <p className="flex items-center align-middle leading-6 w-full h-full hover:text-color-text-main px-6">
+        {option.label}
+      </p>
     </button>
   );
 };

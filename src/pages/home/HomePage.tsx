@@ -1,3 +1,9 @@
+import { HeaderHome } from "../../components/header/HeaderHome";
+
 export const HomePage = () => {
-  return <div className="flex flex-col gap-10 w-100">Home Page</div>;
+  return (
+    <div>
+      <HeaderHome />
+    </div>
+  );
 };

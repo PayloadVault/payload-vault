@@ -9,7 +9,9 @@ const getInputStyles = (
   const base =
     "py-3 px-6 font-medium text-[16px] placeholder-color-text-subtle";
 
-  const text = isReadOnly ? "text-color-text-subtle" : "text-white";
+  const text = isReadOnly
+    ? "text-color-text-subtle"
+    : "text-color-text-secondary";
 
   const positionClasses =
     position === "full"
