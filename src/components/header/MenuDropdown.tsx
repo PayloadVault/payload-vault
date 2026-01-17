@@ -1,0 +1,73 @@
+import { LockIcon, LogoutIcon, MoonIcon, SunIcon } from "../icons";
+
+type MenuDropdownProps = {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+  theme: "light" | "dark";
+  toggleTheme: () => void;
+};
+
+export const MenuDropdown = ({
+  isOpen,
+  setIsOpen,
+  theme,
+  toggleTheme,
+}: MenuDropdownProps) => {
+  if (!isOpen) return null;
+
+  return (
+    <div
+      role="menu"
+      className="
+              absolute right-0 top-full mt-2
+              min-w-55
+              rounded-radius-md
+              border border-color-border-light
+              bg-color-bg-dark
+              shadow-lg
+              z-50
+              overflow-hidden
+            "
+    >
+      <button
+        role="menuitem"
+        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2"
+        onClick={() => {
+          setIsOpen(false);
+          // do change password action
+        }}
+      >
+        <LockIcon className="w-4 h-4" />
+        Change Password
+      </button>
+
+      <button
+        role="menuitem"
+        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2"
+        onClick={() => {
+          toggleTheme();
+          setIsOpen(false);
+        }}
+      >
+        {theme === "dark" ? (
+          <SunIcon className="w-4 h-4" />
+        ) : (
+          <MoonIcon className="w-4 h-4" />
+        )}
+        {theme === "dark" ? "Light Mode" : "Dark Mode"}
+      </button>
+
+      <button
+        role="menuitem"
+        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2 text-color-error-text"
+        onClick={() => {
+          setIsOpen(false);
+          // logout action
+        }}
+      >
+        <LogoutIcon className="w-4 h-4" />
+        Logout
+      </button>
+    </div>
+  );
+};

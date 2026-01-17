@@ -25,11 +25,13 @@ export const PasswordInput = ({
       <div className="flex flex-col gap-2">
         <div className="flex">
           {isRequired && (
-            <span className="mr-1 text-[24px] leading-none text-white">*</span>
+            <span className="mr-1 text-[24px] leading-none text-color-text-secondary">
+              *
+            </span>
           )}
           <label
             htmlFor="password"
-            className="text-sm font-semibold text-white"
+            className="text-sm font-semibold text-color-text-secondary"
           >
             {label}
           </label>
@@ -51,8 +53,8 @@ export const PasswordInput = ({
             onChange={handleInputChange}
             className={`w-full bg-transparent font-medium focus:outline-none placeholder:text-color-text-subtle placeholder:opacity-50 ${
               !visible && value
-                ? "text-[16px] tracking-widest text-white"
-                : "text-[16px] text-white"
+                ? "text-[16px] tracking-widest text-color-text-secondary"
+                : "text-[16px] text-color-text-secondary"
             }`}
           />
           <button
@@ -61,9 +63,9 @@ export const PasswordInput = ({
             className="cursor-pointer"
           >
             {value && visible ? (
-              <EyeIcon className="text-white" />
+              <EyeIcon className="text-color-text-secondary" />
             ) : (
-              <CloseEyeIcon className="text-white" />
+              <CloseEyeIcon className="text-color-text-secondary" />
             )}
           </button>
         </div>
