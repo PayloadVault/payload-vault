@@ -10,7 +10,7 @@ export const PdfIcon = ({ size = 24, ...props }: IconProps) => (
     xmlSpace="preserve"
     {...props}
   >
-    <style type="text/css">{"\n\t.st0{fill:#00c4b3;}\n"}</style>
+    <style type="text/css">{"\n\t.st0{fill:currentColor;}\n"}</style>
     <g>
       <path
         className="st0"
