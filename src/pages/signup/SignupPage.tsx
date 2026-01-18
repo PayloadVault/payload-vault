@@ -5,6 +5,7 @@ import { InputField } from "../../components/inputField/InputField";
 import { PasswordInput } from "../../components/passwordInput/PasswordInput";
 import { useAuth } from "../../context/AuthContext";
 import { EmailConfirmation } from "../../components/auth/EmailConfirmation";
+import { Banner } from "../../components/banner/Banner";
 
 export const SignUpPage = () => {
   const [email, setEmail] = useState("");
@@ -72,32 +73,25 @@ export const SignUpPage = () => {
       >
         <h1 className="text-2xl font-bold text-white">Create Account</h1>
 
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 p-3 rounded-lg">
-            <p className="text-red-500 text-sm text-center">{error}</p>
-          </div>
-        )}
+        {error && <Banner bannerType="error" title={error} description="" />}
 
         <InputField
           label="Email"
           placeholder="your@email.com"
           value={email}
           onChange={(val) => setEmail(val)}
-          isRequired
         />
 
         <PasswordInput
           label="Password"
           value={password}
           onChange={(val) => setPassword(val)}
-          isRequired
         />
 
         <PasswordInput
           label="Repeat password"
           value={repeatedPassword}
           onChange={(val) => setRepeatedPassword(val)}
-          isRequired
         />
 
         <div className="flex flex-col gap-3 mt-4">
