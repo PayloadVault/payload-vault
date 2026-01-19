@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { categories } from "../../data/Categories";
 import { useOutletContext } from "react-router-dom";
 import { useLayoutEffect } from "react";
+import { AdcuriPage } from "./AdcuriPage";
 
 export function CategoryPage() {
   const { slug, subSlug } = useParams();
@@ -28,23 +29,5 @@ export function CategoryPage() {
     setSubtitle("year");
   }, [setTitle, setSubtitle, category.title]);
 
-  return (
-    <div>
-      <h1>{category.title}</h1>
-
-      {hasChildren ? (
-        <ul>
-          {directChildren.map((child) => (
-            <li key={child.slug}>
-              <Link to={`/category/${child.slug}`}>{child.title}</Link>
-              {" — "}
-              <Link to={`/category/${child.slug}/pdfs`}>PDFs</Link>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <Link to="pdfs">View PDFs</Link>
-      )}
-    </div>
-  );
+  return <div>{category.title === "Adcuri" && <AdcuriPage />}</div>;
 }
