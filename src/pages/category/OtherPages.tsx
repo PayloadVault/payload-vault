@@ -106,7 +106,7 @@ export const OtherPages = ({ title }: CategoryProps) => {
     <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
       <TotalIncomeCard
         title={title}
-        subtitle="5 paychecks"
+        subtitle={contentCardData.pdfs.length + " documents"}
         totalIncome={contentCardData.totalIncome}
       />
       <div className="grid md:grid-cols-2 gap-2">
