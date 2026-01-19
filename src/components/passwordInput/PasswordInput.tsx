@@ -41,7 +41,7 @@ export const PasswordInput = ({
     ${
       error
         ? "bg-color-error/10 border-color-error"
-        : "border-color-border-light bg-black"
+        : "border-color-border-light bg-color-bg-dark"
     }
     focus-within:border-color-bg-accent`}
         >
@@ -53,8 +53,8 @@ export const PasswordInput = ({
             onChange={handleInputChange}
             className={`w-full bg-transparent font-medium focus:outline-none placeholder:text-color-text-subtle placeholder:opacity-50 ${
               !visible && value
-                ? "text-[16px] tracking-widest text-color-text-secondary"
-                : "text-[16px] text-color-text-secondary"
+                ? "text-[16px] tracking-widest text-color-text-main"
+                : "text-[16px] text-color-text-main"
             }`}
           />
           <button
