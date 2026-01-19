@@ -5,6 +5,7 @@ import { InputField } from "../../components/inputField/InputField";
 import { PasswordInput } from "../../components/passwordInput/PasswordInput";
 import { useAuth } from "../../context/AuthContext";
 import { Banner } from "../../components/banner/Banner";
+import { Button } from "../../components/button/Button";
 
 export const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -23,8 +24,7 @@ export const LoginPage = () => {
     }
   }, [user, navigate, location]);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = async () => {
     setLoading(true);
     setError(null);
 
@@ -40,12 +40,9 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-black p-4">
-      <form
-        onSubmit={handleLogin}
-        className="flex flex-col gap-6 w-full max-w-md bg-zinc-900 p-8 rounded-xl"
-      >
-        <h1 className="text-2xl font-bold text-white">Login</h1>
+    <div className="flex items-center justify-center w-screen h-screen p-4">
+      <form className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card p-8 rounded-xl border border-color-border-light">
+        <h1 className="text-2xl font-bold text-color-text-main">Login</h1>
 
         {error && <Banner bannerType="error" title={error} description="" />}
 
@@ -63,20 +60,11 @@ export const LoginPage = () => {
         />
 
         <div className="flex flex-col gap-3 mt-4">
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-white text-black font-bold py-3 rounded-lg hover:bg-zinc-200 disabled:opacity-50"
-          >
-            {loading ? "Logging in..." : "Log In"}
-          </button>
+          <Button onClick={handleLogin} text="Log In" isLoading={loading} />
         </div>
 
-        <p className="text-zinc-400 text-center text-sm mt-2">
-          Still don't have an account?{" "}
-          <Link to="/signup" className="text-white underline font-medium">
-            Sign Up
-          </Link>
+        <p className="text-color-text-subtle text-center text-sm mt-2">
+          Still don't have an account? <Link to="/signup">Sign Up</Link>
         </p>
       </form>
     </div>

@@ -7,8 +7,8 @@ const sizeClasses: Record<ButtonSize, string> = {
 };
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: "bg-color-primary text-color-text-secondary",
-  secondary: "bg-color-text-subtle/20 text-color-text-secondary",
+  primary: "bg-color-primary text-black",
+  secondary: "bg-color-text-subtle/20 text-white",
   approve:
     "border-2 border-color-success bg-color-success/80 text-color-text-secondary",
   decline:

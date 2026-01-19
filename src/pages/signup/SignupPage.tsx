@@ -6,6 +6,7 @@ import { PasswordInput } from "../../components/passwordInput/PasswordInput";
 import { useAuth } from "../../context/AuthContext";
 import { EmailConfirmation } from "../../components/auth/EmailConfirmation";
 import { Banner } from "../../components/banner/Banner";
+import { Button } from "../../components/button/Button";
 
 export const SignUpPage = () => {
   const [email, setEmail] = useState("");
@@ -26,8 +27,7 @@ export const SignUpPage = () => {
     }
   }, [user, navigate, location]);
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSignUp = async () => {
     setError(null);
 
     if (password !== repeatedPassword) {
@@ -66,12 +66,11 @@ export const SignUpPage = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-black p-4">
-      <form
-        onSubmit={handleSignUp}
-        className="flex flex-col gap-6 w-full max-w-md bg-zinc-900 p-8 rounded-xl"
-      >
-        <h1 className="text-2xl font-bold text-white">Create Account</h1>
+    <div className="flex justify-center items-center w-screen h-screen p-4">
+      <form className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card border border-color-border-light p-8 rounded-xl">
+        <h1 className="text-2xl font-bold text-color-text-main">
+          Create Account
+        </h1>
 
         {error && <Banner bannerType="error" title={error} description="" />}
 
@@ -95,19 +94,10 @@ export const SignUpPage = () => {
         />
 
         <div className="flex flex-col gap-3 mt-4">
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-white text-black font-bold py-3 rounded-lg hover:bg-zinc-200 disabled:opacity-50 transition-opacity"
-          >
-            {loading ? "Creating account..." : "Sign Up"}
-          </button>
+          <Button onClick={handleSignUp} text="Sign Up" isLoading={loading} />
 
-          <p className="text-zinc-400 text-center text-sm mt-2">
-            Already have an account?{" "}
-            <Link to="/login" className="text-white underline font-medium">
-              Log In
-            </Link>
+          <p className="text-color-text-subtle text-center text-sm mt-2">
+            Already have an account? <Link to="/login">Log In</Link>
           </p>
         </div>
       </form>

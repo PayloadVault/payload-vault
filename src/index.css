@@ -183,7 +183,8 @@ button {
   }
 
   a {
-    @apply text-color-text-accent underline-offset-4 hover:underline;
+    @apply text-color-text-accent underline-offset-4 hover:underline 
+      transition-colors duration-200 ease-in-out hover:text-color-text-accent/80;
   }
 
   ::selection {
