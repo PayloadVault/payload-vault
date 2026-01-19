@@ -23,14 +23,14 @@ const onHover: Record<ButtonVariant, string> = {
 };
 
 const iconColorByVariant: Record<ButtonVariant, string> = {
-  primary: "text-color-text-secondary",
-  secondary: "text-color-text-secondary",
+  primary: "text-black",
+  secondary: "text-white",
   approve: "text-color-text-secondary",
   decline: "text-color-text-secondary",
 };
 
 const spinnerColors: Record<ButtonVariant, string> = {
-  primary: "white",
+  primary: "black",
   secondary: "white",
   approve: "white",
   decline: "white",
