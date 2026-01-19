@@ -22,9 +22,10 @@ export const Button = ({
 
   return (
     <button
-      className={`shadow-shadow-medium cursor-pointer flex w-auto items-center justify-center gap-2 rounded-sm font-bold transition-opacity duration-150 ease-out ${
-        variantClasses[variant]
-      } ${sizeClasses[size]} ${
+      className={`shadow-shadow-medium cursor-pointer flex w-auto items-center justify-center gap-2 font-bold rounded-radius-md transition-opacity 
+                  duration-200 ease-in-out" ${variantClasses[variant]} ${
+        sizeClasses[size]
+      } ${
         isButtonDisabled ? "cursor-not-allowed opacity-50" : onHover[variant]
       } focus:outline-3 focus:outline-(--focus)`}
       disabled={isButtonDisabled}

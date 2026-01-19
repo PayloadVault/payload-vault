@@ -10,7 +10,7 @@ textarea:-webkit-autofill:focus,
 select:-webkit-autofill,
 select:-webkit-autofill:hover,
 select:-webkit-autofill:focus {
-  -webkit-text-fill-color: #fff;
+  -webkit-text-fill-color: var(--color-color-text-main);
   -webkit-box-shadow: 0 0 0px 1000px transparent inset;
   transition: background-color 9999s ease-in-out 0s;
 }
@@ -183,7 +183,8 @@ button {
   }
 
   a {
-    @apply text-color-text-accent underline-offset-4 hover:underline;
+    @apply text-color-text-accent underline-offset-4 hover:underline 
+      transition-colors duration-200 ease-in-out hover:text-color-text-accent/80;
   }
 
   ::selection {

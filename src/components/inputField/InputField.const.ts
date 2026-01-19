@@ -9,9 +9,7 @@ const getInputStyles = (
   const base =
     "py-3 px-6 font-medium text-[16px] placeholder-color-text-subtle";
 
-  const text = isReadOnly
-    ? "text-color-text-subtle"
-    : "text-color-text-secondary";
+  const text = isReadOnly ? "text-color-text-subtle" : "text-color-text-main";
 
   const positionClasses =
     position === "full"
@@ -21,10 +19,10 @@ const getInputStyles = (
       : "rounded-r-lg";
 
   const colorClasses = isReadOnly
-    ? "bg-black border border-color-border-light cursor-not-allowed"
+    ? "bg-color-bg-dark border border-color-border-light cursor-not-allowed"
     : hasError
     ? "bg-color-error/10 border border-color-error"
-    : "bg-black border border-color-border-light";
+    : "bg-color-bg-dark border border-color-border-light";
 
   const focusClasses = isReadOnly
     ? "focus:outline-none focus:border-color-border-light"
