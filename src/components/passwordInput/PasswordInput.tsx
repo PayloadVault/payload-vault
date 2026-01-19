@@ -47,7 +47,7 @@ export const PasswordInput = ({
         >
           <input
             type={visible ? "text" : "password"}
-            id="password"
+            id={label.toLowerCase()}
             placeholder="Enter your password"
             value={value}
             onChange={handleInputChange}
