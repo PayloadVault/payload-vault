@@ -12,6 +12,7 @@ export const PasswordChangeForm = ({
   onSave,
 }: PasswordChangeFormProps) => {
   const [password, setPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSave = async () => {
@@ -28,8 +29,13 @@ export const PasswordChangeForm = ({
       <PasswordInput
         label="New Password"
         value={password}
-        isRequired
         onChange={setPassword}
+      />
+      <PasswordInput
+        label="Confirm New Password"
+        value={repeatPassword}
+        onChange={setRepeatPassword}
+        isRepeated
       />
       <div className="mt-6 flex gap-6">
         <Button variant="secondary" text="Cancel" onClick={onCancel} />
@@ -37,7 +43,6 @@ export const PasswordChangeForm = ({
           text="Confirm change"
           icon={LockIcon}
           onClick={handleSave}
-          isDisabled={!password}
           isLoading={isLoading}
         />
       </div>

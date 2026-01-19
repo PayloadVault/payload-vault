@@ -93,6 +93,7 @@ export const SignUpPage = () => {
           label="Repeat password"
           value={repeatedPassword}
           onChange={(val) => setRepeatedPassword(val)}
+          isRepeated
         />
 
         <div className="flex flex-col gap-3 mt-4">

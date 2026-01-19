@@ -9,6 +9,7 @@ export const PasswordInput = ({
   label = "Password",
   error,
   isRequired,
+  isRepeated,
 }: PasswordInputProps) => {
   const [visible, setVisible] = useState(false);
 
@@ -48,7 +49,9 @@ export const PasswordInput = ({
           <input
             type={visible ? "text" : "password"}
             id={label.toLowerCase()}
-            placeholder="Enter your password"
+            placeholder={
+              isRepeated ? "Repeat your password" : "Enter your password"
+            }
             value={value}
             onChange={handleInputChange}
             className={`w-full bg-transparent font-medium focus:outline-none placeholder:text-color-text-subtle placeholder:opacity-50 ${
