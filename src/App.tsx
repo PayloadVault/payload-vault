@@ -7,6 +7,7 @@ import { CategoryPage } from "./pages/category/CategoryPage";
 import { CategoryPdfsPage } from "./pages/categoryPdfs/CategoryPdfsPage";
 import { useEffect } from "react";
 import { Layout } from "./pages/layout";
+import { ModalProvider } from "./context/modal/ModalProvider";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./context/ProtectedRoutes";
 import { SignUpPage } from "./pages/signup/SignupPage";
@@ -25,64 +26,66 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignUpPage />} />
+      <ModalProvider>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
 
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <HomePage />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route element={<Layout />}>
-          <Route
-            path="/all-pdfs"
-            element={
-              <ProtectedRoute>
-                <AllPdfsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/category/:slug"
-            element={
-              <ProtectedRoute>
-                <CategoryPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/category/:slug/pdfs"
-            element={
-              <ProtectedRoute>
-                <CategoryPdfsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/category/:slug/:subSlug"
-            element={
-              <ProtectedRoute>
-                <CategoryPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/category/:slug/:subSlug/pdfs"
-            element={
-              <ProtectedRoute>
-                <CategoryPdfsPage />
-              </ProtectedRoute>
-            }
-          />
-        </Route>
+          <Route element={<Layout />}>
+            <Route
+              path="/all-pdfs"
+              element={
+                <ProtectedRoute>
+                  <AllPdfsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/category/:slug"
+              element={
+                <ProtectedRoute>
+                  <CategoryPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/category/:slug/pdfs"
+              element={
+                <ProtectedRoute>
+                  <CategoryPdfsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/category/:slug/:subSlug"
+              element={
+                <ProtectedRoute>
+                  <CategoryPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/category/:slug/:subSlug/pdfs"
+              element={
+                <ProtectedRoute>
+                  <CategoryPdfsPage />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
 
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </ModalProvider>
     </AuthProvider>
   );
 }

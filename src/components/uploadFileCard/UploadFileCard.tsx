@@ -5,38 +5,36 @@ import {
   type DragEventHandler,
   type ChangeEventHandler,
 } from "react";
-import { ExcelIcon, ExcelPaper } from "../icons";
-import type { ExcelUploadCardProps } from "./UploadExcelCard.types";
+import { ExcelPaper } from "../icons";
+import type { ExcelUploadCardProps } from "./UploadfileCard.types";
 import { Button } from "../button/Button";
 import { useBannerNotification } from "../../hooks/banner/UseBannerNotification";
 import { Banner } from "../banner/Banner";
 
-export const ExcelUploadCard = ({
+export const FileUploadCard = ({
   title,
   description,
-  accept = ".xlsx,.xls,.csv",
+  accept = ".pdf",
 }: ExcelUploadCardProps) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const [isDragOver, setIsDragOver] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
 
   const { banner, closeBanner, showBanner } = useBannerNotification();
 
   const openPicker = () => inputRef.current?.click();
 
-  const isExcel = (f: File) => {
-    const nameOk = /\.(xlsx|xls)|csv$/i.test(f.name);
-    return nameOk;
+  const isPdf = (f: File) => {
+    return /\.pdf$/i.test(f.name);
   };
 
   const setPickedFile = (f: File | null) => {
     if (!f) return;
-    if (!isExcel(f)) {
+    if (!isPdf(f)) {
       showBanner(
         "File type mismatch",
-        "Please upload a valid Excel file (.xlsx, .xls).",
+        "Please upload a valid PDF file (.pdf).",
         "error"
       );
       return;
@@ -73,31 +71,9 @@ export const ExcelUploadCard = ({
 
   const removeFile = () => setFile(null);
 
-  const handleUpload = async () => {
-    if (!file) return;
-
-    try {
-      setIsUploading(true);
-
-      showBanner(
-        "Upload Successful",
-        "The Excel file has been uploaded successfully.",
-        "success"
-      );
-      setFile(null);
-    } catch (error: unknown) {
-      let message =
-        "Something went wrong while uploading the Excel file. Please try again.";
-
-      showBanner("Error occurred", message, "error");
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   const containerClasses = useMemo(() => {
     const base =
-      "flex w-[50%] max-w-[420px] aspect-square flex-col items-center justify-center gap-4 rounded-lg border border-dashed p-10 text-center transition-colors";
+      "flex w-full aspect-square flex-col items-center justify-center gap-4 rounded-lg border border-dashed p-10 text-center transition-colors";
     if (isDragOver) {
       return `${base} bg-black text-color-text-secondary`;
     }
@@ -166,26 +142,15 @@ export const ExcelUploadCard = ({
         </div>
       )}
 
-      {!file ? (
-        !isDragOver && (
-          <Button variant="secondary" text="Choose File" onClick={openPicker} />
-        )
-      ) : (
-        <div className="mt-2 flex items-center gap-3">
-          <Button
-            variant="secondary"
-            text="Replace file"
-            onClick={openPicker}
-          />
-          <Button
-            variant="primary"
-            text="Upload Excel file"
-            onClick={handleUpload}
-            isLoading={isUploading}
-            icon={ExcelIcon}
-          />
-        </div>
-      )}
+      {!file
+        ? !isDragOver && (
+            <Button
+              variant="secondary"
+              text="Choose File"
+              onClick={openPicker}
+            />
+          )
+        : null}
       {banner && (
         <div className="animate-slide-in animate-slide-out fixed right-4 bottom-4">
           <Banner
