@@ -26,7 +26,7 @@ export const DropdownList = ({
   };
 
   return (
-    <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-md border border-color-border-light bg-color-bg-dark shadow-md">
+    <div className="absolute z-60 mt-2 w-full overflow-hidden rounded-md border border-color-border-light bg-color-bg-dark shadow-md">
       {isSearchEnabled && (
         <div className="p-3">
           <SearchBar value={search} onChange={setSearch} placeholder="Search" />
