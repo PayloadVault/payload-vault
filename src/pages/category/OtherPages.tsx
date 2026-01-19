@@ -54,7 +54,7 @@ export const OtherPages = ({ title }: CategoryProps) => {
       },
       {
         title: "Adcuri Abschlussprovision Document 2",
-        date: "2023-02-15",
+        date: "2023-04-15",
         profit: 13400,
         downloadLink: "/category/adcuri/abschlussprovision/document2.pdf",
         openLink: "/category/adcuri/abschlussprovision/document2",
@@ -69,9 +69,30 @@ export const OtherPages = ({ title }: CategoryProps) => {
       {
         title: "Adcuri Abschlussprovision Document 4",
         date: "2023-04-15",
-        profit: 30400,
+        profit: 3400,
         downloadLink: "/category/adcuri/abschlussprovision/document4.pdf",
         openLink: "/category/adcuri/abschlussprovision/document4",
+      },
+      {
+        title: "Adcuri Bestandsprovision Document 1",
+        date: "2023-03-15",
+        profit: 1400,
+        downloadLink: "/category/adcuri/bestandsprovision/document1.pdf",
+        openLink: "/category/adcuri/bestandsprovision/document1",
+      },
+      {
+        title: "Adcuri Bestandsprovision Document 2",
+        date: "2023-05-15",
+        profit: 400,
+        downloadLink: "/category/adcuri/bestandsprovision/document2.pdf",
+        openLink: "/category/adcuri/bestandsprovision/document2",
+      },
+      {
+        title: "Adcuri Bestandsprovision Document 3",
+        date: "2023-04-15",
+        profit: 12400,
+        downloadLink: "/category/adcuri/bestandsprovision/document3.pdf",
+        openLink: "/category/adcuri/bestandsprovision/document3",
       },
     ],
   };
