@@ -38,6 +38,10 @@ select:-webkit-autofill:focus {
   scrollbar-color: var(--color-border-light) var(--color-bg-dark);
 }
 
+button {
+  cursor: pointer;
+}
+
 :root {
   --color-primary: #00c4b3;
   --color-primary-dark: #009c8f;

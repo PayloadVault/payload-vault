@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../../lib/supabase";
 import { LockIcon, LogoutIcon, MoonIcon, SunIcon } from "../icons";
 
 type MenuDropdownProps = {
@@ -14,6 +16,20 @@ export const MenuDropdown = ({
   toggleTheme,
 }: MenuDropdownProps) => {
   if (!isOpen) return null;
+
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
+      setIsOpen(false);
+      navigate("/login");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
 
   return (
     <div
@@ -65,7 +81,7 @@ export const MenuDropdown = ({
         transition-colors duration-200 ease-in-out"
         onClick={() => {
           setIsOpen(false);
-          // logout action
+          handleLogout();
         }}
       >
         <LogoutIcon className="w-4 h-4" />

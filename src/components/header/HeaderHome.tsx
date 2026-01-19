@@ -2,8 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { Dropdown } from "../dropdown/Dropdown";
 import { UserIcon, VaultIcon } from "../icons";
 import { MenuDropdown } from "./MenuDropdown";
+import { useAuth } from "../../context/AuthContext";
 
 export const HeaderHome = () => {
+  const { user } = useAuth();
+
   const options = [
     { label: "2026", id: "2026" },
     { label: "2025", id: "2025" },
@@ -70,7 +73,7 @@ export const HeaderHome = () => {
             <h5 className="leading-tight">Paycheck Vault</h5>
 
             <p className="text-[14px] sm:text-[16px] text-color-text-secondary truncate">
-              vuletic@pro-fina.de
+              {user?.email}
             </p>
           </div>
         </div>
