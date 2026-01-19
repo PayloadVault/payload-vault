@@ -3,7 +3,7 @@ import type { Option } from "./Dropdown.types";
 export const paycheckFilterOptions: Option[] = [
   { id: "newest", label: "Newest First" },
   { id: "oldest", label: "Oldest First" },
-  { id: "high", label: "Hight To Low" },
+  { id: "high", label: "High To Low" },
   { id: "low", label: "Low To High" },
 ];
 
