@@ -31,7 +31,8 @@ export const MenuDropdown = ({
     >
       <button
         role="menuitem"
-        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2"
+        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2
+        transition-colors duration-200 ease-in-out"
         onClick={() => {
           setIsOpen(false);
           // do change password action
@@ -43,7 +44,8 @@ export const MenuDropdown = ({
 
       <button
         role="menuitem"
-        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2"
+        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2
+        transition-colors duration-200 ease-in-out"
         onClick={() => {
           toggleTheme();
           setIsOpen(false);
@@ -59,7 +61,8 @@ export const MenuDropdown = ({
 
       <button
         role="menuitem"
-        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2 text-color-error-text"
+        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2 text-color-error-text
+        transition-colors duration-200 ease-in-out"
         onClick={() => {
           setIsOpen(false);
           // logout action
