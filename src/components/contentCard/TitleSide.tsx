@@ -1,17 +1,10 @@
 import type { TitleSideProps } from "./ContentCard.types";
 
-export const TitleSide = ({
-  variant,
-  title,
-  subtitle,
-  date,
-  Icon,
-}: TitleSideProps) => {
+export const TitleSide = ({ title, subtitle, date, Icon }: TitleSideProps) => {
   return (
     <div
       className={`flex items-center min-w-0
-        transition-colors duration-200 ease-in-out
-        ${variant !== "document" ? "hover:text-color-primary" : ""}`}
+        transition-colors duration-200 ease-in-out`}
     >
       <Icon className="w-7 h-7 sm:w-8 sm:h-8 text-color-icon mr-3 sm:mr-4 shrink-0" />
 

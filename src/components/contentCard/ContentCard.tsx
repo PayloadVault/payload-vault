@@ -46,19 +46,13 @@ export const ContentCard = (props: CombinedContentCardProps) => {
         transition-colors duration-200 ease-in-out
         ${
           variant !== "document"
-            ? "cursor-pointer hover:border-color-primary"
+            ? "cursor-pointer hover:border-color-primary hover:text-color-primary"
             : ""
         }`}
       onClick={handleNavigate}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <TitleSide
-          variant={variant}
-          title={title}
-          subtitle={subtitle}
-          date={date}
-          Icon={Icon}
-        />
+        <TitleSide title={title} subtitle={subtitle} date={date} Icon={Icon} />
 
         <div className="flex w-full items-center justify-end gap-3 sm:w-auto sm:justify-end sm:gap-5">
           {profit && (
