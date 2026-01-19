@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "../button/Button";
-import { PasswordInput } from "../passwordInput/PasswordInput";
-import { LockIcon } from "../icons";
+import { UploadIcon } from "../icons";
+import { FileUploadCard } from "../uploadFileCard/UploadFileCard";
 
 interface PasswordChangeFormProps {
   onCancel: () => void;
@@ -11,13 +11,12 @@ export const ImportPdfForm = ({
   onCancel,
   onSave,
 }: PasswordChangeFormProps) => {
-  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      await onSave(password);
+      // await onSave();
     } finally {
       setIsLoading(false);
     }
@@ -25,19 +24,18 @@ export const ImportPdfForm = ({
 
   return (
     <div className="flex flex-col gap-6">
-      <PasswordInput
-        label="New Password"
-        value={password}
-        isRequired
-        onChange={setPassword}
-      />
+      <div className="w-full">
+        <FileUploadCard
+          title="Import PDF"
+          description="Choose from files or drag and drop"
+        />
+      </div>
       <div className="mt-6 flex gap-6">
         <Button variant="secondary" text="Cancel" onClick={onCancel} />
         <Button
-          text="Confirm change"
-          icon={LockIcon}
+          text="Upload PDF"
+          icon={UploadIcon}
           onClick={handleSave}
-          isDisabled={!password}
           isLoading={isLoading}
         />
       </div>
