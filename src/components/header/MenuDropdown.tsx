@@ -19,6 +19,7 @@ export const MenuDropdown = ({
   toggleTheme,
 }: MenuDropdownProps) => {
   const { banner, closeBanner, showBanner } = useBannerNotification();
+  const navigate = useNavigate();
 
   const handleChangePassword = async (newPassword: string) => {
     try {
@@ -44,8 +45,6 @@ export const MenuDropdown = ({
   });
 
   if (!isOpen) return null;
-
-  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
