@@ -8,7 +8,7 @@ const sizeClasses: Record<ButtonSize, string> = {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary: "bg-color-primary text-black",
-  secondary: "bg-color-text-subtle/20 text-white",
+  secondary: "bg-color-border-light text-white",
   approve:
     "border-2 border-color-success bg-color-success/80 text-color-text-secondary",
   decline:
@@ -17,7 +17,7 @@ const variantClasses: Record<ButtonVariant, string> = {
 
 const onHover: Record<ButtonVariant, string> = {
   primary: "hover:bg-color-primary/80",
-  secondary: "hover:bg-color-text-subtle/40",
+  secondary: "hover:bg-color-border-light/80",
   decline: "hover:bg-color-error/60",
   approve: "hover:bg-color-success/60",
 };

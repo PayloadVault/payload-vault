@@ -63,7 +63,10 @@ export const MenuDropdown = ({
         role="menuitem"
         className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2
         hover:text-color-text-main text-color-text-subtle transition-colors duration-200 ease-in-out"
-        onClick={openChangePasswordModal}
+        onClick={() => {
+          openChangePasswordModal();
+          setIsOpen(false);
+        }}
       >
         <LockIcon className="w-4 h-4" />
         Change Password
