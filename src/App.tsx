@@ -11,6 +11,7 @@ import { ModalProvider } from "./context/modal/ModalProvider";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./context/ProtectedRoutes";
 import { SignUpPage } from "./pages/signup/SignupPage";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export default function App() {
   useEffect(() => {
@@ -26,66 +27,68 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <ModalProvider>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
+      <QueryClientProvider client={new QueryClient()}>
+        <ModalProvider>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
 
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <HomePage />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route element={<Layout />}>
-            <Route
-              path="/all-pdfs"
-              element={
-                <ProtectedRoute>
-                  <AllPdfsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/category/:slug"
-              element={
-                <ProtectedRoute>
-                  <CategoryPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/category/:slug/pdfs"
-              element={
-                <ProtectedRoute>
-                  <CategoryPdfsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/category/:slug/:subSlug"
-              element={
-                <ProtectedRoute>
-                  <CategoryPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/category/:slug/:subSlug/pdfs"
-              element={
-                <ProtectedRoute>
-                  <CategoryPdfsPage />
-                </ProtectedRoute>
-              }
-            />
-          </Route>
+            <Route element={<Layout />}>
+              <Route
+                path="/all-pdfs"
+                element={
+                  <ProtectedRoute>
+                    <AllPdfsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/category/:slug"
+                element={
+                  <ProtectedRoute>
+                    <CategoryPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/category/:slug/pdfs"
+                element={
+                  <ProtectedRoute>
+                    <CategoryPdfsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/category/:slug/:subSlug"
+                element={
+                  <ProtectedRoute>
+                    <CategoryPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/category/:slug/:subSlug/pdfs"
+                element={
+                  <ProtectedRoute>
+                    <CategoryPdfsPage />
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
 
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </ModalProvider>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </ModalProvider>
+      </QueryClientProvider>
     </AuthProvider>
   );
 }
