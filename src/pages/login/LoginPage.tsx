@@ -4,6 +4,7 @@ import { supabase } from "../../lib/supabase";
 import { InputField } from "../../components/inputField/InputField";
 import { PasswordInput } from "../../components/passwordInput/PasswordInput";
 import { useAuth } from "../../context/AuthContext";
+import { Banner } from "../../components/banner/Banner";
 
 export const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -46,21 +47,19 @@ export const LoginPage = () => {
       >
         <h1 className="text-2xl font-bold text-white">Login</h1>
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {error && <Banner bannerType="error" title={error} description="" />}
 
         <InputField
           label="Email"
           placeholder="your@email.com"
           value={email}
           onChange={(val) => setEmail(val)}
-          isRequired
         />
 
         <PasswordInput
           label="Password"
           value={password}
           onChange={(val) => setPassword(val)}
-          isRequired
         />
 
         <div className="flex flex-col gap-3 mt-4">
