@@ -40,7 +40,6 @@ type CombinedContentCardProps = {
 type SvgIcon = ComponentType<IconProps>;
 
 type TitleSideProps = {
-  variant: ContentCardVariant;
   title: string;
   subtitle?: string;
   date?: string;

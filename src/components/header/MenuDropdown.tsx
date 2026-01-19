@@ -1,4 +1,6 @@
 import { useChangePasswordModal } from "../../hooks/modal/UsePasswordChangeModal";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../../lib/supabase";
 import { LockIcon, LogoutIcon, MoonIcon, SunIcon } from "../icons";
 import { Banner } from "../banner/Banner";
 import { useBannerNotification } from "../../hooks/banner/UseBannerNotification";
@@ -43,6 +45,20 @@ export const MenuDropdown = ({
 
   if (!isOpen) return null;
 
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
+      setIsOpen(false);
+      navigate("/login");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
   return (
     <div
       role="menu"
@@ -59,7 +75,8 @@ export const MenuDropdown = ({
     >
       <button
         role="menuitem"
-        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2"
+        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2
+        transition-colors duration-200 ease-in-out"
         onClick={openChangePasswordModal}
       >
         <LockIcon className="w-4 h-4" />
@@ -68,7 +85,8 @@ export const MenuDropdown = ({
 
       <button
         role="menuitem"
-        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2"
+        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2
+        transition-colors duration-200 ease-in-out"
         onClick={() => {
           toggleTheme();
           setIsOpen(false);
@@ -84,10 +102,11 @@ export const MenuDropdown = ({
 
       <button
         role="menuitem"
-        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2 text-color-error-text"
+        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2 text-color-error-text
+        transition-colors duration-200 ease-in-out"
         onClick={() => {
           setIsOpen(false);
-          // logout action
+          handleLogout();
         }}
       >
         <LogoutIcon className="w-4 h-4" />
