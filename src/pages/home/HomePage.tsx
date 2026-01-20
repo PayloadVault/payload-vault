@@ -4,7 +4,6 @@ import { Dropdown } from "../../components/dropdown/Dropdown";
 import {
   type DropdownOptions,
   categorySortOptions,
-  isSortType,
   isHomeSortType,
 } from "../../components/dropdown/DropdownOption";
 import { HeaderHome } from "../../components/header/HeaderHome";
@@ -16,6 +15,7 @@ import { useYear } from "../../hooks/year/UseYear";
 import { formatData, sortData } from "./utils";
 import type { FullData } from "./types";
 import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
+import { ErrorBlock } from "../../components/errorBlock/ErrorBlock";
 
 export const HomePage = () => {
   const { user } = useAuth();
@@ -55,6 +55,8 @@ export const HomePage = () => {
   }, [sortSelected]);
 
   if (isLoading || !contentCardData) return <PageSkeletonLoader />;
+
+  if (error) return <ErrorBlock />;
 
   return (
     <div className="min-h-screen bg-color-bg">
