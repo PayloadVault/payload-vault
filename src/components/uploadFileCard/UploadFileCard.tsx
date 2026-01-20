@@ -97,13 +97,13 @@ export const FileUploadCard = ({
       }}
     >
       {isDragOver ? (
-        <ExcelPaper className="text-color-text-subtle" />
+        <ExcelPaper className="text-color-text-subtle pointer-events-none" />
       ) : (
-        <ExcelPaper className="text-color-primary" />
+        <ExcelPaper className="text-color-primary pointer-events-none" />
       )}
 
       <p
-        className={`text-[16px] leading-6 font-medium ${
+        className={`text-[16px] leading-6 font-medium pointer-events-none ${
           isDragOver ? "text-color-text-secondary/90" : "text-color-text-subtle"
         }`}
       >
@@ -134,7 +134,7 @@ export const FileUploadCard = ({
                     truncate font-medium text-color-text-secondary
                     max-w-[12ch]
                     sm:max-w-[20ch]
-                    lg:max-w-none
+                    lg:max-w-[20c]
                     "
                     title={file.name}
                   >
