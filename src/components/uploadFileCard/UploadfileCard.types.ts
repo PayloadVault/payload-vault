@@ -1,8 +1,8 @@
-type ExcelUploadCardProps = {
+type UploadCardProps = {
   title: string;
   description: string;
-  onUpload?: (file: File) => Promise<void> | void;
+  onUpload?: (files: File[]) => Promise<void> | void;
   accept?: string;
 };
 
-export type { ExcelUploadCardProps };
+export type { UploadCardProps };
