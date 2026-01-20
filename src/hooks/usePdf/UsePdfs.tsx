@@ -3,53 +3,63 @@ import { supabase } from "../../lib/supabase";
 import type { Database } from "../../types/supabase";
 import type { PostgrestError } from "@supabase/supabase-js";
 
-/**
- * React Query hook for managing PDF records for a specific user.
- *
- * Provides:
- * - Fetching all PDFs for a user
- * - Adding a new PDF record
- * - Deleting an existing PDF record
- *
- * Data is stored in Supabase (`pdf_records` table) and cached via React Query.
- *
- * @param {string} userId - The authenticated user's ID.
- *
- * @returns {{
- *   data: PdfRecord[] | undefined,
- *   isLoading: boolean,
- *   isError: boolean,
- *   error: PostgrestError | null,
- *   addPdf: import("@tanstack/react-query").UseMutationResult<PdfRecord, PostgrestError, NewPdf>,
- *   removePdf: import("@tanstack/react-query").UseMutationResult<PdfRecord, PostgrestError, string>
- * }}
- *
- * @example
- * const { data: pdfs, addPdf, removePdf, isLoading } = usePdfs(user.id);
- *
- * addPdf.mutate({
- *   user_id: user.id,
- *   file_name: "invoice.pdf",
- *   pdf_url: "https://example.com/invoice.pdf",
- *   category: "Strom & Gas",
- *   date_created: new Date().toISOString()
- * });
- *
- * removePdf.mutate(pdfId);
- */
-
 type PdfRecord = Database["public"]["Tables"]["pdf_records"]["Row"];
 type NewPdf = Database["public"]["Tables"]["pdf_records"]["Insert"];
 
-async function fetchPdfs(userId: string): Promise<PdfRecord[]> {
-  const { data, error } = await supabase
-    .from("pdf_records")
-    .select("*")
-    .eq("user_id", userId)
-    .order("date_created", { ascending: false });
+type FetchPdfProps = {
+  userId: string;
+  category?: Database["public"]["Enums"]["document_category"] | "all";
+  year?: number;
+  month?: number;
+  sortBy?: "new" | "old" | "high" | "low";
+};
+
+type PdfListItem = Pick<
+  PdfRecord,
+  "id" | "file_name" | "category" | "profit" | "date_created"
+>;
+
+async function fetchPdfs({
+  userId,
+  category,
+  year,
+  month,
+  sortBy = "new",
+}: FetchPdfProps): Promise<PdfListItem[]> {
+  let query = supabase.from("pdf_records").select("*").eq("user_id", userId);
+
+  if (category && category !== "all") {
+    query = query.eq("category", category);
+  }
+
+  if (year) {
+    const start = `${year}-${String(month ?? 1).padStart(2, "0")}-01`;
+
+    const end = month
+      ? `${year}-${String(month + 1).padStart(2, "0")}-01`
+      : `${year + 1}-01-01`;
+
+    query = query.gte("date_created", start).lt("date_created", end);
+  }
+
+  switch (sortBy) {
+    case "old":
+      query = query.order("date_created", { ascending: true });
+      break;
+    case "high":
+      query = query.order("profit", { ascending: false });
+      break;
+    case "low":
+      query = query.order("profit", { ascending: true });
+      break;
+    default:
+      query = query.order("date_created", { ascending: false });
+  }
+
+  const { data, error } = await query;
 
   if (error) throw error;
-  return data || [];
+  return data ?? [];
 }
 
 async function insertPdf(pdf: NewPdf): Promise<PdfRecord> {
@@ -75,19 +85,19 @@ async function deletePdf(id: string): Promise<PdfRecord> {
   return data;
 }
 
-export function usePdfs(userId: string) {
+export function usePdfs(props: FetchPdfProps) {
   const queryClient = useQueryClient();
 
-  const query = useQuery<PdfRecord[], PostgrestError>({
-    queryKey: ["pdfs", userId],
-    queryFn: () => fetchPdfs(userId),
-    enabled: !!userId,
+  const query = useQuery<PdfListItem[], PostgrestError>({
+    queryKey: ["pdfs", props],
+    queryFn: () => fetchPdfs(props),
+    enabled: !!props.userId,
   });
 
   const addPdf = useMutation<PdfRecord, PostgrestError, NewPdf>({
     mutationFn: insertPdf,
     onSuccess: (newPdf) => {
-      queryClient.setQueryData<PdfRecord[]>(["pdfs", userId], (old = []) => [
+      queryClient.setQueryData<PdfListItem[]>(["pdfs", props], (old = []) => [
         newPdf,
         ...old,
       ]);
@@ -97,7 +107,7 @@ export function usePdfs(userId: string) {
   const removePdf = useMutation<PdfRecord, PostgrestError, string>({
     mutationFn: deletePdf,
     onSuccess: (_deletedPdf, id) => {
-      queryClient.setQueryData<PdfRecord[]>(["pdfs", userId], (old = []) =>
+      queryClient.setQueryData<PdfListItem[]>(["pdfs", props], (old = []) =>
         old.filter((pdf) => pdf.id !== id)
       );
     },
