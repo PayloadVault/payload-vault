@@ -15,6 +15,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useYear } from "../../hooks/year/UseYear";
 import { formatData, sortData } from "./utils";
 import type { FullData } from "./types";
+import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
 
 export const HomePage = () => {
   const { user } = useAuth();
@@ -53,7 +54,7 @@ export const HomePage = () => {
       );
   }, [sortSelected]);
 
-  if (!contentCardData) return <p>Loading...</p>;
+  if (isLoading || !contentCardData) return <PageSkeletonLoader />;
 
   return (
     <div className="min-h-screen bg-color-bg">
