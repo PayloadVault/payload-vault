@@ -20,7 +20,9 @@ async function fetchPdfs({
     const start = `${year}-${String(month ?? 1).padStart(2, "0")}-01`;
 
     const end = month
-      ? `${year}-${String(month + 1).padStart(2, "0")}-01`
+      ? month === 12
+        ? `${year + 1}-01-01`
+        : `${year}-${String(month + 1).padStart(2, "0")}-01`
       : `${year + 1}-01-01`;
 
     query = query.gte("date_created", start).lt("date_created", end);

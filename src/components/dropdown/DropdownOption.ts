@@ -1,5 +1,5 @@
 import type { Option } from "./Dropdown.types";
-import type { SortTypes, HomeSort } from "../../hooks/usePdf/types";
+import type { SortTypes, HomeSort, Category } from "../../hooks/usePdf/types";
 
 export const paycheckFilterOptions: Option[] = [
   { id: "new", label: "Newest First" },
@@ -16,28 +16,28 @@ export const categorySortOptions: Option[] = [
 ];
 
 export const monthOptions: Option[] = [
-  { id: "all", label: "All Months" },
-  { id: "january", label: "January" },
-  { id: "february", label: "February" },
-  { id: "march", label: "March" },
-  { id: "april", label: "April" },
-  { id: "may", label: "May" },
-  { id: "june", label: "June" },
-  { id: "july", label: "July" },
-  { id: "august", label: "August" },
-  { id: "september", label: "September" },
-  { id: "october", label: "October" },
-  { id: "november", label: "November" },
-  { id: "december", label: "December" },
+  { id: "0", label: "All Months" },
+  { id: "1", label: "January" },
+  { id: "2", label: "February" },
+  { id: "3", label: "March" },
+  { id: "4", label: "April" },
+  { id: "5", label: "May" },
+  { id: "6", label: "June" },
+  { id: "7", label: "July" },
+  { id: "8", label: "August" },
+  { id: "9", label: "September" },
+  { id: "10", label: "October" },
+  { id: "11", label: "November" },
+  { id: "12", label: "December" },
 ];
 
 export const categoryOptions: Option[] = [
   { id: "all", label: "All Categories" },
-  { id: "strom-gas", label: "Strom & Gas" },
-  { id: "barmenia-abrechnung", label: "Barmenia Abrechnung" },
-  { id: "ikk-abrechnung", label: "IKK Abrechnung" },
-  { id: "adcuri/abschlussprovision", label: "Adcuri Abschlussprovision" },
-  { id: "adcuri/bestandsprovision", label: "Adcuri Bestandsprovision" },
+  { id: "Strom & Gas", label: "Strom & Gas" },
+  { id: "Barmenia Abrechnung", label: "Barmenia Abrechnung" },
+  { id: "IKK Abrechnung", label: "IKK Abrechnung" },
+  { id: "Adcuri Abschlussprovision", label: "Adcuri Abschlussprovision" },
+  { id: "Adcuri Bestandsprovision", label: "Adcuri Bestandsprovision" },
 ];
 
 export const dropdownOptions = {
@@ -53,6 +53,17 @@ export function isSortType(value: string): value is SortTypes {
 
 export function isHomeSortType(value: string): value is HomeSort {
   return ["low", "high", "most", "least"].includes(value);
+}
+
+export function isCategoryType(value: string): value is Category {
+  return [
+    "all",
+    "Strom & Gas",
+    "Barmenia Abrechnung",
+    "IKK Abrechnung",
+    "Adcuri Abschlussprovision",
+    "Adcuri Bestandsprovision",
+  ].includes(value);
 }
 
 export type DropdownOptions = typeof dropdownOptions;

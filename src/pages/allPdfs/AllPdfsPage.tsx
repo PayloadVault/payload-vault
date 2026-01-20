@@ -1,10 +1,12 @@
 import { useOutletContext } from "react-router-dom";
-import { useLayoutEffect, useState, useEffect } from "react";
+import { useLayoutEffect, useState, useEffect, useMemo } from "react";
 import {
   type DropdownOptions,
   paycheckFilterOptions,
   monthOptions,
   categoryOptions,
+  isSortType,
+  isCategoryType,
 } from "../../components/dropdown/DropdownOption";
 import { Dropdown } from "../../components/dropdown/Dropdown";
 import { ContentCard } from "../../components/contentCard/ContentCard";
@@ -17,6 +19,7 @@ import { ErrorBlock } from "../../components/errorBlock/ErrorBlock";
 import { formatAllPdfs } from "./utils";
 import type { AllPdfTypes } from "./types";
 import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
+import { DocumentSkeletonLoader } from "../../components/skeletonLoader/DocumentSkeletonLoader";
 
 export const AllPdfsPage = () => {
   const { user } = useAuth();
@@ -57,6 +60,9 @@ export const AllPdfsPage = () => {
   } = usePdfs({
     userId: user.id,
     year,
+    month: Number(monthSelected.id) || undefined,
+    sortBy: isSortType(sortSelected.id) ? sortSelected.id : "new",
+    category: isCategoryType(categorySelected.id) ? categorySelected.id : "all",
   });
 
   useEffect(() => {
@@ -65,7 +71,16 @@ export const AllPdfsPage = () => {
     }
   }, [pdfs]);
 
-  if (isLoading || !contentCardData) return <PageSkeletonLoader />;
+  const filteredPdfs = useMemo(() => {
+    if (!contentCardData) return [];
+
+    return contentCardData.pdfs.filter((pdf) => {
+      if (searchQuery.trim() === "") return true;
+      return pdf.title.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+  }, [contentCardData, searchQuery]);
+
+  if (!contentCardData) return <PageSkeletonLoader />;
 
   if (error) return <ErrorBlock />;
 
@@ -103,20 +118,24 @@ export const AllPdfsPage = () => {
           title="Search PDFs"
         />
       </div>
-      <div className="flex flex-col gap-6">
-        {contentCardData.pdfs.map((pdf) => (
-          <ContentCard
-            key={pdf.title}
-            variant="document"
-            title={pdf.title}
-            date={pdf.date}
-            profit={pdf.income}
-            downloadLink={pdf.downloadLink}
-            openLink={pdf.openLink}
-            searchQuery={searchQuery}
-          />
-        ))}
-      </div>
+      {isLoading ? (
+        <DocumentSkeletonLoader />
+      ) : (
+        <div className="flex flex-col gap-6">
+          {filteredPdfs.map((pdf) => (
+            <ContentCard
+              key={pdf.income + pdf.date + pdf.category}
+              variant="document"
+              title={pdf.title}
+              date={pdf.date}
+              profit={pdf.income}
+              downloadLink={pdf.downloadLink}
+              openLink={pdf.openLink}
+              searchQuery={searchQuery}
+            />
+          ))}
+        </div>
+      )}
     </main>
   );
 };
