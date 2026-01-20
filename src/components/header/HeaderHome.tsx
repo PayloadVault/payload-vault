@@ -3,9 +3,11 @@ import { Dropdown } from "../dropdown/Dropdown";
 import { UserIcon, VaultIcon } from "../icons";
 import { MenuDropdown } from "./MenuDropdown";
 import { useAuth } from "../../context/AuthContext";
+import { useYear } from "../../hooks/year/UseYear";
 
 export const HeaderHome = () => {
   const { user } = useAuth();
+  const { year, setYear } = useYear();
 
   const options = [
     { label: "2026", id: "2026" },
@@ -13,7 +15,10 @@ export const HeaderHome = () => {
     { label: "2024", id: "2024" },
   ];
 
-  const [selectedYear, setSelectedYear] = useState(options[0]);
+  const [selectedYear, setSelectedYear] = useState({
+    id: year.toString(),
+    label: year.toString(),
+  });
   const [isOpen, setIsOpen] = useState(false);
   type Theme = "light" | "dark";
 
@@ -21,6 +26,8 @@ export const HeaderHome = () => {
     if (typeof window === "undefined") return "dark";
     return (document.documentElement.dataset.theme as Theme) ?? "dark";
   });
+
+  useEffect(() => {}, [setYear(Number(selectedYear.id))]);
 
   const toggleTheme = () => {
     const next: Theme = theme === "dark" ? "light" : "dark";

@@ -12,15 +12,13 @@ import { TotalIncomeCard } from "../../components/totalIncomeCard/TotalIncomeCar
 import { SearchBar } from "../../components/searchBar/SearchBar";
 
 export const AllPdfsPage = () => {
-  const { setTitle, setSubtitle } = useOutletContext<{
+  const { setTitle } = useOutletContext<{
     setTitle: (title: string) => void;
-    setSubtitle: (subtitle: string) => void;
   }>();
 
   useLayoutEffect(() => {
     setTitle("All PDFs");
-    setSubtitle("year");
-  }, [setTitle, setSubtitle]);
+  }, [setTitle]);
 
   const [searchQuery, setSearchQuery] = useState("");
 
