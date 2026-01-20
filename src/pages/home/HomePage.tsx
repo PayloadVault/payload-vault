@@ -54,44 +54,48 @@ export const HomePage = () => {
       );
   }, [sortSelected]);
 
-  if (isLoading || !contentCardData) return <PageSkeletonLoader />;
-
   if (error) return <ErrorBlock />;
 
   return (
     <div className="min-h-screen bg-color-bg">
       <HeaderHome />
-      <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
-        <TotalIncomeCard
-          title="Total income"
-          subtitle={contentCardData.totalPdf.toString() + " · Paychecks"}
-          totalIncome={contentCardData.totalIncome}
-        />
-        <ContentCard
-          variant="allPdf"
-          title={contentCardData.allPdfs.title}
-          subtitle={contentCardData.allPdfs.subtitle}
-          link={contentCardData.allPdfs.link}
-        />
-        <Dropdown
-          label="Sort Categories"
-          options={categorySortOptions}
-          onSelect={setSortSelected}
-          value={sortSelected}
-        />
-        <div className="flex flex-col gap-6">
-          {contentCardData.allCategories.map((category) => (
-            <ContentCard
-              key={category.category.title}
-              variant="category"
-              title={category.category.title}
-              subtitle={category.subtitle.toString() + " · Paychecks"}
-              profit={category.profit}
-              link={"category/" + category.category.slug}
-            />
-          ))}
-        </div>
-      </main>
+
+      {isLoading || !contentCardData ? (
+        <PageSkeletonLoader />
+      ) : (
+        <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
+          <TotalIncomeCard
+            title="Total income"
+            subtitle={contentCardData.totalPdf.toString() + " · Paychecks"}
+            totalIncome={contentCardData.totalIncome}
+          />
+          <ContentCard
+            variant="allPdf"
+            title={contentCardData.allPdfs.title}
+            subtitle={contentCardData.allPdfs.subtitle}
+            link={contentCardData.allPdfs.link}
+          />
+          <Dropdown
+            label="Sort Categories"
+            options={categorySortOptions}
+            onSelect={setSortSelected}
+            value={sortSelected}
+          />
+          <div className="flex flex-col gap-6">
+            {contentCardData.allCategories.map((category) => (
+              <ContentCard
+                key={category.category.title}
+                variant="category"
+                title={category.category.title}
+                subtitle={category.subtitle.toString() + " · Paychecks"}
+                profit={category.profit}
+                link={"category/" + category.category.slug}
+              />
+            ))}
+          </div>
+        </main>
+      )}
+
       <PdfImportFooter />
     </div>
   );

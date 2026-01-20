@@ -1,7 +1,7 @@
 export const PageSkeletonLoader = () => {
   return (
-    <div className="flex flex-col gap-6 p-6 bg-color-bg-main min-h-screen">
-      <div className="w-2/5 h-12 bg-color-bg-dark rounded-md animate-pulse"></div>
+    <div className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
+      <div className="w-2/5 h-12 bg-color-primary/20 rounded-md animate-pulse"></div>
 
       {Array.from({ length: 6 }).map((_, idx) => (
         <div
