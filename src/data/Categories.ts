@@ -1,6 +1,16 @@
+import type { Category as TitleCategory } from "../hooks/usePdf/types";
+
+export type SlugCategory =
+  | "strom-gas"
+  | "barmenia-abrechnung"
+  | "ikk-abrechnung"
+  | "adcuri"
+  | "adcuri/abschlussprovision"
+  | "adcuri/bestandsprovision";
+
 export type Category = {
-  slug: string;
-  title: string;
+  slug: SlugCategory;
+  title: TitleCategory | "Adcuri";
 };
 
 export const categories: Category[] = [

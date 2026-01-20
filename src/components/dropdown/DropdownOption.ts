@@ -1,15 +1,18 @@
 import type { Option } from "./Dropdown.types";
+import type { SortTypes, HomeSort } from "../../hooks/usePdf/types";
 
 export const paycheckFilterOptions: Option[] = [
-  { id: "newest", label: "Newest First" },
-  { id: "oldest", label: "Oldest First" },
+  { id: "new", label: "Newest First" },
+  { id: "old", label: "Oldest First" },
   { id: "high", label: "High To Low" },
   { id: "low", label: "Low To High" },
 ];
 
 export const categorySortOptions: Option[] = [
-  { label: "High To Low", id: "descending" },
-  { label: "Low To High", id: "ascending" },
+  { label: "High To Low", id: "high" },
+  { label: "Low To High", id: "low" },
+  { label: "Most To Least", id: "most" },
+  { label: "Least To Most", id: "least" },
 ];
 
 export const monthOptions: Option[] = [
@@ -43,5 +46,13 @@ export const dropdownOptions = {
   categorySort: categorySortOptions,
   category: categoryOptions,
 } as const;
+
+export function isSortType(value: string): value is SortTypes {
+  return ["new", "old", "high", "low"].includes(value);
+}
+
+export function isHomeSortType(value: string): value is HomeSort {
+  return ["low", "high", "most", "least"].includes(value);
+}
 
 export type DropdownOptions = typeof dropdownOptions;

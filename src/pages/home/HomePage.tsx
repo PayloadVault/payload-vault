@@ -1,61 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ContentCard } from "../../components/contentCard/ContentCard";
 import { Dropdown } from "../../components/dropdown/Dropdown";
 import {
   type DropdownOptions,
   categorySortOptions,
+  isSortType,
+  isHomeSortType,
 } from "../../components/dropdown/DropdownOption";
 import { HeaderHome } from "../../components/header/HeaderHome";
 import { TotalIncomeCard } from "../../components/totalIncomeCard/TotalIncomeCard";
 import { PdfImportFooter } from "../../components/pdfImport/PdfImportFooter";
+import { usePdfs } from "../../hooks/usePdf/UsePdfs";
+import { useAuth } from "../../context/AuthContext";
+import { useYear } from "../../hooks/year/UseYear";
+import { formatData, sortData } from "./utils";
+import type { FullData } from "./types";
 
 export const HomePage = () => {
+  const { user } = useAuth();
+  const { year } = useYear();
   const [sortSelected, setSortSelected] = useState<
     DropdownOptions["categorySort"][number]
   >(categorySortOptions[0]);
+  const [contentCardData, setContentCardData] = useState<
+    FullData | undefined
+  >();
 
-  const contentCardData = {
-    totalIncome: 12300,
-    allPdfs: {
-      title: "All PDFs",
-      subtitle: "Browse all your PDF documents",
-      link: "/all-pdfs",
-    },
-    categories: [
-      {
-        title: "Storm & Gas",
-        subtitle: "12 documents",
-        profit: 5400,
-        link: "/category/strom-gas",
-      },
-      {
-        title: "Barmenia Abrechnung",
-        subtitle: "12 documents",
-        profit: 13400,
-        link: "/category/barmenia-abrechnung",
-      },
-      {
-        title: "IKK Abrechnung",
-        subtitle: "12 documents",
-        profit: 504400,
-        link: "/category/ikk-abrechnung",
-      },
-      {
-        title: "Adcuri",
-        subtitle: "12 documents",
-        profit: 504400,
-        link: "/category/adcuri",
-      },
-    ],
-  };
+  if (!user) return null;
 
-  const sortedCategories = [...contentCardData.categories].sort((a, b) => {
-    if (sortSelected.id === "ascending") {
-      return a.profit - b.profit;
-    }
-
-    return b.profit - a.profit;
+  const {
+    data: pdfs,
+    isLoading,
+    error,
+  } = usePdfs({
+    userId: user.id,
+    year,
   });
+
+  useEffect(() => {
+    if (pdfs) {
+      setContentCardData(formatData(pdfs));
+    }
+  }, [pdfs]);
+
+  useEffect(() => {
+    if (contentCardData)
+      setContentCardData(
+        sortData(
+          contentCardData,
+          isHomeSortType(sortSelected.id) ? sortSelected.id : "high"
+        )
+      );
+  }, [sortSelected]);
+
+  if (!contentCardData) return <p>Loading...</p>;
 
   return (
     <div className="min-h-screen bg-color-bg">
@@ -63,7 +61,7 @@ export const HomePage = () => {
       <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
         <TotalIncomeCard
           title="Total income"
-          subtitle="5 paychecks"
+          subtitle={contentCardData.totalPdf.toString() + " · Paychecks"}
           totalIncome={contentCardData.totalIncome}
         />
         <ContentCard
@@ -79,14 +77,14 @@ export const HomePage = () => {
           value={sortSelected}
         />
         <div className="flex flex-col gap-6">
-          {sortedCategories.map((category) => (
+          {contentCardData.allCategories.map((category) => (
             <ContentCard
-              key={category.title}
+              key={category.category.title}
               variant="category"
-              title={category.title}
-              subtitle={category.subtitle}
+              title={category.category.title}
+              subtitle={category.subtitle.toString() + " · Paychecks"}
               profit={category.profit}
-              link={category.link}
+              link={"category/" + category.category.slug}
             />
           ))}
         </div>
