@@ -77,7 +77,7 @@ export const FileUploadCard = ({
 
   const containerClasses = useMemo(() => {
     const base =
-      "flex w-full aspect-square flex-col items-center justify-center gap-4 rounded-lg border border-dashed p-10 text-center transition-colors";
+      "flex w-full aspect-square flex-col items-center justify-center gap-4 rounded-lg border border-dashed p-2 text-center transition-colors";
     if (isDragOver) {
       return `${base} bg-black text-color-text-secondary`;
     }
@@ -102,14 +102,6 @@ export const FileUploadCard = ({
         <ExcelPaper className="text-color-primary" />
       )}
 
-      <h5
-        className={`text-2xl leading-[120%] font-bold ${
-          isDragOver ? "text-color-text-secondary" : ""
-        }`}
-      >
-        {title}
-      </h5>
-
       <p
         className={`text-[16px] leading-6 font-medium ${
           isDragOver ? "text-color-text-secondary/90" : "text-color-text-subtle"
@@ -128,30 +120,40 @@ export const FileUploadCard = ({
       />
 
       {files.length > 0 && (
-        <div className="mt-2 flex w-full max-w-105 flex-col gap-2">
-          {files.map((file, index) => (
-            <div
-              key={`${file.name}-${index}`}
-              className="flex items-center justify-between rounded-md bg-color-bg-dark p-4"
-            >
-              <div className="flex items-center gap-2 overflow-hidden">
-                <ExcelPaper size={32} className="text-color-primary" />
-                <span className="truncate font-medium text-color-text-secondary">
-                  {file.name}
-                </span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setFiles((prev) => prev.filter((_, i) => i !== index))
-                }
-                className="transition-color duration-200 ease-in-out ml-3 h-10 w-10 rounded hover:bg-color-primary/10 text-color-text-secondary"
+        <div className="mt-2 w-full max-w-80 lg:max-w-130">
+          <div className="flex max-h-48 flex-col gap-2 overflow-y-auto pr-1">
+            {files.map((file, index) => (
+              <div
+                key={`${file.name}-${index}`}
+                className="flex items-center justify-between rounded-md bg-color-bg-dark p-4"
               >
-                ✕
-              </button>
-            </div>
-          ))}
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <ExcelPaper size={32} className="text-color-primary" />
+                  <span
+                    className="
+                    truncate font-medium text-color-text-secondary
+                    max-w-[12ch]
+                    sm:max-w-[20ch]
+                    lg:max-w-none
+                    "
+                    title={file.name}
+                  >
+                    {file.name}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFiles((prev) => prev.filter((_, i) => i !== index))
+                  }
+                  className="ml-3 h-10 w-10 rounded text-color-text-secondary transition-colors hover:bg-color-primary/10"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
