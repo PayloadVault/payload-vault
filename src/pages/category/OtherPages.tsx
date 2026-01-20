@@ -17,6 +17,7 @@ import { formatAllPdfs } from "../allPdfs/utils";
 import { ErrorBlock } from "../../components/errorBlock/ErrorBlock";
 import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
 import { DocumentSkeletonLoader } from "../../components/skeletonLoader/DocumentSkeletonLoader";
+import { Button } from "../../components/button/Button";
 
 type CategoryProps = {
   title: string;
@@ -37,6 +38,11 @@ export const OtherPages = ({ title }: CategoryProps) => {
   const [contentCardData, setContentCardData] = useState<
     AllPdfTypes | undefined
   >();
+
+  const handleResetFilters = () => {
+    setSortSelected(paycheckFilterOptions[0]);
+    setMonthSelected(monthOptions[0]);
+  };
 
   if (!user) return <ErrorBlock />;
 
@@ -81,6 +87,13 @@ export const OtherPages = ({ title }: CategoryProps) => {
           options={monthOptions}
           onSelect={setMonthSelected}
           value={monthSelected}
+        />
+      </div>
+      <div className="grid grid-cols-1 items-center">
+        <Button
+          onClick={handleResetFilters}
+          text="Reset Filters"
+          size="medium"
         />
       </div>
       {isLoading ? (

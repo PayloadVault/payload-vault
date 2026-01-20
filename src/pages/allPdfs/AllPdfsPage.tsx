@@ -20,6 +20,7 @@ import { formatAllPdfs } from "./utils";
 import type { AllPdfTypes } from "./types";
 import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
 import { DocumentSkeletonLoader } from "../../components/skeletonLoader/DocumentSkeletonLoader";
+import { Button } from "../../components/button/Button";
 
 export const AllPdfsPage = () => {
   const { user } = useAuth();
@@ -50,6 +51,13 @@ export const AllPdfsPage = () => {
   const [categorySelected, setCategorySelected] = useState<
     DropdownOptions["category"][number]
   >(categoryOptions[0]);
+
+  const handleResetFilters = () => {
+    setSortSelected(paycheckFilterOptions[0]);
+    setMonthSelected(monthOptions[0]);
+    setCategorySelected(categoryOptions[0]);
+    setSearchQuery("");
+  };
 
   if (!user) return <ErrorBlock />;
 
@@ -116,6 +124,13 @@ export const AllPdfsPage = () => {
           value={searchQuery}
           debounceMs={200}
           title="Search PDFs"
+        />
+      </div>
+      <div className="grid grid-cols-1 items-center">
+        <Button
+          onClick={handleResetFilters}
+          text="Reset Filters"
+          size="medium"
         />
       </div>
       {isLoading ? (
