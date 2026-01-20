@@ -20,6 +20,8 @@ export const ContentCard = (props: CombinedContentCardProps) => {
     searchQuery,
   } = props;
 
+  console.log("link: ", link);
+
   const Icon = cardIcon[props.variant];
 
   const handleNavigate = () => {
