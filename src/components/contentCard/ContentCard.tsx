@@ -17,6 +17,7 @@ export const ContentCard = (props: CombinedContentCardProps) => {
     profit,
     downloadLink,
     openLink,
+    searchQuery,
   } = props;
 
   const Icon = cardIcon[props.variant];
@@ -52,7 +53,13 @@ export const ContentCard = (props: CombinedContentCardProps) => {
       onClick={handleNavigate}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <TitleSide title={title} subtitle={subtitle} date={date} Icon={Icon} />
+        <TitleSide
+          title={title}
+          subtitle={subtitle}
+          date={date}
+          Icon={Icon}
+          searchQuery={searchQuery || ""}
+        />
 
         <div className="flex w-full items-center justify-end gap-3 sm:w-auto sm:justify-end sm:gap-5">
           {profit && (

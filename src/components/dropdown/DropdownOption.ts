@@ -3,7 +3,7 @@ import type { Option } from "./Dropdown.types";
 export const paycheckFilterOptions: Option[] = [
   { id: "newest", label: "Newest First" },
   { id: "oldest", label: "Oldest First" },
-  { id: "high", label: "Hight To Low" },
+  { id: "high", label: "High To Low" },
   { id: "low", label: "Low To High" },
 ];
 
@@ -28,10 +28,20 @@ export const monthOptions: Option[] = [
   { id: "december", label: "December" },
 ];
 
+export const categoryOptions: Option[] = [
+  { id: "all", label: "All Categories" },
+  { id: "strom-gas", label: "Strom & Gas" },
+  { id: "barmenia-abrechnung", label: "Barmenia Abrechnung" },
+  { id: "ikk-abrechnung", label: "IKK Abrechnung" },
+  { id: "adcuri/abschlussprovision", label: "Adcuri Abschlussprovision" },
+  { id: "adcuri/bestandsprovision", label: "Adcuri Bestandsprovision" },
+];
+
 export const dropdownOptions = {
   paycheckFilter: paycheckFilterOptions,
   month: monthOptions,
   categorySort: categorySortOptions,
+  category: categoryOptions,
 } as const;
 
 export type DropdownOptions = typeof dropdownOptions;

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { CloseIcon } from "../icons";
 
 interface ModalProps {
@@ -8,9 +8,17 @@ interface ModalProps {
 }
 
 export const Modal = ({ title, onClose, children }: ModalProps) => {
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="flex flex-col gap-6 rounded-lg bg-color-bg-alt p-6">
+      <div className="flex flex-col gap-6 rounded-lg bg-color-bg-card p-6">
         <div className="relative flex w-full items-center justify-center">
           <button
             onClick={onClose}

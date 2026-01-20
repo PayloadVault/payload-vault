@@ -4,6 +4,7 @@ type PasswordInputProps = {
   label?: string;
   error?: string;
   isRequired?: boolean;
+  isRepeated?: boolean;
 };
 
 export type { PasswordInputProps };

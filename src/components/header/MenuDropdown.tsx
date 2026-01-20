@@ -2,8 +2,6 @@ import { useChangePasswordModal } from "../../hooks/modal/UsePasswordChangeModal
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { LockIcon, LogoutIcon, MoonIcon, SunIcon } from "../icons";
-import { Banner } from "../banner/Banner";
-import { useBannerNotification } from "../../hooks/banner/UseBannerNotification";
 
 type MenuDropdownProps = {
   isOpen: boolean;
@@ -18,23 +16,12 @@ export const MenuDropdown = ({
   theme,
   toggleTheme,
 }: MenuDropdownProps) => {
-  const { banner, closeBanner, showBanner } = useBannerNotification();
   const navigate = useNavigate();
 
   const handleChangePassword = async (newPassword: string) => {
     try {
       // await updatePassword(newPassword);
-      showBanner(
-        "Password updated.",
-        "You have successfully replaced your old password with the new one.",
-        "success"
-      );
     } catch (error) {
-      showBanner(
-        "Password update failed.",
-        "An error occurred while updating your password. Please try again.",
-        "error"
-      );
     } finally {
       closeModal();
     }
@@ -75,8 +62,11 @@ export const MenuDropdown = ({
       <button
         role="menuitem"
         className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2
-        transition-colors duration-200 ease-in-out"
-        onClick={openChangePasswordModal}
+        hover:text-color-text-main text-color-text-subtle transition-colors duration-200 ease-in-out"
+        onClick={() => {
+          openChangePasswordModal();
+          setIsOpen(false);
+        }}
       >
         <LockIcon className="w-4 h-4" />
         Change Password
@@ -85,7 +75,7 @@ export const MenuDropdown = ({
       <button
         role="menuitem"
         className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2
-        transition-colors duration-200 ease-in-out"
+        hover:text-color-text-main text-color-text-subtle transition-colors duration-200 ease-in-out"
         onClick={() => {
           toggleTheme();
           setIsOpen(false);
@@ -101,8 +91,8 @@ export const MenuDropdown = ({
 
       <button
         role="menuitem"
-        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2 text-color-error-text
-        transition-colors duration-200 ease-in-out"
+        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2 text-color-error-text/75
+        hover:text-color-error-text transition-colors duration-200 ease-in-out"
         onClick={() => {
           setIsOpen(false);
           handleLogout();
@@ -111,16 +101,6 @@ export const MenuDropdown = ({
         <LogoutIcon className="w-4 h-4" />
         Logout
       </button>
-      {banner && (
-        <div className="animate-slide-in animate-slide-out fixed right-4 bottom-4">
-          <Banner
-            bannerType={banner.bannerType}
-            title={banner.title}
-            description={banner.description}
-            onCloseBanner={closeBanner}
-          />
-        </div>
-      )}
     </div>
   );
 };

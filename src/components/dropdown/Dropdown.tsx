@@ -95,7 +95,7 @@ export const Dropdown = ({
               className={`align-middle leading-6 ${
                 isPlaceholderActive
                   ? "text-color-text-subtle"
-                  : "text-color-text-secondary"
+                  : "text-color-text-main"
               }`}
             >
               {displayText}

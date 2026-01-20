@@ -11,7 +11,7 @@ export const Layout = () => {
     <div className="flex flex-col min-h-screen overflow-hidden">
       <Header title={title} subtitle={subtitle} />
 
-      <main className="flex-1 overflow-y-auto p-6">
+      <main className="flex-1 overflow-y-auto">
         <Outlet context={{ setTitle, setSubtitle }} />
       </main>
 

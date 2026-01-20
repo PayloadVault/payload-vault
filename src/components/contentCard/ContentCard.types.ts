@@ -35,6 +35,7 @@ type CombinedContentCardProps = {
   link?: string;
   downloadLink?: string;
   openLink?: string;
+  searchQuery?: string;
 };
 
 type SvgIcon = ComponentType<IconProps>;
@@ -44,6 +45,7 @@ type TitleSideProps = {
   subtitle?: string;
   date?: string;
   Icon: SvgIcon;
+  searchQuery: string;
 };
 
 export type {
