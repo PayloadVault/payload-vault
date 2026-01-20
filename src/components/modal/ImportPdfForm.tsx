@@ -12,11 +12,13 @@ export const ImportPdfForm = ({
   onSave,
 }: PasswordChangeFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
 
   const handleSave = async () => {
     setIsLoading(true);
     try {
       // await onSave();
+      // console.log("all pdfs: ", files);
     } finally {
       setIsLoading(false);
     }
@@ -28,6 +30,8 @@ export const ImportPdfForm = ({
         <FileUploadCard
           title="Import PDF"
           description="Choose from files or drag and drop"
+          files={files}
+          setFiles={setFiles}
         />
       </div>
       <div className="mt-6 flex gap-6">

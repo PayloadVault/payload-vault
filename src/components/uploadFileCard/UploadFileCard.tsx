@@ -10,14 +10,14 @@ import type { UploadCardProps } from "./UploadfileCard.types";
 import { Button } from "../button/Button";
 
 export const FileUploadCard = ({
-  title,
   description,
   accept = ".pdf",
+  files,
+  setFiles,
 }: UploadCardProps) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const [isDragOver, setIsDragOver] = useState(false);
-  const [files, setFiles] = useState<File[]>([]);
 
   const openPicker = () => inputRef.current?.click();
 
