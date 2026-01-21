@@ -2,18 +2,16 @@ import type { Database } from "../../types/supabase";
 
 type PdfRecord = Database["public"]["Tables"]["pdf_records"]["Row"];
 type NewPdf = Database["public"]["Tables"]["pdf_records"]["Insert"];
+type SortTypes = "new" | "old" | "high" | "low";
+type HomeSort = "low" | "high" | "most" | "least";
+type Category = Database["public"]["Enums"]["document_category"] | "all";
 
 type FetchPdfProps = {
   userId: string;
-  category?: Database["public"]["Enums"]["document_category"] | "all";
+  category?: Category;
   year?: number;
   month?: number;
-  sortBy?: "new" | "old" | "high" | "low";
+  sortBy?: SortTypes;
 };
 
-type PdfListItem = Pick<
-  PdfRecord,
-  "id" | "file_name" | "category" | "profit" | "date_created"
->;
-
-export type { PdfRecord, NewPdf, FetchPdfProps, PdfListItem };
+export type { PdfRecord, NewPdf, FetchPdfProps, SortTypes, Category, HomeSort };
