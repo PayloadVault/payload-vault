@@ -3,14 +3,11 @@ import { Button } from "../button/Button";
 import { UploadIcon } from "../icons";
 import { FileUploadCard } from "../uploadFileCard/UploadFileCard";
 
-interface PasswordChangeFormProps {
+interface ImportPdfFormProps {
   onCancel: () => void;
-  onSave: (newPassword: string) => Promise<void>;
+  onSave: (files: File[]) => Promise<void>;
 }
-export const ImportPdfForm = ({
-  onCancel,
-  onSave,
-}: PasswordChangeFormProps) => {
+export const ImportPdfForm = ({ onCancel, onSave }: ImportPdfFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
 
