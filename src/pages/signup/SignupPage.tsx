@@ -8,6 +8,7 @@ import { EmailConfirmation } from "../../components/auth/EmailConfirmation";
 import { Banner } from "../../components/banner/Banner";
 import { Button } from "../../components/button/Button";
 import { VaultIcon } from "../../components/icons";
+import { signUpSchema } from "../../validation/SignUpValidation";
 
 export const SignUpPage = () => {
   const [email, setEmail] = useState("");
@@ -31,21 +32,24 @@ export const SignUpPage = () => {
   const handleSignUp = async () => {
     setError(null);
 
-    if (password !== repeatedPassword) {
-      setError("Passwords do not match");
-      return;
-    }
+    const result = signUpSchema.safeParse({
+      email,
+      password,
+      repeatedPassword,
+    });
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters long");
+    if (!result.success) {
+      const message = result.error.issues[0].message;
+
+      setError(message);
       return;
     }
 
     setLoading(true);
 
     const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
+      email: result.data.email,
+      password: result.data.password,
       options: {
         emailRedirectTo: window.location.origin,
       },
@@ -53,13 +57,11 @@ export const SignUpPage = () => {
 
     if (signUpError) {
       setError(signUpError.message);
-      setLoading(false);
     } else if (data.user && data.session === null) {
       setIsSent(true);
-      setLoading(false);
-    } else {
-      setLoading(false);
     }
+
+    setLoading(false);
   };
 
   if (isSent) {
@@ -68,7 +70,7 @@ export const SignUpPage = () => {
 
   return (
     <div className="flex justify-center items-center w-screen h-screen p-4">
-      <form className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card border border-color-border-light p-8 rounded-xl">
+      <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card border border-color-border-light p-8 rounded-xl">
         <div className="bg-color-primary/15 p-2 rounded-full mx-auto">
           <VaultIcon className="w-12 h-12 mx-auto text-color-primary" />
         </div>
@@ -103,7 +105,7 @@ export const SignUpPage = () => {
             Already have an account? <Link to="/login">Log In</Link>
           </p>
         </div>
-      </form>
+      </div>
     </div>
   );
 };
