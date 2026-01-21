@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   type DropdownOptions,
   categorySortOptions,
@@ -6,43 +6,52 @@ import {
 import { Dropdown } from "../../components/dropdown/Dropdown";
 import { ContentCard } from "../../components/contentCard/ContentCard";
 import { TotalIncomeCard } from "../../components/totalIncomeCard/TotalIncomeCard";
+import { useAuth } from "../../context/AuthContext";
+import { useYear } from "../../hooks/year/UseYear";
+import { ErrorBlock } from "../../components/errorBlock/ErrorBlock";
+import { usePdfs } from "../../hooks/usePdf/UsePdfs";
+import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
+import { formatAdcuriData } from "./utils";
+import type { AdcuriFullData } from "./types";
 
 export const AdcuriPage = () => {
+  const { user } = useAuth();
+  const { year } = useYear();
+
+  const [contentCardData, setContentCardData] = useState<
+    AdcuriFullData | undefined
+  >();
+
   const [sortSelected, setSortSelected] = useState<
     DropdownOptions["categorySort"][number]
   >(categorySortOptions[0]);
 
-  const contentCardData = {
-    totalIncome: 504400,
-    categories: [
-      {
-        title: "Adcuri Abschlussprovision",
-        subtitle: "12 documents",
-        profit: 5400,
-        link: "/category/adcuri/abschlussprovision",
-      },
-      {
-        title: "Adcuri Bestandsprovision",
-        subtitle: "12 documents",
-        profit: 13400,
-        link: "/category/adcuri/bestandsprovision",
-      },
-    ],
-  };
+  if (!user) return <ErrorBlock />;
 
-  const sortedCategories = [...contentCardData.categories].sort((a, b) => {
-    if (sortSelected.id === "ascending") {
-      return a.profit - b.profit;
-    }
-
-    return b.profit - a.profit;
+  const {
+    data: pdfs,
+    isLoading,
+    error,
+  } = usePdfs({
+    userId: user.id,
+    year,
   });
+
+  useEffect(() => {
+    if (pdfs) {
+      setContentCardData(formatAdcuriData(pdfs));
+    }
+  }, [pdfs]);
+
+  if (isLoading || !contentCardData) return <PageSkeletonLoader />;
+
+  if (error) return <ErrorBlock />;
 
   return (
     <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
       <TotalIncomeCard
         title="Adcuri total income"
-        subtitle="5 paychecks"
+        subtitle={contentCardData.totalPdf.toString() + " · Paychecks"}
         totalIncome={contentCardData.totalIncome}
       />
       <Dropdown
@@ -52,14 +61,14 @@ export const AdcuriPage = () => {
         value={sortSelected}
       />
       <div className="flex flex-col gap-6">
-        {sortedCategories.map((category) => (
+        {contentCardData.adcuriCategories.map((category) => (
           <ContentCard
-            key={category.title}
+            key={category.category.title}
             variant="category"
-            title={category.title}
-            subtitle={category.subtitle}
+            title={category.category.title}
+            subtitle={category.subtitle.toString() + " · Paychecks"}
             profit={category.profit}
-            link={category.link}
+            link={category.category.slug.split("/")[1]}
           />
         ))}
       </div>
