@@ -27,7 +27,7 @@ export const HomePage = () => {
     FullData | undefined
   >();
 
-  if (!user) return null;
+  if (!user) return <ErrorBlock />;
 
   const {
     data: pdfs,
