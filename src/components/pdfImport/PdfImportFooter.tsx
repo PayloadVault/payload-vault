@@ -4,8 +4,8 @@ import { UploadIcon } from "../icons";
 
 export const PdfImportFooter = () => {
   const { openImportPdfModal, closeModal } = useImportPdfModal({
-    onSave: async (filePath: string) => {
-      console.log("Importing PDF from:", filePath);
+    onSave: async (file: File[]) => {
+      console.log("Importing PDF from:", file);
       closeModal();
     },
   });

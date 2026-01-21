@@ -14,8 +14,7 @@ export const ImportPdfForm = ({ onCancel, onSave }: ImportPdfFormProps) => {
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      // await onSave();
-      // console.log("all pdfs: ", files);
+      await onSave(files);
     } finally {
       setIsLoading(false);
     }
