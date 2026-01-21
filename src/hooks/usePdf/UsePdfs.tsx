@@ -3,6 +3,11 @@ import { supabase } from "../../lib/supabase";
 import type { PostgrestError } from "@supabase/supabase-js";
 import type { FetchPdfProps, PdfRecord, NewPdf } from "./types";
 
+async function deleteFileFromStorage(path: string) {
+  const { error } = await supabase.storage.from("pdf_reports").remove([path]);
+  if (error) console.error("Error removing file from bucket:", error);
+}
+
 async function fetchPdfs({
   userId,
   category,
@@ -43,9 +48,18 @@ async function fetchPdfs({
   }
 
   const { data, error } = await query;
-
   if (error) throw error;
-  return data ?? [];
+
+  const filePaths = data.map((pdf) => pdf.pdf_url);
+  const { data: signedUrls, error: signError } = await supabase.storage
+    .from("pdf_reports")
+    .createSignedUrls(filePaths, 3600);
+
+  if (signError) throw signError;
+  return data.map((pdf, index) => ({
+    ...pdf,
+    signed_url: signedUrls[index]?.signedUrl ?? "",
+  }));
 }
 
 async function insertPdf(pdf: NewPdf): Promise<PdfRecord> {
@@ -59,7 +73,20 @@ async function insertPdf(pdf: NewPdf): Promise<PdfRecord> {
   return data;
 }
 
-async function deletePdf(id: string): Promise<PdfRecord> {
+// Updated to delete from Storage AND Database
+async function deletePdfAndFile(id: string): Promise<PdfRecord> {
+  const { data: record, error: fetchError } = await supabase
+    .from("pdf_records")
+    .select("pdf_url")
+    .eq("id", id)
+    .single();
+
+  if (fetchError) throw fetchError;
+
+  if (record?.pdf_url) {
+    await deleteFileFromStorage(record.pdf_url);
+  }
+
   const { data, error } = await supabase
     .from("pdf_records")
     .delete()
@@ -110,6 +137,7 @@ export function usePdfs(props: FetchPdfProps) {
     queryKey: ["pdfs", props],
     queryFn: () => fetchPdfs(props),
     enabled: !!props.userId,
+    staleTime: 1000 * 60 * 50,
   });
 
   const addPdf = useMutation<PdfRecord, PostgrestError, NewPdf>({
@@ -127,7 +155,7 @@ export function usePdfs(props: FetchPdfProps) {
   });
 
   const removePdf = useMutation<PdfRecord, PostgrestError, string>({
-    mutationFn: deletePdf,
+    mutationFn: deletePdfAndFile,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pdfs"] });
     },

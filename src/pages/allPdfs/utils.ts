@@ -12,8 +12,8 @@ const formatAllPdfs = (allPdfs: PdfRecord[]) => {
     const singlePdf: SinglePdf = {
       category: pdf.category,
       date: pdf.date_created,
-      downloadLink: pdf.pdf_url,
-      openLink: pdf.pdf_url,
+      signedUrl: pdf.signed_url || "",
+      openLink: pdf.signed_url || "",
       income: pdf.profit,
       title: pdf.file_name,
     };
