@@ -41,9 +41,6 @@ serve(async (req) => {
     // 4. Initialize Gemini AI
     const genAI = new GoogleGenerativeAI(Deno.env.get("GOOGLE_API_KEY") ?? "");
 
-    // --- FIX: USE EXACT NAME FROM YOUR LIST ---
-    // Your list showed "gemini-flash-latest".
-    // If this hits a limit, try "gemini-2.0-flash-lite-preview-02-05" (Lite is usually free)
     const model = genAI.getGenerativeModel({
       model: "gemini-flash-latest",
     });
@@ -72,7 +69,6 @@ serve(async (req) => {
 
     const responseText = result.response.text();
 
-    // Clean up response (sometimes AI adds ```json ... ```)
     const cleanedJson = responseText.replace(/```json|```/g, "").trim();
     const extractedData = JSON.parse(cleanedJson);
 
@@ -81,7 +77,6 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("Error:", error);
-    // Return error details so you can see them in the browser console
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
