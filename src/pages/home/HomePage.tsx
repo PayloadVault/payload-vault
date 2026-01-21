@@ -1,18 +1,12 @@
 import { useState, useEffect } from "react";
 import { ContentCard } from "../../components/contentCard/ContentCard";
-import { Dropdown } from "../../components/dropdown/Dropdown";
-import {
-  type DropdownOptions,
-  categorySortOptions,
-  isHomeSortType,
-} from "../../components/dropdown/DropdownOption";
 import { HeaderHome } from "../../components/header/HeaderHome";
 import { TotalIncomeCard } from "../../components/totalIncomeCard/TotalIncomeCard";
 import { PdfImportFooter } from "../../components/pdfImport/PdfImportFooter";
 import { usePdfs } from "../../hooks/usePdf/UsePdfs";
 import { useAuth } from "../../context/AuthContext";
 import { useYear } from "../../hooks/year/UseYear";
-import { formatData, sortData } from "./utils";
+import { formatData } from "./utils";
 import type { FullData } from "./types";
 import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
 import { ErrorBlock } from "../../components/errorBlock/ErrorBlock";
@@ -20,9 +14,6 @@ import { ErrorBlock } from "../../components/errorBlock/ErrorBlock";
 export const HomePage = () => {
   const { user } = useAuth();
   const { year } = useYear();
-  const [sortSelected, setSortSelected] = useState<
-    DropdownOptions["categorySort"][number]
-  >(categorySortOptions[0]);
   const [contentCardData, setContentCardData] = useState<
     FullData | undefined
   >();
@@ -43,16 +34,6 @@ export const HomePage = () => {
       setContentCardData(formatData(pdfs));
     }
   }, [pdfs]);
-
-  useEffect(() => {
-    if (contentCardData)
-      setContentCardData(
-        sortData(
-          contentCardData,
-          isHomeSortType(sortSelected.id) ? sortSelected.id : "high"
-        )
-      );
-  }, [sortSelected]);
 
   if (error) return <ErrorBlock />;
 
@@ -75,12 +56,7 @@ export const HomePage = () => {
             subtitle={contentCardData.allPdfs.subtitle}
             link={contentCardData.allPdfs.link}
           />
-          <Dropdown
-            label="Sort Categories"
-            options={categorySortOptions}
-            onSelect={setSortSelected}
-            value={sortSelected}
-          />
+          <h2 className="text-color-primary font-bold mx-auto">Categories</h2>
           <div className="flex flex-col gap-6">
             {contentCardData.allCategories.map((category) => (
               <ContentCard
