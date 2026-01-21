@@ -3,6 +3,13 @@ import { supabase } from "../../lib/supabase";
 import type { PostgrestError } from "@supabase/supabase-js";
 import type { FetchPdfProps, PdfRecord, NewPdf } from "./types";
 
+type PdfCategory =
+  | "Strom & Gas"
+  | "Barmenia Abrechnung"
+  | "IKK Abrechnung"
+  | "Adcuri Abschlussprovision"
+  | "Adcuri Bestandsprovision";
+
 async function deleteFileFromStorage(path: string) {
   const { error } = await supabase.storage.from("pdf_reports").remove([path]);
   if (error) console.error("Error removing file from bucket:", error);
@@ -50,7 +57,13 @@ async function fetchPdfs({
   const { data, error } = await query;
   if (error) throw error;
 
-  const filePaths = data.map((pdf) => pdf.pdf_url);
+  const filePaths = data
+    .map((pdf) => pdf.pdf_url)
+    .filter((p): p is string => typeof p === "string" && p.length > 0);
+
+  if (filePaths.length === 0)
+    return data.map((pdf) => ({ ...pdf, signed_url: "" }));
+
   const { data: signedUrls, error: signError } = await supabase.storage
     .from("pdf_reports")
     .createSignedUrls(filePaths, 3600);
@@ -58,7 +71,7 @@ async function fetchPdfs({
   if (signError) throw signError;
   return data.map((pdf, index) => ({
     ...pdf,
-    signed_url: signedUrls[index]?.signedUrl ?? "",
+    signed_url: signedUrls?.[index]?.signedUrl ?? "",
   }));
 }
 
@@ -73,7 +86,6 @@ async function insertPdf(pdf: NewPdf): Promise<PdfRecord> {
   return data;
 }
 
-// Updated to delete from Storage AND Database
 async function deletePdfAndFile(id: string): Promise<PdfRecord> {
   const { data: record, error: fetchError } = await supabase
     .from("pdf_records")
@@ -117,17 +129,56 @@ async function uploadAndInsertPdf({
 
   if (uploadError) throw uploadError;
 
-  // Here we should do metadata extraction
+  let metadata = {
+    profit: 0,
+    date_created: new Date().toISOString().split("T")[0],
+    category: "Strom & Gas" as PdfCategory,
+  };
+
+  try {
+    const { data: aiData, error: aiError } = await supabase.functions.invoke(
+      "extract-data-from-pdf",
+      {
+        body: {
+          filePath: filePath,
+          fileType: file.type,
+        },
+      },
+    );
+
+    if (aiError) throw aiError;
+    if (aiData) {
+      metadata = {
+        profit: aiData.profit || 0,
+        date_created: aiData.date_created || metadata.date_created,
+        category: validateCategory(aiData.category),
+      };
+    }
+  } catch (err) {
+    console.error("AI Extraction failed, using defaults:", err);
+  }
+
   const newPdfRecord: NewPdf = {
     user_id: userId,
     file_name: file.name,
     pdf_url: filePath,
-    category: "Strom & Gas",
-    profit: Math.random() * 1000,
-    date_created: new Date().toISOString().split("T")[0],
+    category: metadata.category as PdfCategory,
+    profit: metadata.profit,
+    date_created: metadata.date_created,
   };
 
   return insertPdf(newPdfRecord);
+}
+
+function validateCategory(cat: string): PdfCategory {
+  const valid = [
+    "Strom & Gas",
+    "Barmenia Abrechnung",
+    "IKK Abrechnung",
+    "Adcuri Abschlussprovision",
+    "Adcuri Bestandsprovision",
+  ];
+  return valid.includes(cat) ? (cat as PdfCategory) : "Strom & Gas";
 }
 
 export function usePdfs(props: FetchPdfProps) {
