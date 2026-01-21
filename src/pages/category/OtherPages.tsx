@@ -1,18 +1,32 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import {
   type DropdownOptions,
   paycheckFilterOptions,
   monthOptions,
+  isSortType,
+  isCategoryType,
 } from "../../components/dropdown/DropdownOption";
 import { Dropdown } from "../../components/dropdown/Dropdown";
 import { ContentCard } from "../../components/contentCard/ContentCard";
 import { TotalIncomeCard } from "../../components/totalIncomeCard/TotalIncomeCard";
+import { useAuth } from "../../context/AuthContext";
+import { useYear } from "../../hooks/year/UseYear";
+import type { AllPdfTypes } from "../allPdfs/types";
+import { usePdfs } from "../../hooks/usePdf/UsePdfs";
+import { formatAllPdfs } from "../allPdfs/utils";
+import { ErrorBlock } from "../../components/errorBlock/ErrorBlock";
+import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
+import { DocumentSkeletonLoader } from "../../components/skeletonLoader/DocumentSkeletonLoader";
+import { Button } from "../../components/button/Button";
 
 type CategoryProps = {
   title: string;
 };
 
 export const OtherPages = ({ title }: CategoryProps) => {
+  const { user } = useAuth();
+  const { year } = useYear();
+
   const [sortSelected, setSortSelected] = useState<
     DropdownOptions["paycheckFilter"][number]
   >(paycheckFilterOptions[0]);
@@ -21,113 +35,44 @@ export const OtherPages = ({ title }: CategoryProps) => {
     DropdownOptions["month"][number]
   >(monthOptions[0]);
 
-  const getMonthIdFromDate = (date: string) => {
-    const monthIndex = new Date(date).getMonth();
+  const [contentCardData, setContentCardData] = useState<
+    AllPdfTypes | undefined
+  >();
 
-    const monthIds = [
-      "january",
-      "february",
-      "march",
-      "april",
-      "may",
-      "june",
-      "july",
-      "august",
-      "september",
-      "october",
-      "november",
-      "december",
-    ];
-
-    return monthIds[monthIndex];
+  const handleResetFilters = () => {
+    setSortSelected(paycheckFilterOptions[0]);
+    setMonthSelected(monthOptions[0]);
   };
 
-  const contentCardData = {
-    totalIncome: 504400,
-    pdfs: [
-      {
-        title: "Adcuri Abschlussprovision Document 1",
-        date: "2023-01-15",
-        profit: 5400,
-        downloadLink: "/category/adcuri/abschlussprovision/document1.pdf",
-        openLink: "/category/adcuri/abschlussprovision/document1",
-      },
-      {
-        title: "Adcuri Abschlussprovision Document 2",
-        date: "2023-04-15",
-        profit: 13400,
-        downloadLink: "/category/adcuri/abschlussprovision/document2.pdf",
-        openLink: "/category/adcuri/abschlussprovision/document2",
-      },
-      {
-        title: "Adcuri Abschlussprovision Document 3",
-        date: "2023-03-15",
-        profit: 20400,
-        downloadLink: "/category/adcuri/abschlussprovision/document3.pdf",
-        openLink: "/category/adcuri/abschlussprovision/document3",
-      },
-      {
-        title: "Adcuri Abschlussprovision Document 4",
-        date: "2023-04-15",
-        profit: 3400,
-        downloadLink: "/category/adcuri/abschlussprovision/document4.pdf",
-        openLink: "/category/adcuri/abschlussprovision/document4",
-      },
-      {
-        title: "Adcuri Bestandsprovision Document 1",
-        date: "2023-03-15",
-        profit: 1400,
-        downloadLink: "/category/adcuri/bestandsprovision/document1.pdf",
-        openLink: "/category/adcuri/bestandsprovision/document1",
-      },
-      {
-        title: "Adcuri Bestandsprovision Document 2",
-        date: "2023-05-15",
-        profit: 400,
-        downloadLink: "/category/adcuri/bestandsprovision/document2.pdf",
-        openLink: "/category/adcuri/bestandsprovision/document2",
-      },
-      {
-        title: "Adcuri Bestandsprovision Document 3",
-        date: "2023-04-15",
-        profit: 12400,
-        downloadLink: "/category/adcuri/bestandsprovision/document3.pdf",
-        openLink: "/category/adcuri/bestandsprovision/document3",
-      },
-    ],
-  };
+  if (!user) return <ErrorBlock />;
 
-  const sortedPdfs = useMemo(() => {
-    const filtered = contentCardData.pdfs.filter((pdf) => {
-      if (monthSelected.id === "all") return true;
-      return getMonthIdFromDate(pdf.date) === monthSelected.id;
-    });
+  const {
+    data: pdfs,
+    isLoading,
+    error,
+  } = usePdfs({
+    userId: user.id,
+    year,
+    month: Number(monthSelected.id) || undefined,
+    sortBy: isSortType(sortSelected.id) ? sortSelected.id : "new",
+    category: isCategoryType(title) ? title : "all",
+  });
 
-    return filtered.sort((a, b) => {
-      switch (sortSelected.id) {
-        case "newest":
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
+  useEffect(() => {
+    if (pdfs) {
+      setContentCardData(formatAllPdfs(pdfs));
+    }
+  }, [pdfs]);
 
-        case "oldest":
-          return new Date(a.date).getTime() - new Date(b.date).getTime();
+  if (!contentCardData) return <PageSkeletonLoader />;
 
-        case "high":
-          return b.profit - a.profit;
-
-        case "low":
-          return a.profit - b.profit;
-
-        default:
-          return 0;
-      }
-    });
-  }, [contentCardData.pdfs, monthSelected.id, sortSelected.id]);
+  if (error) return <ErrorBlock />;
 
   return (
     <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
       <TotalIncomeCard
         title={title}
-        subtitle={contentCardData.pdfs.length + " documents"}
+        subtitle={contentCardData.totalPdf.toString() + " · Paychecks"}
         totalIncome={contentCardData.totalIncome}
       />
       <div className="grid md:grid-cols-2 gap-2">
@@ -144,19 +89,30 @@ export const OtherPages = ({ title }: CategoryProps) => {
           value={monthSelected}
         />
       </div>
-      <div className="flex flex-col gap-6">
-        {sortedPdfs.map((pdf) => (
-          <ContentCard
-            key={pdf.title}
-            variant="document"
-            title={pdf.title}
-            date={pdf.date}
-            profit={pdf.profit}
-            downloadLink={pdf.downloadLink}
-            openLink={pdf.openLink}
-          />
-        ))}
+      <div className="grid grid-cols-1 items-center">
+        <Button
+          onClick={handleResetFilters}
+          text="Reset Filters"
+          size="medium"
+        />
       </div>
+      {isLoading ? (
+        <DocumentSkeletonLoader />
+      ) : (
+        <div className="flex flex-col gap-6">
+          {contentCardData.pdfs.map((pdf) => (
+            <ContentCard
+              key={pdf.income + pdf.date + pdf.category}
+              variant="document"
+              title={pdf.title}
+              date={pdf.date}
+              profit={pdf.income}
+              downloadLink={pdf.downloadLink}
+              openLink={pdf.openLink}
+            />
+          ))}
+        </div>
+      )}
     </main>
   );
 };
