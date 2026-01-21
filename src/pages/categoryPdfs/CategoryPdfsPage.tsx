@@ -9,15 +9,13 @@ export function CategoryPdfsPage() {
   const category = categories.find((c) => c.slug === fullSlug);
   if (!category) return <h1>Category not found: {fullSlug}</h1>;
 
-  const { setTitle, setSubtitle } = useOutletContext<{
+  const { setTitle } = useOutletContext<{
     setTitle: (title: string) => void;
-    setSubtitle: (subtitle: string) => void;
   }>();
 
   useLayoutEffect(() => {
     setTitle(`${category.title} — PDF`);
-    setSubtitle("year");
-  }, [setTitle, setSubtitle, category.title]);
+  }, [setTitle, category.title]);
 
   return (
     <div>
