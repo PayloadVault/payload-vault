@@ -7,6 +7,7 @@ import { useAuth } from "../../context/AuthContext";
 import { Banner } from "../../components/banner/Banner";
 import { Button } from "../../components/button/Button";
 import { VaultIcon } from "../../components/icons";
+import { loginSchema } from "../../validation/LoginValidation";
 
 export const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -26,23 +27,34 @@ export const LoginPage = () => {
   }, [user, navigate, location]);
 
   const handleLogin = async () => {
-    setLoading(true);
     setError(null);
 
+    const result = loginSchema.safeParse({ email, password });
+
+    if (!result.success) {
+      const message = result.error.issues[0].message;
+
+      setError(message);
+      return;
+    }
+
+    setLoading(true);
+
     const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+      email: result.data.email,
+      password: result.data.password,
     });
 
     if (error) {
       setError(error.message);
     }
+
     setLoading(false);
   };
 
   return (
     <div className="flex items-center justify-center w-screen h-screen p-4">
-      <form className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card p-8 rounded-xl border border-color-border-light">
+      <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card p-8 rounded-xl border border-color-border-light">
         <div className="bg-color-primary/15 p-2 rounded-full mx-auto">
           <VaultIcon className="w-12 h-12 mx-auto text-color-primary" />
         </div>
@@ -70,7 +82,7 @@ export const LoginPage = () => {
         <p className="text-color-text-subtle text-center text-sm mt-2">
           Still don't have an account? <Link to="/signup">Sign Up</Link>
         </p>
-      </form>
+      </div>
     </div>
   );
 };
