@@ -27,7 +27,16 @@ export const HeaderHome = () => {
     return (document.documentElement.dataset.theme as Theme) ?? "dark";
   });
 
-  useEffect(() => {}, [setYear(Number(selectedYear.id))]);
+  useEffect(() => {
+    setYear(Number(selectedYear.id));
+  }, [selectedYear, setYear]);
+
+  useEffect(() => {
+    setSelectedYear({
+      id: year.toString(),
+      label: year.toString(),
+    });
+  }, [year]);
 
   const toggleTheme = () => {
     const next: Theme = theme === "dark" ? "light" : "dark";
