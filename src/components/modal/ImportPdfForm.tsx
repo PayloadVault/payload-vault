@@ -3,20 +3,18 @@ import { Button } from "../button/Button";
 import { UploadIcon } from "../icons";
 import { FileUploadCard } from "../uploadFileCard/UploadFileCard";
 
-interface PasswordChangeFormProps {
+interface ImportPdfFormProps {
   onCancel: () => void;
-  onSave: (newPassword: string) => Promise<void>;
+  onSave: (files: File[]) => Promise<void>;
 }
-export const ImportPdfForm = ({
-  onCancel,
-  onSave,
-}: PasswordChangeFormProps) => {
+export const ImportPdfForm = ({ onCancel, onSave }: ImportPdfFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
 
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      // await onSave();
+      await onSave(files);
     } finally {
       setIsLoading(false);
     }
@@ -28,6 +26,8 @@ export const ImportPdfForm = ({
         <FileUploadCard
           title="Import PDF"
           description="Choose from files or drag and drop"
+          files={files}
+          setFiles={setFiles}
         />
       </div>
       <div className="mt-6 flex gap-6">

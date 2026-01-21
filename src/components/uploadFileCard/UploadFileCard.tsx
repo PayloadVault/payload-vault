@@ -6,45 +6,51 @@ import {
   type ChangeEventHandler,
 } from "react";
 import { ExcelPaper } from "../icons";
-import type { ExcelUploadCardProps } from "./UploadfileCard.types";
+import type { UploadCardProps } from "./UploadfileCard.types";
 import { Button } from "../button/Button";
-import { useBannerNotification } from "../../hooks/banner/UseBannerNotification";
-import { Banner } from "../banner/Banner";
 
 export const FileUploadCard = ({
-  title,
   description,
   accept = ".pdf",
-}: ExcelUploadCardProps) => {
+  files,
+  setFiles,
+}: UploadCardProps) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const [isDragOver, setIsDragOver] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
-
-  const { banner, closeBanner, showBanner } = useBannerNotification();
 
   const openPicker = () => inputRef.current?.click();
 
-  const isPdf = (f: File) => {
-    return /\.pdf$/i.test(f.name);
-  };
+  const isValidFile = (f: File) => /\.pdf$/i.test(f.name);
 
-  const setPickedFile = (f: File | null) => {
-    if (!f) return;
-    if (!isPdf(f)) {
-      showBanner(
-        "File type mismatch",
-        "Please upload a valid PDF file (.pdf).",
-        "error"
-      );
-      return;
+  const addFiles = (incoming: File[]) => {
+    const validFiles: File[] = [];
+    const invalidFiles: string[] = [];
+
+    incoming.forEach((file) => {
+      if (isValidFile(file)) {
+        validFiles.push(file);
+      } else {
+        invalidFiles.push(file.name);
+      }
+    });
+
+    if (invalidFiles.length) {
+      // showBanner(
+      //   "File type mismatch",
+      //   "Some files were ignored. Only PDF files are allowed.",
+      //   "error"
+      // );
     }
-    setFile(f);
+
+    if (validFiles.length) {
+      setFiles((prev) => [...prev, ...validFiles]);
+    }
   };
 
   const onInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-    const f = e.target.files?.[0] ?? null;
-    if (f) setPickedFile(f);
+    const selectedFiles = Array.from(e.target.files ?? []);
+    if (selectedFiles.length) addFiles(selectedFiles);
     e.currentTarget.value = "";
   };
 
@@ -53,8 +59,8 @@ export const FileUploadCard = ({
     e.stopPropagation();
     setIsDragOver(false);
 
-    const f = e.dataTransfer.files?.[0] ?? null;
-    if (f) setPickedFile(f);
+    const droppedFiles = Array.from(e.dataTransfer.files ?? []);
+    if (droppedFiles.length) addFiles(droppedFiles);
   };
 
   const onDragOver: DragEventHandler<HTMLDivElement> = (e) => {
@@ -69,11 +75,9 @@ export const FileUploadCard = ({
     setIsDragOver(false);
   };
 
-  const removeFile = () => setFile(null);
-
   const containerClasses = useMemo(() => {
     const base =
-      "flex w-full aspect-square flex-col items-center justify-center gap-4 rounded-lg border border-dashed p-10 text-center transition-colors";
+      "flex w-full aspect-square flex-col items-center justify-center gap-4 rounded-lg border border-dashed p-2 text-center transition-colors";
     if (isDragOver) {
       return `${base} bg-black text-color-text-secondary`;
     }
@@ -93,21 +97,13 @@ export const FileUploadCard = ({
       }}
     >
       {isDragOver ? (
-        <ExcelPaper className="text-color-text-subtle" />
+        <ExcelPaper className="text-color-text-subtle pointer-events-none" />
       ) : (
-        <ExcelPaper className="text-color-primary" />
+        <ExcelPaper className="text-color-primary pointer-events-none" />
       )}
 
-      <h5
-        className={`text-2xl leading-[120%] font-bold ${
-          isDragOver ? "text-color-text-secondary" : ""
-        }`}
-      >
-        {title}
-      </h5>
-
       <p
-        className={`text-[16px] leading-6 font-medium ${
+        className={`text-[16px] leading-6 font-medium pointer-events-none ${
           isDragOver ? "text-color-text-secondary/90" : "text-color-text-subtle"
         }`}
       >
@@ -118,48 +114,51 @@ export const FileUploadCard = ({
         ref={inputRef}
         type="file"
         accept={accept}
+        multiple
         className="hidden"
         onChange={onInputChange}
       />
 
-      {file && (
-        <div className="mt-2 flex w-full max-w-105 items-center justify-between rounded-l-sm bg-color-bg-alt p-4 text-left">
-          <div className="flex items-center gap-2 overflow-hidden">
-            <ExcelPaper size={32} className="text-color-primary" />
+      {files.length > 0 && (
+        <div className="mt-2 w-full max-w-80 lg:max-w-130">
+          <div className="flex max-h-48 flex-col gap-2 overflow-y-auto pr-1">
+            {files.map((file, index) => (
+              <div
+                key={`${file.name}-${index}`}
+                className="flex items-center justify-between rounded-md bg-color-bg-dark p-4"
+              >
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <ExcelPaper size={32} className="text-color-primary" />
+                  <span
+                    className="
+                    truncate font-medium text-color-text-secondary
+                    max-w-[12ch]
+                    sm:max-w-[20ch]
+                    lg:max-w-[20c]
+                    "
+                    title={file.name}
+                  >
+                    {file.name}
+                  </span>
+                </div>
 
-            <span className="truncate text-[16px] leading-6 font-medium text-color-text-secondary">
-              {file.name}
-            </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFiles((prev) => prev.filter((_, i) => i !== index))
+                  }
+                  className="ml-3 h-10 w-10 rounded text-color-text-secondary transition-colors hover:bg-color-primary/10"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
           </div>
-
-          <button
-            type="button"
-            onClick={removeFile}
-            className="ml-3 inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded text-color-text-secondary hover:bg-white/5"
-          >
-            ✕
-          </button>
         </div>
       )}
 
-      {!file
-        ? !isDragOver && (
-            <Button
-              variant="secondary"
-              text="Choose File"
-              onClick={openPicker}
-            />
-          )
-        : null}
-      {banner && (
-        <div className="animate-slide-in animate-slide-out fixed right-4 bottom-4">
-          <Banner
-            bannerType={banner.bannerType}
-            title={banner.title}
-            description={banner.description}
-            onCloseBanner={closeBanner}
-          />
-        </div>
+      {!isDragOver && (
+        <Button variant="secondary" text="Choose Files" onClick={openPicker} />
       )}
     </div>
   );

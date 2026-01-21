@@ -2,7 +2,7 @@ import { ImportPdfForm } from "../../components/modal/ImportPdfForm";
 import { useModal } from "../../context/modal/ModalContext";
 
 type UseImportPdfModalProps = {
-  onSave: (newPassword: string) => Promise<void>;
+  onSave: (files: File[]) => Promise<void>;
 };
 
 export const useImportPdfModal = ({ onSave }: UseImportPdfModalProps) => {
