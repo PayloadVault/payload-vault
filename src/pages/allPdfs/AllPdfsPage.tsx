@@ -144,7 +144,7 @@ export const AllPdfsPage = () => {
               title={pdf.title}
               date={pdf.date}
               profit={pdf.income}
-              downloadLink={pdf.downloadLink}
+              downloadLink={pdf.signedUrl}
               openLink={pdf.openLink}
               searchQuery={searchQuery}
             />
