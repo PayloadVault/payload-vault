@@ -71,6 +71,38 @@ async function deletePdf(id: string): Promise<PdfRecord> {
   return data;
 }
 
+type UploadVariables = {
+  file: File;
+  userId: string;
+};
+
+async function uploadAndInsertPdf({
+  file,
+  userId,
+}: UploadVariables): Promise<PdfRecord> {
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9]/g, "_")}.${fileExt}`;
+  const filePath = `${userId}/${fileName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("pdf_reports")
+    .upload(filePath, file);
+
+  if (uploadError) throw uploadError;
+
+  // Here we should do metadata extraction
+  const newPdfRecord: NewPdf = {
+    user_id: userId,
+    file_name: file.name,
+    pdf_url: filePath,
+    category: "Strom & Gas",
+    profit: Math.random() * 1000,
+    date_created: new Date().toISOString().split("T")[0],
+  };
+
+  return insertPdf(newPdfRecord);
+}
+
 export function usePdfs(props: FetchPdfProps) {
   const queryClient = useQueryClient();
 
@@ -82,22 +114,24 @@ export function usePdfs(props: FetchPdfProps) {
 
   const addPdf = useMutation<PdfRecord, PostgrestError, NewPdf>({
     mutationFn: insertPdf,
-    onSuccess: (newPdf) => {
-      queryClient.setQueryData<PdfRecord[]>(["pdfs", props], (old = []) => [
-        newPdf,
-        ...old,
-      ]);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pdfs"] });
+    },
+  });
+
+  const uploadPdf = useMutation<PdfRecord, PostgrestError, UploadVariables>({
+    mutationFn: uploadAndInsertPdf,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pdfs"] });
     },
   });
 
   const removePdf = useMutation<PdfRecord, PostgrestError, string>({
     mutationFn: deletePdf,
-    onSuccess: (_deletedPdf, id) => {
-      queryClient.setQueryData<PdfRecord[]>(["pdfs", props], (old = []) =>
-        old.filter((pdf) => pdf.id !== id)
-      );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pdfs"] });
     },
   });
 
-  return { ...query, addPdf, removePdf };
+  return { ...query, addPdf, uploadPdf, removePdf };
 }
