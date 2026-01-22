@@ -13,7 +13,7 @@ export const passwordChangeSchema = z
   .object({
     password: z.string().min(1, "Password is required").pipe(strongPassword),
 
-    repeatPassword: z.string().min(1, "Repeat password is required"),
+    repeatPassword: z.string().min(1, "Please repeat your password"),
   })
   .superRefine((data, ctx) => {
     if (data.password !== data.repeatPassword) {
