@@ -42,7 +42,9 @@ export const PasswordChangeForm = ({
 
   return (
     <div className="flex flex-col gap-6">
-      {error && <Banner bannerType="error" description="" title={error} />}
+      <div className="w-70">
+        {error && <Banner bannerType="error" description="" title={error} />}
+      </div>
       <PasswordInput
         label="New Password"
         value={password}

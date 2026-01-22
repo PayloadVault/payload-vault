@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const passwordRules = z
+const strongPassword = z
   .string()
   .min(8, "Password must be at least 8 characters long")
   .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
@@ -11,8 +11,9 @@ const passwordRules = z
 
 export const passwordChangeSchema = z
   .object({
-    password: passwordRules,
-    repeatPassword: passwordRules,
+    password: z.string().min(1, "Password is required").pipe(strongPassword),
+
+    repeatPassword: z.string().min(1, "Repeat password is required"),
   })
   .superRefine((data, ctx) => {
     if (data.password !== data.repeatPassword) {
