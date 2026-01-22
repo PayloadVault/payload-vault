@@ -2,6 +2,22 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai";
 
+type ExtractedAIData = {
+  profit?: unknown;
+  date_created?: unknown;
+  category?: unknown;
+};
+
+function sanitizeAIResponse(raw: string): ExtractedAIData | null {
+  try {
+    const cleaned = raw.replace(/```json|```/g, "").trim();
+    const parsed = JSON.parse(cleaned);
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -22,7 +38,7 @@ serve(async (req) => {
     // 1. Initialize Supabase Admin Client
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
     // 2. Download the file from Supabase Storage
@@ -35,7 +51,7 @@ serve(async (req) => {
     // 3. Convert file to Base64
     const arrayBuffer = await fileData.arrayBuffer();
     const base64Data = btoa(
-      String.fromCharCode(...new Uint8Array(arrayBuffer)),
+      String.fromCharCode(...new Uint8Array(arrayBuffer))
     );
 
     // 4. Initialize Gemini AI
@@ -47,14 +63,74 @@ serve(async (req) => {
 
     // 5. Define the prompt
     const prompt = `
-      Analyze this invoice PDF. Extract the following data in strict JSON format:
-      - profit: The total gross amount (Summe Brutto). Return as a number (e.g. 405.00).
-      - date_created: The invoice date (Faktura-Datum). Return as YYYY-MM-DD string.
-      - category: Categorize strictly as one of: "Strom & Gas", "Barmenia Abrechnung", "IKK Abrechnung", "Adcuri Abschlussprovision", "Adcuri Bestandsprovision".
-      
-      If you are unsure about the category, default to "Strom & Gas".
-      Return ONLY the JSON object, no markdown formatting.
-    `;
+      You are an automated invoice parser.
+
+      You will receive a PDF invoice (German language).
+      Your task is to extract structured data EXACTLY as specified.
+
+      IMPORTANT RULES:
+      - Read ONLY the content of the provided PDF.
+      - Do NOT guess values.
+      - Do NOT invent numbers or dates.
+      - If a value cannot be found with high confidence, use the fallback rules below.
+      - Your response MUST be valid JSON.
+      - Your response MUST contain ONLY the JSON object (no markdown, no comments, no explanations).
+
+      --------------------
+      FIELDS TO EXTRACT
+      --------------------
+
+      1) profit
+      - Definition: The total gross amount (German: "Summe Brutto", "Gesamtbetrag Brutto", "Saldo", or "Bruttobetrag").
+      - Use the FINAL payable gross total, not net, not tax.
+      - Remove currency symbols (€, EUR).
+      - Convert comma decimals to dot decimals.
+      - Return as a NUMBER (example: 405.00).
+      - If multiple totals exist, choose the highest clearly labeled gross total.
+      - If no gross total is found, return 0.
+
+      2) date_created
+      - Definition: The invoice issue date.
+      - Look for labels such as:
+        - "Faktura-Datum"
+        - "Rechnungsdatum"
+        - "Datum"
+      - Convert the date to ISO format: YYYY-MM-DD.
+      - If multiple dates exist, prefer the invoice date over service period dates.
+      - If no valid date is found, use today's date.
+
+      3) category
+      - You MUST return EXACTLY ONE of the following values:
+        - "Strom & Gas"
+        - "Barmenia Abrechnung"
+        - "IKK Abrechnung"
+        - "Adcuri Abschlussprovision"
+        - "Adcuri Bestandsprovision"
+
+      CATEGORY RULES:
+      - If the invoice mentions electricity, gas, energy providers, kWh, Abschlag → "Strom & Gas"
+      - If it mentions "Barmenia" → "Barmenia Abrechnung"
+      - If it mentions "IKK" → "IKK Abrechnung"
+      - If it mentions "Adcuri" AND "Abschlussprovision" → "Adcuri Abschlussprovision"
+      - If it mentions "Adcuri" AND "Bestandsprovision" → "Adcuri Bestandsprovision"
+      - If unsure or unclear → "Strom & Gas"
+
+      --------------------
+      OUTPUT FORMAT
+      --------------------
+
+      Return EXACTLY this JSON structure:
+
+      {
+        "profit": number,
+        "date_created": "YYYY-MM-DD",
+        "category": "one of the allowed categories"
+      }
+
+      Do NOT include markdown.
+      Do NOT include explanations.
+      Do NOT include extra fields.
+      `;
 
     // 6. Call Gemini
     const result = await model.generateContent([
@@ -67,10 +143,16 @@ serve(async (req) => {
       },
     ]);
 
-    const responseText = result.response.text();
+    console.log("Gemini Response:", await result.response.text());
 
-    const cleanedJson = responseText.replace(/```json|```/g, "").trim();
-    const extractedData = JSON.parse(cleanedJson);
+    const responseText = result.response.text();
+    const aiParsed = sanitizeAIResponse(responseText);
+
+    const extractedData = {
+      profit: aiParsed?.profit,
+      date_created: aiParsed?.date_created,
+      category: aiParsed?.category,
+    };
 
     return new Response(JSON.stringify(extractedData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
