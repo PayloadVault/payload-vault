@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai";
+import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 type ExtractedAIData = {
   profit?: unknown;
@@ -50,9 +51,7 @@ serve(async (req) => {
 
     // 3. Convert file to Base64
     const arrayBuffer = await fileData.arrayBuffer();
-    const base64Data = btoa(
-      String.fromCharCode(...new Uint8Array(arrayBuffer))
-    );
+    const base64Data = base64Encode(new Uint8Array(arrayBuffer));
 
     // 4. Initialize Gemini AI
     const genAI = new GoogleGenerativeAI(Deno.env.get("GOOGLE_API_KEY") ?? "");
@@ -112,7 +111,7 @@ serve(async (req) => {
       - If it mentions "Barmenia" → "Barmenia Abrechnung"
       - If it mentions "IKK" → "IKK Abrechnung"
       - If it mentions "Adcuri" AND "Abschlussprovision" → "Adcuri Abschlussprovision"
-      - If it mentions "Adcuri" AND "Bestandsprovision" → "Adcuri Bestandsprovision"
+      - If it mentions "Adcuri" AND "Bestandsprovision" → "Adcuri Bestandsprovision", if it mentions "Adcuri" but neither provision type, prefer "Adcuri Bestandsprovision"
       - If unsure or unclear → "Strom & Gas"
 
       --------------------
@@ -142,8 +141,6 @@ serve(async (req) => {
         },
       },
     ]);
-
-    console.log("Gemini Response:", await result.response.text());
 
     const responseText = result.response.text();
     const aiParsed = sanitizeAIResponse(responseText);
