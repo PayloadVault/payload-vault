@@ -100,9 +100,9 @@ export const OtherPages = ({ title }: CategoryProps) => {
         <DocumentSkeletonLoader />
       ) : (
         <div className="flex flex-col gap-6">
-          {contentCardData.pdfs.map((pdf) => (
+          {contentCardData.pdfs.map((pdf, index) => (
             <ContentCard
-              key={pdf.income + pdf.date + pdf.category}
+              key={index}
               variant="document"
               title={pdf.title}
               date={pdf.date}
