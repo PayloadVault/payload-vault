@@ -20,7 +20,11 @@ export const MenuDropdown = ({
 
   const handleChangePassword = async (newPassword: string) => {
     try {
-      // await updatePassword(newPassword);
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) throw error;
     } catch (error) {
     } finally {
       closeModal();
