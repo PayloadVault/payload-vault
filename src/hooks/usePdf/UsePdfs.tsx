@@ -3,6 +3,18 @@ import { supabase } from "../../lib/supabase";
 import type { PostgrestError } from "@supabase/supabase-js";
 import type { FetchPdfProps, PdfRecord, NewPdf } from "./types";
 
+type PdfCategory =
+  | "Strom & Gas"
+  | "Barmenia Abrechnung"
+  | "IKK Abrechnung"
+  | "Adcuri Abschlussprovision"
+  | "Adcuri Bestandsprovision";
+
+async function deleteFileFromStorage(path: string) {
+  const { error } = await supabase.storage.from("pdf_reports").remove([path]);
+  if (error) console.error("Error removing file from bucket:", error);
+}
+
 async function fetchPdfs({
   userId,
   category,
@@ -43,9 +55,24 @@ async function fetchPdfs({
   }
 
   const { data, error } = await query;
-
   if (error) throw error;
-  return data ?? [];
+
+  const filePaths = data
+    .map((pdf) => pdf.pdf_url)
+    .filter((p): p is string => typeof p === "string" && p.length > 0);
+
+  if (filePaths.length === 0)
+    return data.map((pdf) => ({ ...pdf, signed_url: "" }));
+
+  const { data: signedUrls, error: signError } = await supabase.storage
+    .from("pdf_reports")
+    .createSignedUrls(filePaths, 3600);
+
+  if (signError) throw signError;
+  return data.map((pdf, index) => ({
+    ...pdf,
+    signed_url: signedUrls?.[index]?.signedUrl ?? "",
+  }));
 }
 
 async function insertPdf(pdf: NewPdf): Promise<PdfRecord> {
@@ -59,7 +86,19 @@ async function insertPdf(pdf: NewPdf): Promise<PdfRecord> {
   return data;
 }
 
-async function deletePdf(id: string): Promise<PdfRecord> {
+async function deletePdfAndFile(id: string): Promise<PdfRecord> {
+  const { data: record, error: fetchError } = await supabase
+    .from("pdf_records")
+    .select("pdf_url")
+    .eq("id", id)
+    .single();
+
+  if (fetchError) throw fetchError;
+
+  if (record?.pdf_url) {
+    await deleteFileFromStorage(record.pdf_url);
+  }
+
   const { data, error } = await supabase
     .from("pdf_records")
     .delete()
@@ -71,6 +110,77 @@ async function deletePdf(id: string): Promise<PdfRecord> {
   return data;
 }
 
+type UploadVariables = {
+  file: File;
+  userId: string;
+};
+
+async function uploadAndInsertPdf({
+  file,
+  userId,
+}: UploadVariables): Promise<PdfRecord> {
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9]/g, "_")}.${fileExt}`;
+  const filePath = `${userId}/${fileName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("pdf_reports")
+    .upload(filePath, file);
+
+  if (uploadError) throw uploadError;
+
+  let metadata = {
+    profit: 0,
+    date_created: new Date().toISOString().split("T")[0],
+    category: "Strom & Gas" as PdfCategory,
+  };
+
+  try {
+    const { data: aiData, error: aiError } = await supabase.functions.invoke(
+      "extract-data-from-pdf",
+      {
+        body: {
+          filePath: filePath,
+          fileType: file.type,
+        },
+      },
+    );
+
+    if (aiError) throw aiError;
+    if (aiData) {
+      metadata = {
+        profit: aiData.profit || 0,
+        date_created: aiData.date_created || metadata.date_created,
+        category: validateCategory(aiData.category),
+      };
+    }
+  } catch (err) {
+    console.error("AI Extraction failed, using defaults:", err);
+  }
+
+  const newPdfRecord: NewPdf = {
+    user_id: userId,
+    file_name: file.name,
+    pdf_url: filePath,
+    category: metadata.category as PdfCategory,
+    profit: metadata.profit,
+    date_created: metadata.date_created,
+  };
+
+  return insertPdf(newPdfRecord);
+}
+
+function validateCategory(cat: string): PdfCategory {
+  const valid = [
+    "Strom & Gas",
+    "Barmenia Abrechnung",
+    "IKK Abrechnung",
+    "Adcuri Abschlussprovision",
+    "Adcuri Bestandsprovision",
+  ];
+  return valid.includes(cat) ? (cat as PdfCategory) : "Strom & Gas";
+}
+
 export function usePdfs(props: FetchPdfProps) {
   const queryClient = useQueryClient();
 
@@ -78,26 +188,29 @@ export function usePdfs(props: FetchPdfProps) {
     queryKey: ["pdfs", props],
     queryFn: () => fetchPdfs(props),
     enabled: !!props.userId,
+    staleTime: 1000 * 60 * 50,
   });
 
   const addPdf = useMutation<PdfRecord, PostgrestError, NewPdf>({
     mutationFn: insertPdf,
-    onSuccess: (newPdf) => {
-      queryClient.setQueryData<PdfRecord[]>(["pdfs", props], (old = []) => [
-        newPdf,
-        ...old,
-      ]);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pdfs"] });
+    },
+  });
+
+  const uploadPdf = useMutation<PdfRecord, PostgrestError, UploadVariables>({
+    mutationFn: uploadAndInsertPdf,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pdfs"] });
     },
   });
 
   const removePdf = useMutation<PdfRecord, PostgrestError, string>({
-    mutationFn: deletePdf,
-    onSuccess: (_deletedPdf, id) => {
-      queryClient.setQueryData<PdfRecord[]>(["pdfs", props], (old = []) =>
-        old.filter((pdf) => pdf.id !== id)
-      );
+    mutationFn: deletePdfAndFile,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pdfs"] });
     },
   });
 
-  return { ...query, addPdf, removePdf };
+  return { ...query, addPdf, uploadPdf, removePdf };
 }

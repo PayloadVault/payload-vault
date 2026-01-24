@@ -61,9 +61,9 @@ export const AdcuriPage = () => {
         value={sortSelected}
       />
       <div className="flex flex-col gap-6">
-        {contentCardData.adcuriCategories.map((category) => (
+        {contentCardData.adcuriCategories.map((category, index) => (
           <ContentCard
-            key={category.category.title}
+            key={index}
             variant="category"
             title={category.category.title}
             subtitle={category.subtitle.toString() + " · Paychecks"}

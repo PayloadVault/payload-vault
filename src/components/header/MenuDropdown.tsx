@@ -2,6 +2,7 @@ import { useChangePasswordModal } from "../../hooks/modal/UsePasswordChangeModal
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { LockIcon, LogoutIcon, MoonIcon, SunIcon } from "../icons";
+import { useBanner } from "../../context/banner/BannerContext";
 
 type MenuDropdownProps = {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export const MenuDropdown = ({
   toggleTheme,
 }: MenuDropdownProps) => {
   const navigate = useNavigate();
+  const { showBanner } = useBanner();
 
   const handleChangePassword = async (newPassword: string) => {
     try {
@@ -24,8 +26,26 @@ export const MenuDropdown = ({
         password: newPassword,
       });
 
-      if (error) throw error;
+      if (error) {
+        showBanner(
+          "Error",
+          "An error occurred while changing the password.",
+          "error"
+        );
+        throw error;
+      }
+
+      showBanner(
+        "Password Changed",
+        "Your password has been successfully changed.",
+        "success"
+      );
     } catch (error) {
+      showBanner(
+        "Error",
+        "An error occurred while changing the password.",
+        "error"
+      );
     } finally {
       closeModal();
     }

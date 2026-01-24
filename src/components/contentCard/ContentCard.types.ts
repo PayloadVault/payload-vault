@@ -36,6 +36,8 @@ type CombinedContentCardProps = {
   downloadLink?: string;
   openLink?: string;
   searchQuery?: string;
+  id?: string;
+  onDelete?: (id: string) => void;
 };
 
 type SvgIcon = ComponentType<IconProps>;

@@ -10,10 +10,11 @@ const formatAllPdfs = (allPdfs: PdfRecord[]) => {
     totalIncome += pdf.profit;
     totalPdf++;
     const singlePdf: SinglePdf = {
+      id: pdf.id,
       category: pdf.category,
       date: pdf.date_created,
-      downloadLink: pdf.pdf_url,
-      openLink: pdf.pdf_url,
+      signedUrl: pdf.signed_url || "",
+      openLink: pdf.signed_url || "",
       income: pdf.profit,
       title: pdf.file_name,
     };

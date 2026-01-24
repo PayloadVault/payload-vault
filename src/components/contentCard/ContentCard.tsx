@@ -3,10 +3,13 @@ import type { CombinedContentCardProps } from "./ContentCard.types";
 import { useNavigate } from "react-router-dom";
 import { TitleSide } from "./TitleSide";
 import { normalizeProfit } from "./ContentCard.utils";
-import { ArrowIcon, DownloadIcon, OpenIcon } from "../icons";
+import { ArrowIcon, DeleteIcon, DownloadIcon, OpenIcon } from "../icons";
+import { useModal } from "../../context/modal/ModalContext";
+import { DeleteConfirmationForm } from "../modal/DeleteConfirmationForm";
 
 export const ContentCard = (props: CombinedContentCardProps) => {
   const navigate = useNavigate();
+  const { openModal, closeModal } = useModal();
 
   const {
     variant,
@@ -18,6 +21,8 @@ export const ContentCard = (props: CombinedContentCardProps) => {
     downloadLink,
     openLink,
     searchQuery,
+    id,
+    onDelete,
   } = props;
 
   const Icon = cardIcon[props.variant];
@@ -28,16 +33,52 @@ export const ContentCard = (props: CombinedContentCardProps) => {
     }
   };
 
-  const handleDownloadClick = (e: React.MouseEvent) => {
+  const handleDownloadClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!downloadLink) return;
-    window.open(downloadLink, "_blank", "noopener,noreferrer");
+    try {
+      const response = await fetch(downloadLink);
+      const blob = await response.blob();
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = title || "document.pdf";
+
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+      window.open(downloadLink, "_blank", "noopener,noreferrer");
+    }
   };
 
   const handleOpenClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!openLink) return;
     window.open(openLink, "_blank", "noopener,noreferrer");
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!id || !onDelete) return;
+
+    openModal({
+      title: "Delete Document",
+      children: (
+        <DeleteConfirmationForm
+          fileName={title}
+          onConfirm={() => {
+            onDelete(id);
+            closeModal();
+          }}
+          onCancel={closeModal}
+        />
+      ),
+    });
   };
 
   return (
@@ -90,6 +131,17 @@ export const ContentCard = (props: CombinedContentCardProps) => {
                 aria-label="Open"
               >
                 <OpenIcon className="w-6 h-6 text-color-icon shrink-0" />
+              </button>
+
+              <button
+                type="button"
+                className="cursor-pointer p-2 sm:p-1 items-center justify-center flex
+                  hover:text-color-primary rounded-radius-sm hover:bg-color-primary/10
+                  transition-colors duration-200 ease-in-out"
+                onClick={handleDeleteClick}
+                aria-label="Delete"
+              >
+                <DeleteIcon className="w-6 h-6 text-color-icon shrink-0" />
               </button>
             </div>
           ) : (

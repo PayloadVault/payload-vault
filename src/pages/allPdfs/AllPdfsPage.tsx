@@ -65,6 +65,7 @@ export const AllPdfsPage = () => {
     data: pdfs,
     isLoading,
     error,
+    removePdf,
   } = usePdfs({
     userId: user.id,
     year,
@@ -137,16 +138,18 @@ export const AllPdfsPage = () => {
         <DocumentSkeletonLoader />
       ) : (
         <div className="flex flex-col gap-6">
-          {filteredPdfs.map((pdf) => (
+          {filteredPdfs.map((pdf, index) => (
             <ContentCard
-              key={pdf.income + pdf.date + pdf.category}
+              key={pdf.id || index}
               variant="document"
               title={pdf.title}
               date={pdf.date}
               profit={pdf.income}
-              downloadLink={pdf.downloadLink}
+              downloadLink={pdf.signedUrl}
               openLink={pdf.openLink}
               searchQuery={searchQuery}
+              id={pdf.id}
+              onDelete={(id) => removePdf.mutate(id)}
             />
           ))}
         </div>

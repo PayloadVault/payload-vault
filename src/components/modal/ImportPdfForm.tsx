@@ -7,6 +7,7 @@ interface ImportPdfFormProps {
   onCancel: () => void;
   onSave: (files: File[]) => Promise<void>;
 }
+
 export const ImportPdfForm = ({ onCancel, onSave }: ImportPdfFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
@@ -21,7 +22,7 @@ export const ImportPdfForm = ({ onCancel, onSave }: ImportPdfFormProps) => {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 mt-3">
       <div className="w-full">
         <FileUploadCard
           title="Import PDF"

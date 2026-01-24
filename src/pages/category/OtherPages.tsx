@@ -50,6 +50,7 @@ export const OtherPages = ({ title }: CategoryProps) => {
     data: pdfs,
     isLoading,
     error,
+    removePdf,
   } = usePdfs({
     userId: user.id,
     year,
@@ -100,15 +101,17 @@ export const OtherPages = ({ title }: CategoryProps) => {
         <DocumentSkeletonLoader />
       ) : (
         <div className="flex flex-col gap-6">
-          {contentCardData.pdfs.map((pdf) => (
+          {contentCardData.pdfs.map((pdf, index) => (
             <ContentCard
-              key={pdf.income + pdf.date + pdf.category}
+              key={pdf.id || index}
               variant="document"
               title={pdf.title}
               date={pdf.date}
               profit={pdf.income}
-              downloadLink={pdf.downloadLink}
+              downloadLink={pdf.signedUrl}
               openLink={pdf.openLink}
+              id={pdf.id}
+              onDelete={(id) => removePdf.mutate(id)}
             />
           ))}
         </div>

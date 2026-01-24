@@ -1,12 +1,47 @@
+import { useAuth } from "../../context/AuthContext";
 import { useImportPdfModal } from "../../hooks/modal/UseImportPdfModal";
+import { usePdfs } from "../../hooks/usePdf/UsePdfs";
 import { Button } from "../button/Button";
 import { UploadIcon } from "../icons";
+import { useBanner } from "../../context/banner/BannerContext";
 
 export const PdfImportFooter = () => {
+  const { user } = useAuth();
+  const { uploadPdf } = usePdfs({ userId: user?.id || "" });
+
+  const { showBanner } = useBanner();
+
+  if (!user) return;
+
   const { openImportPdfModal, closeModal } = useImportPdfModal({
-    onSave: async (file: File[]) => {
-      console.log("Importing PDF from:", file);
-      closeModal();
+    onSave: async (files: File[]) => {
+      if (!files || files.length === 0) {
+        console.warn("No files selected");
+        return;
+      }
+
+      try {
+        await uploadPdf.mutateAsync({
+          file: files[0],
+          userId: user.id,
+        });
+
+        showBanner(
+          "PDF Uploaded",
+          "The PDF has been successfully uploaded.",
+          "success"
+        );
+
+        closeModal();
+      } catch (error) {
+        console.error("Error uploading file:", error);
+
+        showBanner(
+          "Error",
+          "An error occurred while uploading the PDF.",
+          "error"
+        );
+      }
     },
   });
 

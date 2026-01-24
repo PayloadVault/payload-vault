@@ -58,9 +58,9 @@ export const HomePage = () => {
           />
           <h2 className="text-color-primary font-bold mx-auto">Categories</h2>
           <div className="flex flex-col gap-6">
-            {contentCardData.allCategories.map((category) => (
+            {contentCardData.allCategories.map((category, index) => (
               <ContentCard
-                key={category.category.title}
+                key={index}
                 variant="category"
                 title={category.category.title}
                 subtitle={category.subtitle.toString() + " · Paychecks"}
