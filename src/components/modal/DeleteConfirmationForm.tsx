@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "../button/Button";
+import { useBanner } from "../../context/banner/BannerContext";
 
 interface DeleteConfirmationFormProps {
   fileName: string;
@@ -14,10 +15,24 @@ export const DeleteConfirmationForm = ({
 }: DeleteConfirmationFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
+  const { showBanner } = useBanner();
+
   const handleConfirm = async () => {
     setIsLoading(true);
     try {
       await onConfirm();
+
+      showBanner(
+        "File Deleted",
+        `The file "${fileName}" has been successfully deleted.`,
+        "success"
+      );
+    } catch (error) {
+      showBanner(
+        "Error",
+        `An error occurred while deleting the file "${fileName}".`,
+        "error"
+      );
     } finally {
       setIsLoading(false);
     }

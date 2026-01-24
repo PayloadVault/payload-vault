@@ -45,7 +45,6 @@ export const PasswordChangeForm = ({
         "success"
       );
     } catch (error) {
-      setError("An error occurred while changing the password.");
       showBanner(
         "Error",
         "An error occurred while changing the password.",
