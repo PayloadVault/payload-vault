@@ -113,6 +113,7 @@ export const AllPdfsPage = () => {
       value.toLowerCase().trim().replace(/\s+/g, "_");
 
     const zipName = [
+      user.email ? user.email.split("@")[0] : null,
       monthSelected.id !== "0" ? monthSelected.label : null,
       `${year}`,
       categorySelected.id,
