@@ -59,6 +59,10 @@ export const AllPdfsPage = () => {
     setSearchQuery("");
   };
 
+  const handleDownloadAll = () => {
+    // Implement download all functionality here
+  };
+
   if (!user) return <ErrorBlock />;
 
   const {
@@ -127,10 +131,16 @@ export const AllPdfsPage = () => {
           title="Search PDFs"
         />
       </div>
-      <div className="grid grid-cols-1 items-center">
+      <div className="grid grid-cols-1 items-center gap-5">
         <Button
           onClick={handleResetFilters}
           text="Reset Filters"
+          size="medium"
+        />
+        <Button
+          onClick={handleDownloadAll}
+          variant="secondary"
+          text="Download All Filtered PDFs"
           size="medium"
         />
       </div>
