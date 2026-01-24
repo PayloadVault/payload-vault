@@ -21,34 +21,29 @@ export const MenuDropdown = ({
   const { showBanner } = useBanner();
 
   const handleChangePassword = async (newPassword: string) => {
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
 
-      if (error) {
-        showBanner(
-          "Error",
-          "An error occurred while changing the password.",
-          "error"
+    if (error) {
+      // Check if the error is about using the same password
+      if (
+        error.message.toLowerCase().includes("same") ||
+        error.message.toLowerCase().includes("different")
+      ) {
+        throw new Error(
+          "New password cannot be the same as your current password."
         );
-        throw error;
       }
-
-      showBanner(
-        "Password Changed",
-        "Your password has been successfully changed.",
-        "success"
-      );
-    } catch (error) {
-      showBanner(
-        "Error",
-        "An error occurred while changing the password.",
-        "error"
-      );
-    } finally {
-      closeModal();
+      throw new Error("An error occurred while changing the password.");
     }
+
+    showBanner(
+      "Password Changed",
+      "Your password has been successfully changed.",
+      "success"
+    );
+    closeModal();
   };
 
   const { openChangePasswordModal, closeModal } = useChangePasswordModal({
