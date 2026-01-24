@@ -1,18 +1,28 @@
+import { useState } from "react";
 import { Button } from "../button/Button";
 
 interface DeleteConfirmationFormProps {
   fileName: string;
-  onConfirm: () => void;
+  onConfirm: () => Promise<void>;
   onCancel: () => void;
-  isLoading?: boolean;
 }
 
 export const DeleteConfirmationForm = ({
   fileName,
   onConfirm,
   onCancel,
-  isLoading = false,
 }: DeleteConfirmationFormProps) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleConfirm = async () => {
+    setIsLoading(true);
+    try {
+      await onConfirm();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <p className="text-color-text-secondary">
@@ -22,19 +32,12 @@ export const DeleteConfirmationForm = ({
         </span>
         "?
       </p>
-      <div className="flex justify-end gap-3">
-        <Button
-          text="Cancel"
-          variant="secondary"
-          size="medium"
-          onClick={onCancel}
-          isDisabled={isLoading}
-        />
+      <div className="mt-6 flex gap-6">
+        <Button variant="secondary" text="Cancel" onClick={onCancel} />
         <Button
           text="Delete"
           variant="decline"
-          size="medium"
-          onClick={onConfirm}
+          onClick={handleConfirm}
           isLoading={isLoading}
         />
       </div>
