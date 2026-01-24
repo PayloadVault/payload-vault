@@ -50,6 +50,7 @@ export const OtherPages = ({ title }: CategoryProps) => {
     data: pdfs,
     isLoading,
     error,
+    removePdf,
   } = usePdfs({
     userId: user.id,
     year,
@@ -102,13 +103,15 @@ export const OtherPages = ({ title }: CategoryProps) => {
         <div className="flex flex-col gap-6">
           {contentCardData.pdfs.map((pdf, index) => (
             <ContentCard
-              key={index}
+              key={pdf.id || index}
               variant="document"
               title={pdf.title}
               date={pdf.date}
               profit={pdf.income}
               downloadLink={pdf.signedUrl}
               openLink={pdf.openLink}
+              id={pdf.id}
+              onDelete={(id) => removePdf.mutate(id)}
             />
           ))}
         </div>
