@@ -2,16 +2,14 @@ import type { IconProps } from "./Icon.types";
 
 export const DeleteIcon = ({ size = 24, ...props }: IconProps) => (
   <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
+    fill="currentColor"
+    width="800px"
+    viewBox="-3 -2 24 24"
     xmlns="http://www.w3.org/2000/svg"
+    preserveAspectRatio="xMinYMin"
+    className="jam jam-trash"
     {...props}
   >
-    <path
-      d="M9 3h6a1 1 0 0 1 1 1v1h4a1 1 0 1 1 0 2h-1v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7H4a1 1 0 1 1 0-2h4V4a1 1 0 0 1 1-1zm1 2h4V5h-4zm-3 2v13h10V7zm3 3a1 1 0 0 1 2 0v7a1 1 0 1 1-2 0zm4 0a1 1 0 0 1 2 0v7a1 1 0 1 1-2 0z"
-      fill="currentColor"
-    />
+    <path d="M6 2V1a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1h4a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-.133l-.68 10.2a3 3 0 0 1-2.993 2.8H5.826a3 3 0 0 1-2.993-2.796L2.137 7H2a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h4zm10 2H2v1h14V4zM4.141 7l.687 10.068a1 1 0 0 0 .998.932h6.368a1 1 0 0 0 .998-.934L13.862 7h-9.72zM7 8a1 1 0 0 1 1 1v7a1 1 0 0 1-2 0V9a1 1 0 0 1 1-1zm4 0a1 1 0 0 1 1 1v7a1 1 0 0 1-2 0V9a1 1 0 0 1 1-1z" />
   </svg>
 );
