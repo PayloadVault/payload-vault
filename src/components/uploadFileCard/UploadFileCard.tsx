@@ -64,6 +64,8 @@ export const FileUploadCard = ({
     e.stopPropagation();
     setIsDragOver(false);
 
+    if (disabled) return;
+
     const droppedFiles = Array.from(e.dataTransfer.files ?? []);
     if (droppedFiles.length) addFiles(droppedFiles);
   };
@@ -71,6 +73,7 @@ export const FileUploadCard = ({
   const onDragOver: DragEventHandler<HTMLDivElement> = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (disabled) return;
     setIsDragOver(true);
   };
 
