@@ -6,7 +6,7 @@ const buttonText: Record<BannerType, string> = {
 };
 
 const bannerStyle: Record<BannerType, string> = {
-  success: "border-color-success-border/40 bg-color-success/40",
-  error: "border-color-error-border/40 bg-color-error/40",
+  success: "border-color-success-border/40 bg-color-success",
+  error: "border-color-error-border/40 bg-color-error",
 };
 export { buttonText, bannerStyle };

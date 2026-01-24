@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Button } from "../button/Button";
 import { PasswordInput } from "../passwordInput/PasswordInput";
 import { LockIcon } from "../icons";
+import { passwordChangeSchema } from "../../validation/ChangePasswordValidation";
+import { Banner } from "../banner/Banner";
+import { useBanner } from "../../context/banner/BannerContext";
 
 interface PasswordChangeFormProps {
   onCancel: () => void;
@@ -14,11 +17,40 @@ export const PasswordChangeForm = ({
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { showBanner } = useBanner();
 
   const handleSave = async () => {
+    setError(null);
+
+    const result = passwordChangeSchema.safeParse({
+      password,
+      repeatPassword,
+    });
+
+    if (!result.success) {
+      const firstError = result.error.issues[0]?.message;
+      setError(firstError);
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await onSave(password);
+      await onSave(result.data.password);
+
+      showBanner(
+        "Password Changed",
+        "Your password has been successfully changed.",
+        "success"
+      );
+    } catch (error) {
+      setError("An error occurred while changing the password.");
+      showBanner(
+        "Error",
+        "An error occurred while changing the password.",
+        "error"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -26,6 +58,9 @@ export const PasswordChangeForm = ({
 
   return (
     <div className="flex flex-col gap-6">
+      <div className="w-70">
+        {error && <Banner bannerType="error" description="" title={error} />}
+      </div>
       <PasswordInput
         label="New Password"
         value={password}

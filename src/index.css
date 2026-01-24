@@ -60,10 +60,10 @@ button {
   --color-bg-accent: var(--color-primary);
   --color-border-light: #545454;
   --color-border-dark: #1f2937;
-  --color-success: #4fa866;
+  --color-success: #3a7b4b;
   --color-success-border: #16a34a;
   --color-success-text: #4ade80;
-  --color-error: #c45b61;
+  --color-error: #a64d51;
   --color-error-border: #dc2626;
   --color-error-text: #f87171;
   --shadow-soft: 0 4px 8px rgba(255, 255, 255, 0.05);
