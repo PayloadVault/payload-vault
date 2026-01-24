@@ -109,6 +109,19 @@ export const AllPdfsPage = () => {
       return;
     }
 
+    const slugify = (value: string) =>
+      value.toLowerCase().trim().replace(/\s+/g, "_");
+
+    const zipName = [
+      monthSelected.id !== "0" ? monthSelected.label : null,
+      `${year}`,
+      categorySelected.id,
+    ]
+      .filter((v): v is string => Boolean(v))
+      .map(slugify)
+      .join("_")
+      .concat("_documents.zip");
+
     try {
       await Promise.all(
         filteredPdfs.map(async (pdf, index) => {
@@ -129,7 +142,7 @@ export const AllPdfsPage = () => {
       const url = window.URL.createObjectURL(zipBlob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = "documents.zip";
+      link.download = zipName;
 
       document.body.appendChild(link);
       link.click();
