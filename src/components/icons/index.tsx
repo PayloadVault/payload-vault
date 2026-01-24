@@ -19,3 +19,4 @@ export { ExcelPaper } from "./ExcelPaper";
 export { ArrowBackIcon } from "./ArrowBackIcon";
 export { OpenIcon } from "./OpenIcon";
 export { DownloadIcon } from "./DownloadIcon";
+export { DeleteIcon } from "./DeleteIcon";
