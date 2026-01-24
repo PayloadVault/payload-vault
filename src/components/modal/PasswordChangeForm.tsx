@@ -35,6 +35,12 @@ export const PasswordChangeForm = ({
     setIsLoading(true);
     try {
       await onSave(result.data.password);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An error occurred while changing the password.");
+      }
     } finally {
       setIsLoading(false);
     }
