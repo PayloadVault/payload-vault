@@ -28,7 +28,7 @@ export const Modal = ({ title, onClose, children }: ModalProps) => {
           </button>
         </div>
 
-        <div className="flex w-full flex-col gap-10">
+        <div className="flex w-full flex-col">
           <div className="flex flex-col items-start gap-2">
             <h6 className="text-[20px] font-bold">{title}</h6>
           </div>
