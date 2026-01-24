@@ -5,9 +5,15 @@ interface ModalProps {
   title: string;
   onClose: () => void;
   children?: ReactNode;
+  disableClose?: boolean;
 }
 
-export const Modal = ({ title, onClose, children }: ModalProps) => {
+export const Modal = ({
+  title,
+  onClose,
+  children,
+  disableClose,
+}: ModalProps) => {
   useEffect(() => {
     document.body.style.overflow = "hidden";
 
@@ -22,7 +28,12 @@ export const Modal = ({ title, onClose, children }: ModalProps) => {
         <div className="relative flex w-full items-center justify-center">
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 cursor-pointer hover:bg-color-primary/20 rounded-radius-md p-2"
+            disabled={disableClose}
+            className={`absolute top-3 right-3 rounded-radius-md p-2 ${
+              disableClose
+                ? "cursor-not-allowed opacity-50"
+                : "cursor-pointer hover:bg-color-primary/20"
+            }`}
           >
             <CloseIcon />
           </button>

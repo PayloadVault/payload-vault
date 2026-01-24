@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
     // 1. Initialize Supabase Admin Client
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     );
 
     // 2. Download the file from Supabase Storage
@@ -149,6 +149,9 @@ Deno.serve(async (req) => {
       date_created: aiParsed?.date_created,
       category: aiParsed?.category,
     };
+
+    // We can keep logging on backend side for debugging purposes
+    console.log("Extracted Data:", extractedData);
 
     return new Response(JSON.stringify(extractedData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

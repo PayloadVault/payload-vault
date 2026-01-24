@@ -14,6 +14,7 @@ export const FileUploadCard = ({
   accept = ".pdf",
   files,
   setFiles,
+  disabled,
 }: UploadCardProps) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -158,7 +159,12 @@ export const FileUploadCard = ({
       )}
 
       {!isDragOver && (
-        <Button variant="secondary" text="Choose Files" onClick={openPicker} />
+        <Button
+          variant="secondary"
+          text="Choose Files"
+          onClick={openPicker}
+          isDisabled={disabled}
+        />
       )}
     </div>
   );
