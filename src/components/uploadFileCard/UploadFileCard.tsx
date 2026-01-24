@@ -21,7 +21,10 @@ export const FileUploadCard = ({
 
   const [isDragOver, setIsDragOver] = useState(false);
 
-  const openPicker = () => inputRef.current?.click();
+  const openPicker = () => {
+    if (disabled) return;
+    inputRef.current?.click();
+  };
 
   const isValidFile = (f: File) => /\.pdf$/i.test(f.name);
 
