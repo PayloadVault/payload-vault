@@ -136,7 +136,7 @@ export const ContentCard = (props: CombinedContentCardProps) => {
               <button
                 type="button"
                 className="cursor-pointer p-2 sm:p-1 items-center justify-center flex
-                  hover:text-color-primary rounded-radius-sm hover:bg-color-primary/10
+                  hover:text-color-error-text rounded-radius-sm hover:bg-color-error/20
                   transition-colors duration-200 ease-in-out"
                 onClick={handleDeleteClick}
                 aria-label="Delete"
