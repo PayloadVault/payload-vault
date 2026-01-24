@@ -26,13 +26,12 @@ export const MenuDropdown = ({
     });
 
     if (error) {
-      // Check if the error is about using the same password
       if (
         error.message.toLowerCase().includes("same") ||
         error.message.toLowerCase().includes("different")
       ) {
         throw new Error(
-          "New password cannot be the same as your current password."
+          "New password cannot be the same as your current password.",
         );
       }
       throw new Error("An error occurred while changing the password.");
@@ -41,7 +40,7 @@ export const MenuDropdown = ({
     showBanner(
       "Password Changed",
       "Your password has been successfully changed.",
-      "success"
+      "success",
     );
     closeModal();
   };
