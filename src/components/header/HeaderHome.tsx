@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Dropdown } from "../dropdown/Dropdown";
 import { UserIcon, VaultIcon } from "../icons";
 import { MenuDropdown } from "./MenuDropdown";
@@ -7,13 +7,16 @@ import { useYear } from "../../hooks/year/UseYear";
 
 export const HeaderHome = () => {
   const { user } = useAuth();
-  const { year, setYear } = useYear();
+  const { year, setYear, availableYears } = useYear();
 
-  const options = [
-    { label: "2026", id: "2026" },
-    { label: "2025", id: "2025" },
-    { label: "2024", id: "2024" },
-  ];
+  const options = useMemo(
+    () =>
+      availableYears.map((y) => ({
+        label: y.toString(),
+        id: y.toString(),
+      })),
+    [availableYears]
+  );
 
   const [selectedYear, setSelectedYear] = useState({
     id: year.toString(),

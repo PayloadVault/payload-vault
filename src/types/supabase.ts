@@ -75,7 +75,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_report_years: {
+        Args: never
+        Returns: {
+          year: number
+        }[]
+      }
     }
     Enums: {
       document_category:
