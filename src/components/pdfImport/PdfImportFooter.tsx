@@ -3,12 +3,15 @@ import { useImportPdfModal } from "../../hooks/modal/UseImportPdfModal";
 import { usePdfs } from "../../hooks/usePdf/UsePdfs";
 import { Button } from "../button/Button";
 import { UploadIcon } from "../icons";
+import { useBanner } from "../../context/banner/BannerContext";
 
 export const PdfImportFooter = () => {
   const { user } = useAuth();
   const { uploadPdf } = usePdfs({ userId: user?.id || "" });
 
-  if(!user) return;
+  const { showBanner } = useBanner();
+
+  if (!user) return;
 
   const { openImportPdfModal, closeModal } = useImportPdfModal({
     onSave: async (files: File[]) => {
@@ -22,10 +25,22 @@ export const PdfImportFooter = () => {
           file: files[0],
           userId: user.id,
         });
+
+        showBanner(
+          "PDF Uploaded",
+          "The PDF has been successfully uploaded.",
+          "success"
+        );
+
         closeModal();
       } catch (error) {
         console.error("Error uploading file:", error);
-        alert("Failed to upload PDF. Please try again.");
+
+        showBanner(
+          "Error",
+          "An error occurred while uploading the PDF.",
+          "error"
+        );
       }
     },
   });
