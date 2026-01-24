@@ -4,6 +4,7 @@ import { usePdfs } from "../../hooks/usePdf/UsePdfs";
 import { Button } from "../button/Button";
 import { UploadIcon } from "../icons";
 import { useBanner } from "../../context/banner/BannerContext";
+import type { UploadProgress } from "../modal/ImportPdfForm";
 
 export const PdfImportFooter = () => {
   const { user } = useAuth();
@@ -14,34 +15,65 @@ export const PdfImportFooter = () => {
   if (!user) return;
 
   const { openImportPdfModal, closeModal } = useImportPdfModal({
-    onSave: async (files: File[]) => {
+    onSave: async (
+      files: File[],
+      onProgress: (progress: UploadProgress) => void,
+    ) => {
       if (!files || files.length === 0) {
         console.warn("No files selected");
         return;
       }
 
-      try {
-        await uploadPdf.mutateAsync({
-          file: files[0],
-          userId: user.id,
+      let successCount = 0;
+      let failedCount = 0;
+      const failedFiles: string[] = [];
+
+      // Process files sequentially to avoid overwhelming the AI API
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        onProgress({
+          current: i + 1,
+          total: files.length,
+          currentFileName: file.name,
         });
 
+        try {
+          await uploadPdf.mutateAsync({
+            file,
+            userId: user.id,
+          });
+          successCount++;
+        } catch (error) {
+          console.error(`Error uploading file ${file.name}:`, error);
+          failedCount++;
+          failedFiles.push(file.name);
+        }
+      }
+
+      if (failedCount === 0) {
         showBanner(
-          "PDF Uploaded",
-          "The PDF has been successfully uploaded.",
-          "success"
+          "Upload Complete",
+          successCount === 1
+            ? "The PDF has been successfully uploaded."
+            : `All ${successCount} PDFs have been successfully uploaded.`,
+          "success",
         );
-
-        closeModal();
-      } catch (error) {
-        console.error("Error uploading file:", error);
-
+      } else if (successCount === 0) {
         showBanner(
-          "Error",
-          "An error occurred while uploading the PDF.",
-          "error"
+          "Upload Failed",
+          `Failed to upload ${failedCount} file${failedCount > 1 ? "s" : ""}.`,
+          "error",
+        );
+      } else {
+        showBanner(
+          "Partial Upload",
+          `${successCount} uploaded successfully, ${failedCount} failed.`,
+          "error",
         );
       }
+
+      closeModal();
     },
   });
 

@@ -1,8 +1,8 @@
-import { ImportPdfForm } from "../../components/modal/ImportPdfForm";
+import { ImportPdfForm, type UploadProgress } from "../../components/modal/ImportPdfForm";
 import { useModal } from "../../context/modal/ModalContext";
 
 type UseImportPdfModalProps = {
-  onSave: (files: File[]) => Promise<void>;
+  onSave: (files: File[], onProgress: (progress: UploadProgress) => void) => Promise<void>;
 };
 
 export const useImportPdfModal = ({ onSave }: UseImportPdfModalProps) => {
@@ -10,7 +10,7 @@ export const useImportPdfModal = ({ onSave }: UseImportPdfModalProps) => {
 
   const openImportPdfModal = () => {
     openModal({
-      title: "Import PDF",
+      title: "Import PDFs",
       children: <ImportPdfForm onCancel={closeModal} onSave={onSave} />,
     });
   };

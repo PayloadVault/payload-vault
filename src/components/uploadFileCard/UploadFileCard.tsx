@@ -15,6 +15,7 @@ export const FileUploadCard = ({
   files,
   setFiles,
   disabled,
+  maxFiles = 10,
 }: UploadCardProps) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -45,7 +46,10 @@ export const FileUploadCard = ({
     }
 
     if (validFiles.length) {
-      setFiles((prev) => [...prev, ...validFiles]);
+      setFiles((prev) => {
+        const combined = [...prev, ...validFiles];
+        return combined.slice(0, maxFiles);
+      });
     }
   };
 
