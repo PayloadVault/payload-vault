@@ -116,6 +116,7 @@ export const AllPdfsPage = () => {
       monthSelected.id !== "0" ? monthSelected.label : null,
       `${year}`,
       categorySelected.id,
+      searchQuery ? `search_${searchQuery}` : null,
     ]
       .filter((v): v is string => Boolean(v))
       .map(slugify)
