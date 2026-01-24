@@ -1,3 +1,4 @@
+import JSZip from "jszip";
 import { useOutletContext } from "react-router-dom";
 import { useLayoutEffect, useState, useEffect, useMemo } from "react";
 import {
@@ -21,10 +22,13 @@ import type { AllPdfTypes } from "./types";
 import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
 import { DocumentSkeletonLoader } from "../../components/skeletonLoader/DocumentSkeletonLoader";
 import { Button } from "../../components/button/Button";
+import { useBanner } from "../../context/banner/BannerContext";
 
 export const AllPdfsPage = () => {
   const { user } = useAuth();
   const { year } = useYear();
+
+  const { showBanner } = useBanner();
 
   const { setTitle } = useOutletContext<{
     setTitle: (title: string) => void;
@@ -57,10 +61,6 @@ export const AllPdfsPage = () => {
     setMonthSelected(monthOptions[0]);
     setCategorySelected(categoryOptions[0]);
     setSearchQuery("");
-  };
-
-  const handleDownloadAll = () => {
-    // Implement download all functionality here
   };
 
   if (!user) return <ErrorBlock />;
@@ -96,6 +96,60 @@ export const AllPdfsPage = () => {
   if (!contentCardData) return <PageSkeletonLoader />;
 
   if (error) return <ErrorBlock />;
+
+  const handleDownloadAll = async () => {
+    const zip = new JSZip();
+
+    if (filteredPdfs.length === 0) {
+      showBanner(
+        "No PDFs to download",
+        "There are no filtered PDFs available for download.",
+        "error"
+      );
+      return;
+    }
+
+    try {
+      await Promise.all(
+        filteredPdfs.map(async (pdf, index) => {
+          if (!pdf.signedUrl) return;
+
+          const response = await fetch(pdf.signedUrl);
+          const blob = await response.blob();
+
+          const fileName =
+            pdf.title?.replace(/[^\w\d]+/g, "_") || `document_${index + 1}.pdf`;
+
+          zip.file(`${fileName}.pdf`, blob);
+        })
+      );
+
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+
+      const url = window.URL.createObjectURL(zipBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "documents.zip";
+
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      showBanner(
+        "Download started",
+        "Your PDFs are being downloaded as a ZIP file.",
+        "success"
+      );
+    } catch (error) {
+      showBanner(
+        "Failed to download PDFs",
+        "Something went wrong while downloading PDFs. Please try again.",
+        "error"
+      );
+    }
+  };
 
   return (
     <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
