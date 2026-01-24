@@ -21,7 +21,7 @@ export const ImportPdfForm = ({ onCancel, onSave }: ImportPdfFormProps) => {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 mt-3">
       <div className="w-full">
         <FileUploadCard
           title="Import PDF"
