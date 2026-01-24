@@ -195,6 +195,7 @@ export function usePdfs(props: FetchPdfProps) {
     mutationFn: insertPdf,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pdfs"] });
+      queryClient.invalidateQueries({ queryKey: ["availableYears"] });
     },
   });
 
@@ -202,6 +203,7 @@ export function usePdfs(props: FetchPdfProps) {
     mutationFn: uploadAndInsertPdf,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pdfs"] });
+      queryClient.invalidateQueries({ queryKey: ["availableYears"] });
     },
   });
 
@@ -209,6 +211,7 @@ export function usePdfs(props: FetchPdfProps) {
     mutationFn: deletePdfAndFile,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pdfs"] });
+      queryClient.invalidateQueries({ queryKey: ["availableYears"] });
     },
   });
 

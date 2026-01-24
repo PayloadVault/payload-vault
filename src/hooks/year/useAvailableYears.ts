@@ -1,61 +1,48 @@
-import { useCallback, useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../context/AuthContext";
 
+async function fetchAvailableYears(userId: string | undefined): Promise<number[]> {
+    if (!userId) {
+        return [new Date().getFullYear()];
+    }
+
+    const { data, error: rpcError } = await supabase.rpc(
+        "get_user_report_years",
+    );
+
+    if (rpcError) {
+        throw rpcError;
+    }
+
+    const currentYear = new Date().getFullYear();
+    const fetchedYears: number[] = data?.map((row: { year: number }) => row.year) ?? [];
+
+    const mergedYears = [...new Set([currentYear, ...fetchedYears])];
+    mergedYears.sort((a, b) => b - a);
+
+    return mergedYears;
+}
+
 export function useAvailableYears() {
     const { user } = useAuth();
-    const [availableYears, setAvailableYears] = useState<number[]>(() => [
-        new Date().getFullYear(),
-    ]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const queryClient = useQueryClient();
 
-    const fetchYears = useCallback(async () => {
-        if (!user) {
-            setAvailableYears([new Date().getFullYear()]);
-            setIsLoading(false);
-            return;
-        }
+    const query = useQuery({
+        queryKey: ["availableYears", user?.id],
+        queryFn: () => fetchAvailableYears(user?.id),
+        staleTime: 1000 * 60 * 5,
+        initialData: [new Date().getFullYear()],
+    });
 
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const { data, error: rpcError } = await supabase.rpc(
-                "get_user_report_years",
-            );
-
-            if (rpcError) {
-                throw rpcError;
-            }
-
-            const currentYear = new Date().getFullYear();
-            const fetchedYears: number[] = data?.map((row) => row.year) ?? [];
-
-            const mergedYears = [...new Set([currentYear, ...fetchedYears])];
-
-            mergedYears.sort((a, b) => b - a);
-
-            setAvailableYears(mergedYears);
-        } catch (err) {
-            console.error("Failed to fetch available years:", err);
-            setError(
-                err instanceof Error ? err.message : "Failed to fetch years",
-            );
-            setAvailableYears([new Date().getFullYear()]);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [user]);
-
-    useEffect(() => {
-        fetchYears();
-    }, [fetchYears]);
+    const refetch = async () => {
+        await queryClient.invalidateQueries({ queryKey: ["availableYears"] });
+    };
 
     return {
-        availableYears,
-        isLoading,
-        error,
-        refetch: fetchYears,
+        availableYears: query.data ?? [new Date().getFullYear()],
+        isLoading: query.isLoading,
+        error: query.error?.message ?? null,
+        refetch,
     };
 }
