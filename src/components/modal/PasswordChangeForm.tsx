@@ -4,6 +4,7 @@ import { PasswordInput } from "../passwordInput/PasswordInput";
 import { LockIcon } from "../icons";
 import { passwordChangeSchema } from "../../validation/ChangePasswordValidation";
 import { Banner } from "../banner/Banner";
+import { useBanner } from "../../context/banner/BannerContext";
 
 interface PasswordChangeFormProps {
   onCancel: () => void;
@@ -17,6 +18,8 @@ export const PasswordChangeForm = ({
   const [repeatPassword, setRepeatPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { showBanner } = useBanner();
 
   const handleSave = async () => {
     setError(null);
@@ -35,6 +38,19 @@ export const PasswordChangeForm = ({
     setIsLoading(true);
     try {
       await onSave(result.data.password);
+
+      showBanner(
+        "Password Changed",
+        "Your password has been successfully changed.",
+        "success"
+      );
+    } catch (error) {
+      setError("An error occurred while changing the password.");
+      showBanner(
+        "Error",
+        "An error occurred while changing the password.",
+        "error"
+      );
     } finally {
       setIsLoading(false);
     }
