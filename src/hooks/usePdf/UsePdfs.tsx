@@ -115,6 +115,24 @@ type UploadVariables = {
   userId: string;
 };
 
+export class ExtractionError extends Error {
+  constructor(
+    message: string,
+    public readonly rejectionReason?: string,
+  ) {
+    super(message);
+    this.name = "ExtractionError";
+  }
+}
+
+type ExtractionResponse = {
+  success: boolean;
+  profit?: number;
+  date_created?: string;
+  category?: string;
+  rejection_reason?: string;
+};
+
 async function uploadAndInsertPdf({
   file,
   userId,
@@ -129,34 +147,36 @@ async function uploadAndInsertPdf({
 
   if (uploadError) throw uploadError;
 
-  let metadata = {
-    profit: 0,
-    date_created: new Date().toISOString().split("T")[0],
-    category: "Strom & Gas" as PdfCategory,
-  };
-
-  try {
-    const { data: aiData, error: aiError } = await supabase.functions.invoke(
-      "extract-data-from-pdf",
-      {
-        body: {
-          filePath: filePath,
-          fileType: file.type,
-        },
+  const { data: aiData, error: aiError } = await supabase.functions.invoke<ExtractionResponse>(
+    "extract-data-from-pdf",
+    {
+      body: {
+        filePath: filePath,
+        fileType: file.type,
       },
-    );
+    },
+  );
 
-    if (aiError) throw aiError;
-    if (aiData) {
-      metadata = {
-        profit: aiData.profit || 0,
-        date_created: aiData.date_created || metadata.date_created,
-        category: validateCategory(aiData.category),
-      };
-    }
-  } catch (err) {
-    console.error("AI Extraction failed, using defaults:", err);
+  if (aiError) {
+    // Clean up uploaded file on AI error
+    await supabase.storage.from("pdf_reports").remove([filePath]);
+    throw new ExtractionError("AI extraction failed", aiError.message);
   }
+
+  if (!aiData?.success) {
+    // Clean up uploaded file if extraction was rejected
+    await supabase.storage.from("pdf_reports").remove([filePath]);
+    throw new ExtractionError(
+      "Document not recognized",
+      aiData?.rejection_reason || "Could not identify this document as a valid invoice.",
+    );
+  }
+
+  const metadata = {
+    profit: aiData.profit || 0,
+    date_created: aiData.date_created || new Date().toISOString().split("T")[0],
+    category: validateCategory(aiData.category || ""),
+  };
 
   const newPdfRecord: NewPdf = {
     user_id: userId,
