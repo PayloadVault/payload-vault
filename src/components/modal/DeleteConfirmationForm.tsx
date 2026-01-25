@@ -40,7 +40,7 @@ export const DeleteConfirmationForm = ({
 
   return (
     <div className="flex flex-col gap-6">
-      <p className="text-color-text-secondary">
+      <p className="text-color-text-secondary w-70">
         Are you sure you want to delete "
         <span className="font-semibold text-color-text-primary">
           {fileName}

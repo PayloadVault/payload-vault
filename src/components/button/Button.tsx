@@ -26,7 +26,7 @@ export const Button = ({
         variantClasses[variant]
       } ${sizeClasses[size]} ${
         isButtonDisabled ? "cursor-not-allowed opacity-50" : onHover[variant]
-      } focus:outline-3 focus:outline-(--focus)`}
+      } focus:outline-3 focus:outline-color-primary/70`}
       disabled={isButtonDisabled}
       onClick={onClick}
     >
