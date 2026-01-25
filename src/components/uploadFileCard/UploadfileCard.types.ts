@@ -7,6 +7,8 @@ type UploadCardProps = {
   accept?: string;
   files: File[];
   setFiles: Dispatch<SetStateAction<File[]>>;
+  disabled?: boolean;
+  maxFiles?: number;
 };
 
 export type { UploadCardProps };

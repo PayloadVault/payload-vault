@@ -18,13 +18,18 @@ export const FileUploadCard = ({
   accept = ".pdf",
   files,
   setFiles,
+  disabled,
+  maxFiles = 10,
 }: UploadCardProps) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const { showBanner } = useBanner();
 
   const [isDragOver, setIsDragOver] = useState(false);
 
-  const openPicker = () => inputRef.current?.click();
+  const openPicker = () => {
+    if (disabled) return;
+    inputRef.current?.click();
+  };
 
   const isPdfFile = (f: File) => /\.pdf$/i.test(f.name);
   const isValidSize = (f: File) => f.size <= MAX_FILE_SIZE_BYTES;
@@ -63,7 +68,10 @@ export const FileUploadCard = ({
     }
 
     if (validFiles.length) {
-      setFiles((prev) => [...prev, ...validFiles]);
+      setFiles((prev) => {
+        const combined = [...prev, ...validFiles];
+        return combined.slice(0, maxFiles);
+      });
     }
   };
 
@@ -78,6 +86,8 @@ export const FileUploadCard = ({
     e.stopPropagation();
     setIsDragOver(false);
 
+    if (disabled) return;
+
     const droppedFiles = Array.from(e.dataTransfer.files ?? []);
     if (droppedFiles.length) addFiles(droppedFiles);
   };
@@ -85,6 +95,7 @@ export const FileUploadCard = ({
   const onDragOver: DragEventHandler<HTMLDivElement> = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (disabled) return;
     setIsDragOver(true);
   };
 
@@ -166,7 +177,12 @@ export const FileUploadCard = ({
                   onClick={() =>
                     setFiles((prev) => prev.filter((_, i) => i !== index))
                   }
-                  className="ml-3 h-10 w-10 rounded text-color-text-secondary transition-colors hover:bg-color-primary/10"
+                  disabled={disabled}
+                  className={`ml-3 h-10 w-10 rounded text-color-text-secondary transition-colors ${
+                    disabled
+                      ? "cursor-not-allowed opacity-50"
+                      : "hover:bg-color-primary/10"
+                  }`}
                 >
                   ✕
                 </button>
@@ -177,7 +193,12 @@ export const FileUploadCard = ({
       )}
 
       {!isDragOver && (
-        <Button variant="secondary" text="Choose Files" onClick={openPicker} />
+        <Button
+          variant="secondary"
+          text="Choose Files"
+          onClick={openPicker}
+          isDisabled={disabled}
+        />
       )}
     </div>
   );
