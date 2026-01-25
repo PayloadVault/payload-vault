@@ -11,9 +11,9 @@ export const Header = ({ title, subtitle }: HeaderProps) => {
       <div
         className="
           flex flex-col gap-3
-          px-4 py-3
+          px-4 pb-3
           sm:px-6
-          md:px-10 md:py-3
+          md:px-10 md:pb-3
           md:flex-row md:items-center md:justify-between
         "
       >

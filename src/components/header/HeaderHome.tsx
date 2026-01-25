@@ -5,7 +5,11 @@ import { MenuDropdown } from "./MenuDropdown";
 import { useAuth } from "../../context/AuthContext";
 import { useYear } from "../../hooks/year/UseYear";
 
-export const HeaderHome = () => {
+type HeaderHomeProps = {
+  isTwoHeaders?: boolean;
+};
+
+export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
   const { user } = useAuth();
   const { year, setYear, availableYears } = useYear();
 
@@ -73,7 +77,11 @@ export const HeaderHome = () => {
   }, []);
 
   return (
-    <header className="bg-color-bg-main border-b-color-border-light border-b-2">
+    <header
+      className={`bg-color-bg-main ${
+        !isTwoHeaders ? "border-b-color-border-light border-b-2" : ""
+      }`}
+    >
       <div
         className="
           flex flex-col gap-3

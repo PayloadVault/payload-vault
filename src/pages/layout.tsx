@@ -11,7 +11,7 @@ export const Layout = () => {
 
   return (
     <div className="flex flex-col min-h-screen overflow-hidden">
-      <HeaderHome />
+      <HeaderHome isTwoHeaders />
       <Header title={title} subtitle={year.toString()} />
 
       <main className="flex-1 overflow-y-auto">
