@@ -1,4 +1,5 @@
 import { ArrowBackIcon } from "../icons";
+import { useNavigate } from "react-router-dom";
 
 type HeaderProps = {
   title: string;
@@ -6,14 +7,16 @@ type HeaderProps = {
 };
 
 export const Header = ({ title, subtitle }: HeaderProps) => {
+  const navigate = useNavigate();
+
   return (
     <header className="bg-color-bg-main border-b-color-border-light border-b-2">
       <div
         className="
           flex flex-col gap-3
-          px-4 py-3
+          px-4 pb-3
           sm:px-6
-          md:px-10 md:py-3
+          md:px-10 md:pb-3
           md:flex-row md:items-center md:justify-between
         "
       >
@@ -21,7 +24,7 @@ export const Header = ({ title, subtitle }: HeaderProps) => {
           <button
             className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shrink-0 cursor-pointer hover:text-color-primary hover:bg-color-primary/20 rounded-full
         transition-colors duration-200 ease-in-out"
-            onClick={() => window.history.back()}
+            onClick={() => navigate(-1)}
           >
             <ArrowBackIcon className="w-5 h-5 sm:w-7 sm:h-7" />
           </button>
