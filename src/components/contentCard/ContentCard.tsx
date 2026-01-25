@@ -103,7 +103,7 @@ export const ContentCard = (props: CombinedContentCardProps) => {
         />
 
         <div className="flex w-full items-center justify-end gap-3 sm:w-auto sm:justify-end sm:gap-5">
-          {profit && (
+          {(profit || profit === 0) && (
             <h4 className="font-bold text-color-primary whitespace-nowrap">
               {normalizeProfit(profit)} €
             </h4>

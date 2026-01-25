@@ -1,3 +1,4 @@
+import JSZip from "jszip";
 import { useOutletContext } from "react-router-dom";
 import { useLayoutEffect, useState, useEffect, useMemo } from "react";
 import {
@@ -21,10 +22,13 @@ import type { AllPdfTypes } from "./types";
 import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
 import { DocumentSkeletonLoader } from "../../components/skeletonLoader/DocumentSkeletonLoader";
 import { Button } from "../../components/button/Button";
+import { useBanner } from "../../context/banner/BannerContext";
 
 export const AllPdfsPage = () => {
   const { user } = useAuth();
   const { year } = useYear();
+
+  const { showBanner } = useBanner();
 
   const { setTitle } = useOutletContext<{
     setTitle: (title: string) => void;
@@ -93,6 +97,75 @@ export const AllPdfsPage = () => {
 
   if (error) return <ErrorBlock />;
 
+  const handleDownloadAll = async () => {
+    const zip = new JSZip();
+
+    if (filteredPdfs.length === 0) {
+      showBanner(
+        "No PDFs to download",
+        "There are no filtered PDFs available for download.",
+        "error"
+      );
+      return;
+    }
+
+    const slugify = (value: string) =>
+      value.toLowerCase().trim().replace(/\s+/g, "_");
+
+    const zipName = [
+      user.email ? user.email.split("@")[0] : null,
+      monthSelected.id !== "0" ? monthSelected.label : null,
+      `${year}`,
+      categorySelected.id,
+      searchQuery ? `search_${searchQuery}` : null,
+    ]
+      .filter((v): v is string => Boolean(v))
+      .map(slugify)
+      .join("_")
+      .concat("_documents.zip");
+
+    try {
+      await Promise.all(
+        filteredPdfs.map(async (pdf, index) => {
+          if (!pdf.signedUrl) return;
+
+          const response = await fetch(pdf.signedUrl);
+          const blob = await response.blob();
+
+          const fileName =
+            pdf.title?.replace(/[^\w\d]+/g, "_") || `document_${index + 1}.pdf`;
+
+          zip.file(`${fileName}.pdf`, blob);
+        })
+      );
+
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+
+      const url = window.URL.createObjectURL(zipBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = zipName;
+
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      showBanner(
+        "Download started",
+        "Your PDFs are being downloaded as a ZIP file.",
+        "success"
+      );
+    } catch (error) {
+      showBanner(
+        "Failed to download PDFs",
+        "Something went wrong while downloading PDFs. Please try again.",
+        "error"
+      );
+    }
+  };
+
   return (
     <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
       <TotalIncomeCard
@@ -127,10 +200,16 @@ export const AllPdfsPage = () => {
           title="Search PDFs"
         />
       </div>
-      <div className="grid grid-cols-1 items-center">
+      <div className="grid grid-cols-1 items-center gap-5">
         <Button
           onClick={handleResetFilters}
           text="Reset Filters"
+          size="medium"
+        />
+        <Button
+          onClick={handleDownloadAll}
+          variant="secondary"
+          text="Download All Filtered PDFs"
           size="medium"
         />
       </div>

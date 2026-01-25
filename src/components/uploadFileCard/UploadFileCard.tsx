@@ -8,6 +8,10 @@ import {
 import { ExcelPaper } from "../icons";
 import type { UploadCardProps } from "./UploadfileCard.types";
 import { Button } from "../button/Button";
+import { useBanner } from "../../context/banner/BannerContext";
+
+const MAX_FILE_SIZE_KB = 500;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_KB * 1024;
 
 export const FileUploadCard = ({
   description,
@@ -18,6 +22,7 @@ export const FileUploadCard = ({
   maxFiles = 10,
 }: UploadCardProps) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const { showBanner } = useBanner();
 
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -26,26 +31,40 @@ export const FileUploadCard = ({
     inputRef.current?.click();
   };
 
-  const isValidFile = (f: File) => /\.pdf$/i.test(f.name);
+  const isPdfFile = (f: File) => /\.pdf$/i.test(f.name);
+  const isValidSize = (f: File) => f.size <= MAX_FILE_SIZE_BYTES;
 
   const addFiles = (incoming: File[]) => {
     const validFiles: File[] = [];
-    const invalidFiles: string[] = [];
+    const invalidFormatFiles: string[] = [];
+    const oversizedFiles: string[] = [];
 
     incoming.forEach((file) => {
-      if (isValidFile(file)) {
-        validFiles.push(file);
-      } else {
-        invalidFiles.push(file.name);
+      if (!isPdfFile(file)) {
+        invalidFormatFiles.push(file.name);
+        return;
       }
+      if (!isValidSize(file)) {
+        oversizedFiles.push(file.name);
+        return;
+      }
+      validFiles.push(file);
     });
 
-    if (invalidFiles.length) {
-      // showBanner(
-      //   "File type mismatch",
-      //   "Some files were ignored. Only PDF files are allowed.",
-      //   "error"
-      // );
+    if (invalidFormatFiles.length) {
+      showBanner(
+        "Invalid file format",
+        `Only PDF files are allowed. Removed: ${invalidFormatFiles.join(", ")}`,
+        "error",
+      );
+    }
+
+    if (oversizedFiles.length) {
+      showBanner(
+        "File too large",
+        `Files must be under ${MAX_FILE_SIZE_KB} KB. Removed: ${oversizedFiles.join(", ")}`,
+        "error",
+      );
     }
 
     if (validFiles.length) {

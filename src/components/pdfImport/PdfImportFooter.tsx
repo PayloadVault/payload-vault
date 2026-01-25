@@ -1,6 +1,6 @@
 import { useAuth } from "../../context/AuthContext";
 import { useImportPdfModal } from "../../hooks/modal/UseImportPdfModal";
-import { usePdfs } from "../../hooks/usePdf/UsePdfs";
+import { usePdfs, ExtractionError } from "../../hooks/usePdf/UsePdfs";
 import { Button } from "../button/Button";
 import { UploadIcon } from "../icons";
 import { useBanner } from "../../context/banner/BannerContext";
@@ -48,6 +48,14 @@ export const PdfImportFooter = () => {
           console.error(`Error uploading file ${file.name}:`, error);
           failedCount++;
           failedFiles.push(file.name);
+
+          if (error instanceof ExtractionError) {
+            showBanner(
+              "Extraction Failed",
+              `${file.name}: ${error.rejectionReason || "Could not extract data from this document."}`,
+              "error",
+            );
+          }
         }
       }
 

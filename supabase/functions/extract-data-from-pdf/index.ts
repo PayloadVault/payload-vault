@@ -6,6 +6,15 @@ type ExtractedAIData = {
   profit?: unknown;
   date_created?: unknown;
   category?: unknown;
+  rejection_reason?: unknown;
+};
+
+type ExtractionResponse = {
+  success: boolean;
+  profit?: number;
+  date_created?: string;
+  category?: string;
+  rejection_reason?: string;
 };
 
 function sanitizeAIResponse(raw: string): ExtractedAIData | null {
@@ -115,19 +124,36 @@ Deno.serve(async (req) => {
       - If it mentions "IKK" → "IKK Abrechnung"
       - If it mentions "Adcuri" AND "Abschlussprovision" → "Adcuri Abschlussprovision"
       - If it mentions "Adcuri" AND "Bestandsprovision" → "Adcuri Bestandsprovision", if it mentions "Adcuri" but neither provision type, prefer "Adcuri Bestandsprovision"
-      - If unsure or unclear → "Strom & Gas"
+      - If unsure or unclear → "No Category"
+
+      If the content is some random document but NOT a recognized invoice, return:
+      - "No Category" for category
+      - Include a "rejection_reason" field explaining briefly why the document was not recognized (e.g., "Document does not appear to be an invoice" or "No recognizable invoice format or provider found").
 
       --------------------
       OUTPUT FORMAT
       --------------------
 
-      Return EXACTLY this JSON structure:
+      For valid invoices, return EXACTLY this JSON structure:
 
       {
         "profit": number,
         "date_created": "YYYY-MM-DD",
         "category": "string"
       }
+
+      For unrecognized documents, return:
+
+      {
+        "profit": 0,
+        "date_created": "YYYY-MM-DD",
+        "category": "No Category",
+        "rejection_reason": "Brief explanation of why the document was not recognized"
+      }
+
+      Do NOT include markdown.
+      Do NOT include explanations outside the JSON.
+      Do NOT include extra fields beyond those specified.
       `;
 
     // 6. Call Gemini
@@ -144,11 +170,22 @@ Deno.serve(async (req) => {
     const responseText = result.response.text();
     const aiParsed = sanitizeAIResponse(responseText);
 
-    const extractedData = {
-      profit: aiParsed?.profit,
-      date_created: aiParsed?.date_created,
-      category: aiParsed?.category,
-    };
+    const category = aiParsed?.category as string | undefined;
+    const isValidCategory = category && category !== "No Category";
+
+    const extractedData: ExtractionResponse = isValidCategory
+      ? {
+        success: true,
+        profit: (aiParsed?.profit as number) || 0,
+        date_created: (aiParsed?.date_created as string) ||
+          new Date().toISOString().split("T")[0],
+        category: category,
+      }
+      : {
+        success: false,
+        rejection_reason: (aiParsed?.rejection_reason as string) ||
+          "Could not identify this document as a valid invoice. Please ensure you are uploading a supported invoice type.",
+      };
 
     // We can keep logging on backend side for debugging purposes
     console.log("Extracted Data:", extractedData);
