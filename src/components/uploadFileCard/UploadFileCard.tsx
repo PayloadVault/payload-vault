@@ -158,7 +158,12 @@ export const FileUploadCard = ({
                   onClick={() =>
                     setFiles((prev) => prev.filter((_, i) => i !== index))
                   }
-                  className="ml-3 h-10 w-10 rounded text-color-text-secondary transition-colors hover:bg-color-primary/10"
+                  disabled={disabled}
+                  className={`ml-3 h-10 w-10 rounded text-color-text-secondary transition-colors ${
+                    disabled
+                      ? "cursor-not-allowed opacity-50"
+                      : "hover:bg-color-primary/10"
+                  }`}
                 >
                   ✕
                 </button>
