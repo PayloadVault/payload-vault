@@ -2,7 +2,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../context/AuthContext";
 
-async function fetchAvailableYears(userId: string | undefined): Promise<number[]> {
+async function fetchAvailableYears(
+    userId: string | undefined,
+): Promise<number[]> {
     if (!userId) {
         return [new Date().getFullYear()];
     }
@@ -16,7 +18,8 @@ async function fetchAvailableYears(userId: string | undefined): Promise<number[]
     }
 
     const currentYear = new Date().getFullYear();
-    const fetchedYears: number[] = data?.map((row: { year: number }) => row.year) ?? [];
+    const fetchedYears: number[] =
+        data?.map((row: { year: number }) => row.year) ?? [];
 
     const mergedYears = [...new Set([currentYear, ...fetchedYears])];
     mergedYears.sort((a, b) => b - a);
@@ -32,7 +35,8 @@ export function useAvailableYears() {
         queryKey: ["availableYears", user?.id],
         queryFn: () => fetchAvailableYears(user?.id),
         staleTime: 1000 * 60 * 5,
-        initialData: [new Date().getFullYear()],
+        enabled: !!user?.id,
+        placeholderData: [new Date().getFullYear()],
     });
 
     const refetch = async () => {
