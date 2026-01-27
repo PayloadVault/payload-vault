@@ -3,6 +3,16 @@ import { GoogleGenerativeAI } from "npm:@google/generative-ai";
 import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 import { INVOICE_EXTRACTION_PROMPT } from "./prompt.ts";
 
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL") ?? "",
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+);
+
+const genAI = new GoogleGenerativeAI(Deno.env.get("GOOGLE_API_KEY") ?? "");
+const geminiModel = genAI.getGenerativeModel({
+  model: "gemini-flash-latest",
+});
+
 type ExtractedAIData = {
   profit?: unknown;
   date_created?: unknown;
@@ -45,32 +55,19 @@ Deno.serve(async (req) => {
 
     if (!filePath) throw new Error("No filePath provided");
 
-    // 1. Initialize Supabase Admin Client
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    );
-
-    // 2. Download the file from Supabase Storage
+    // Download the file from Supabase Storage
     const { data: fileData, error: downloadError } = await supabase.storage
       .from("pdf_reports")
       .download(filePath);
 
     if (downloadError) throw downloadError;
 
-    // 3. Convert file to Base64
+    // Convert file to Base64
     const arrayBuffer = await fileData.arrayBuffer();
     const base64Data = base64Encode(new Uint8Array(arrayBuffer));
 
-    // 4. Initialize Gemini AI
-    const genAI = new GoogleGenerativeAI(Deno.env.get("GOOGLE_API_KEY") ?? "");
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-flash-latest",
-    });
-
-    // 5. Call Gemini
-    const result = await model.generateContent([
+    // Call Gemini
+    const result = await geminiModel.generateContent([
       INVOICE_EXTRACTION_PROMPT,
       {
         inlineData: {
