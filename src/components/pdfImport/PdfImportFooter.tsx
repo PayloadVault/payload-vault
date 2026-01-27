@@ -24,20 +24,18 @@ export const PdfImportFooter = () => {
         return;
       }
 
+      let completedCount = 0;
       let successCount = 0;
       let failedCount = 0;
-      const failedFiles: string[] = [];
+      const failedFiles: { name: string; reason?: string }[] = [];
 
-      // Process files sequentially to avoid overwhelming the AI API
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+      onProgress({
+        completed: 0,
+        total: files.length,
+        inProgress: true,
+      });
 
-        onProgress({
-          current: i + 1,
-          total: files.length,
-          currentFileName: file.name,
-        });
-
+      const uploadPromises = files.map(async (file) => {
         try {
           await uploadPdf.mutateAsync({
             file,
@@ -47,17 +45,32 @@ export const PdfImportFooter = () => {
         } catch (error) {
           console.error(`Error uploading file ${file.name}:`, error);
           failedCount++;
-          failedFiles.push(file.name);
 
           if (error instanceof ExtractionError) {
-            showBanner(
-              "Extraction Failed",
-              `${file.name}: ${error.rejectionReason || "Could not extract data from this document."}`,
-              "error",
-            );
+            failedFiles.push({
+              name: file.name,
+              reason: error.rejectionReason,
+            });
+          } else {
+            failedFiles.push({ name: file.name });
           }
+        } finally {
+          completedCount++;
+          onProgress({
+            completed: completedCount,
+            total: files.length,
+            inProgress: completedCount < files.length,
+          });
         }
-      }
+      });
+
+      await Promise.all(uploadPromises);
+
+      failedFiles.forEach(({ name, reason }) => {
+        if (reason) {
+          showBanner("Extraction Failed", `${name}: ${reason}`, "error");
+        }
+      });
 
       if (failedCount === 0) {
         showBanner(
