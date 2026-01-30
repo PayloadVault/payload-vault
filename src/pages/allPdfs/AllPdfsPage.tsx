@@ -207,7 +207,7 @@ export const AllPdfsPage = () => {
       />
       <div className="grid md:grid-cols-2 gap-2">
         <Dropdown
-          label="Sort By"
+          label="Sort Documents"
           options={paycheckFilterOptions}
           onSelect={setSortSelected}
           value={sortSelected}
