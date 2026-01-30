@@ -1,5 +1,5 @@
 import type { Option } from "./Dropdown.types";
-import type { SortTypes, HomeSort, Category } from "../../hooks/usePdf/types";
+import type { Category, HomeSort, SortTypes } from "../../hooks/usePdf/types";
 
 export const paycheckFilterOptions: Option[] = [
   { id: "new", label: "Newest First" },
@@ -16,7 +16,6 @@ export const categorySortOptions: Option[] = [
 ];
 
 export const monthOptions: Option[] = [
-  { id: "0", label: "All Months" },
   { id: "1", label: "January" },
   { id: "2", label: "February" },
   { id: "3", label: "March" },

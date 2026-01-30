@@ -1,6 +1,12 @@
 import JSZip from "jszip";
 import { useOutletContext } from "react-router-dom";
-import { useLayoutEffect, useState, useEffect, useMemo } from "react";
+import {
+  useLayoutEffect,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import {
   type DropdownOptions,
   paycheckFilterOptions,
@@ -48,22 +54,29 @@ export const AllPdfsPage = () => {
     DropdownOptions["paycheckFilter"][number]
   >(paycheckFilterOptions[0]);
 
-  const [monthSelected, setMonthSelected] = useState<
+  const [startMonthSelected, setStartMonthSelected] = useState<
     DropdownOptions["month"][number]
   >(monthOptions[0]);
+  const [endMonthSelected, setEndMonthSelected] = useState<
+    DropdownOptions["month"][number]
+  >(monthOptions[monthOptions.length - 1]);
+
+  const endMonthOptions = useMemo(
+    () => monthOptions.slice(monthOptions.indexOf(startMonthSelected)),
+    [startMonthSelected],
+  );
 
   const [categorySelected, setCategorySelected] = useState<
     DropdownOptions["category"][number]
   >(categoryOptions[0]);
 
-  const handleResetFilters = () => {
+  const handleResetFilters = useCallback(() => {
     setSortSelected(paycheckFilterOptions[0]);
-    setMonthSelected(monthOptions[0]);
+    setStartMonthSelected(monthOptions[0]);
+    setEndMonthSelected(monthOptions[monthOptions.length - 1]);
     setCategorySelected(categoryOptions[0]);
     setSearchQuery("");
-  };
-
-  if (!user) return <ErrorBlock />;
+  }, []);
 
   const {
     data: pdfs,
@@ -71,9 +84,10 @@ export const AllPdfsPage = () => {
     error,
     removePdf,
   } = usePdfs({
-    userId: user.id,
+    userId: user?.id ?? "",
     year,
-    month: Number(monthSelected.id) || undefined,
+    startMonth: Number(startMonthSelected.id) || undefined,
+    endMonth: Number(endMonthSelected.id) || undefined,
     sortBy: isSortType(sortSelected.id) ? sortSelected.id : "new",
     category: isCategoryType(categorySelected.id) ? categorySelected.id : "all",
   });
@@ -83,6 +97,21 @@ export const AllPdfsPage = () => {
       setContentCardData(formatAllPdfs(pdfs));
     }
   }, [pdfs]);
+
+  useEffect(() => {
+    handleResetFilters();
+  }, [year]);
+
+  useEffect(() => {
+    if (
+      monthOptions.indexOf(endMonthSelected) <
+      monthOptions.indexOf(startMonthSelected)
+    ) {
+      setEndMonthSelected(startMonthSelected);
+    }
+  }, [startMonthSelected]);
+
+  if (!user) return <ErrorBlock />;
 
   const filteredPdfs = useMemo(() => {
     if (!contentCardData) return [];
@@ -104,7 +133,7 @@ export const AllPdfsPage = () => {
       showBanner(
         "No PDFs to download",
         "There are no filtered PDFs available for download.",
-        "error"
+        "error",
       );
       return;
     }
@@ -114,7 +143,10 @@ export const AllPdfsPage = () => {
 
     const zipName = [
       user.email ? user.email.split("@")[0] : null,
-      monthSelected.id !== "0" ? monthSelected.label : null,
+      startMonthSelected.label,
+      endMonthSelected.id !== startMonthSelected.id
+        ? `to_${endMonthSelected.label}`
+        : null,
       `${year}`,
       categorySelected.id,
       searchQuery ? `search_${searchQuery}` : null,
@@ -136,7 +168,7 @@ export const AllPdfsPage = () => {
             pdf.title?.replace(/[^\w\d]+/g, "_") || `document_${index + 1}.pdf`;
 
           zip.file(`${fileName}.pdf`, blob);
-        })
+        }),
       );
 
       const zipBlob = await zip.generateAsync({ type: "blob" });
@@ -155,13 +187,13 @@ export const AllPdfsPage = () => {
       showBanner(
         "Download started",
         "Your PDFs are being downloaded as a ZIP file.",
-        "success"
+        "success",
       );
     } catch (error) {
       showBanner(
         "Failed to download PDFs",
         "Something went wrong while downloading PDFs. Please try again.",
-        "error"
+        "error",
       );
     }
   };
@@ -181,16 +213,22 @@ export const AllPdfsPage = () => {
           value={sortSelected}
         />
         <Dropdown
-          label="Choose Month"
-          options={monthOptions}
-          onSelect={setMonthSelected}
-          value={monthSelected}
-        />
-        <Dropdown
           label="Choose Category"
           options={categoryOptions}
           onSelect={setCategorySelected}
           value={categorySelected}
+        />
+        <Dropdown
+          label="Choose Start Month"
+          options={monthOptions}
+          onSelect={setStartMonthSelected}
+          value={startMonthSelected}
+        />
+        <Dropdown
+          label="Choose End Month"
+          options={endMonthOptions}
+          onSelect={setEndMonthSelected}
+          value={endMonthSelected}
         />
         <SearchBar
           placeholder="Search PDFs..."

@@ -12,7 +12,8 @@ type FetchPdfProps = {
   userId: string;
   category?: Category;
   year?: number;
-  month?: number;
+  startMonth?: number;
+  endMonth?: number;
   sortBy?: SortTypes;
 };
 
