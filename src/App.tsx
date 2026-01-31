@@ -14,6 +14,8 @@ import { SignUpPage } from "./pages/signup/SignupPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { YearProvider } from "./context/YearContext";
 import { BannerProvider } from "./context/banner/BannerProvider";
+import { ImpressumPage } from "./pages/impressum/ImpressumPage";
+import { PrivacyPolicyPage } from "./pages/privacyPolicy/PrivacyPolicyPage";
 
 export default function App() {
   useEffect(() => {
@@ -87,8 +89,25 @@ export default function App() {
                       </ProtectedRoute>
                     }
                   />
-                </Route>
 
+                  <Route
+                    path="/impressum"
+                    element={
+                      <ProtectedRoute>
+                        <ImpressumPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/datenschutz"
+                    element={
+                      <ProtectedRoute>
+                        <PrivacyPolicyPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </ModalProvider>

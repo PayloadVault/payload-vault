@@ -10,6 +10,7 @@ import { formatData } from "./utils";
 import type { FullData } from "./types";
 import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
 import { ErrorBlock } from "../../components/errorBlock/ErrorBlock";
+import { Footer } from "../../components/footer/Footer";
 
 export const HomePage = () => {
   const { user } = useAuth();
@@ -72,6 +73,7 @@ export const HomePage = () => {
         </main>
       )}
 
+      <Footer />
       <PdfImportFooter />
     </div>
   );

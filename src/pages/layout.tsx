@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PdfImportFooter } from "../components/pdfImport/PdfImportFooter";
 import { useYear } from "../hooks/year/UseYear";
 import { HeaderHome } from "../components/header/HeaderHome";
+import { Footer } from "../components/footer/Footer";
 
 export const Layout = () => {
   const [title, setTitle] = useState("");
@@ -18,6 +19,7 @@ export const Layout = () => {
         <Outlet context={{ setTitle }} />
       </main>
 
+      <Footer />
       <PdfImportFooter />
     </div>
   );
