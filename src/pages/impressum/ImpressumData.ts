@@ -32,11 +32,11 @@ const IMPRESSUM_DATA = {
       content: [
         {
           type: "provider",
-          name: "Bazilije Vuletić",
+          name: "[Provider Name]",
           details: [
-            "Vermittlung von Versicherungen",
-            "Kölner Str. 152",
-            "58509 Lüdenscheid",
+            "[Business Activity / Service Description]",
+            "[Street and House Number]",
+            "[Postal Code and City]",
           ],
         },
       ],
@@ -47,8 +47,8 @@ const IMPRESSUM_DATA = {
       content: [
         {
           type: "contact",
-          phone: "+49 160 2222992",
-          email: "vuletic@pro-fina.de",
+          phone: "[Phone Number]",
+          email: "[Email Address]",
         },
       ],
     },
@@ -59,7 +59,7 @@ const IMPRESSUM_DATA = {
         {
           type: "text",
           value:
-            "Keine Umsatzsteuerpflicht nach § 19 UStG (Kleinunternehmerregelung).",
+            "[VAT information, e.g. VAT exempt under small business regulation § 19 UStG]",
         },
       ],
     },
@@ -70,7 +70,7 @@ const IMPRESSUM_DATA = {
         {
           type: "text",
           value:
-            "Tätigkeit: Gebundener Versicherungsvertreter nach § 34d Abs. 7 GewO\nRegistrierungsnummer: **D-6FME-UFOB4-98**\nZuständige Registerstelle: Südwestfälische Industrie- und Handelskammer zu Hagen, Bahnhofstraße 18, 58095 Hagen\nVermittlerregister: [www.vermittlerregister.info](https://www.vermittlerregister.info)",
+            "Tätigkeit: [Professional Activity according to GewO]\nRegistrierungsnummer: [Registration Number]\nZuständige Registerstelle: [Responsible Authority Name and Address]\nVermittlerregister: [Link to Intermediary Register]",
         },
       ],
     },
@@ -80,7 +80,7 @@ const IMPRESSUM_DATA = {
       content: [
         {
           type: "text",
-          value: "Barmenia Krankenversicherung AG",
+          value: "[Liability Insurance Provider Name]",
         },
       ],
     },
@@ -106,19 +106,19 @@ const IMPRESSUM_DATA = {
           type: "infoCards",
           cards: [
             {
-              title: "Versicherungsombudsmann e. V.",
-              address: "Postfach 08 06 32, 10006 Berlin",
+              title: "[Arbitration Body Name]",
+              address: "[Arbitration Body Address]",
               link: {
-                label: "www.versicherungsombudsmann.de",
-                href: "https://www.versicherungsombudsmann.de",
+                label: "[Arbitration Body Website]",
+                href: "[Website URL]",
               },
             },
             {
-              title: "Ombudsmann Private Kranken- und Pflegeversicherung",
-              address: "Postfach 06 02 22, 10052 Berlin",
+              title: "[Arbitration Body Name]",
+              address: "[Arbitration Body Address]",
               link: {
-                label: "www.pkv-ombudsmann.de",
-                href: "https://www.pkv-ombudsmann.de",
+                label: "[Arbitration Body Website]",
+                href: "[Website URL]",
               },
             },
           ],

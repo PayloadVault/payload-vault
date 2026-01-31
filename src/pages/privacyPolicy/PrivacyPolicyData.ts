@@ -31,10 +31,10 @@ const PRIVACY_POLICY_DATA = {
       content: [
         {
           type: "contact",
-          name: "Bazilije Vuletic",
-          address: ["Kölner Str. 152", "58509 Lüdenscheid"],
-          phone: "+49 160 2222992",
-          email: "vuletic@pro-fina.de",
+          name: "[Controller Name]",
+          address: ["[Street and House Number]", "[Postal Code and City]"],
+          phone: "[Phone Number]",
+          email: "[Email Address]",
         },
       ],
     },
@@ -45,7 +45,7 @@ const PRIVACY_POLICY_DATA = {
         {
           type: "text",
           value:
-            "Der Schutz Ihrer persönlichen Daten ist uns wichtig. Personenbezogene Daten werden ausschließlich im Rahmen der gesetzlichen Datenschutzvorschriften (DSGVO) verarbeitet.",
+            "Der Schutz Ihrer persönlichen Daten ist uns ein wichtiges Anliegen. Personenbezogene Daten werden ausschließlich im Rahmen der geltenden Datenschutzvorschriften, insbesondere der Datenschutz-Grundverordnung (DSGVO), verarbeitet.",
         },
       ],
     },
@@ -56,94 +56,122 @@ const PRIVACY_POLICY_DATA = {
         {
           type: "text",
           value:
-            "Diese Website wird extern gehostet bei:\nNetlify, 2325 3rd Street, Suite 296, San Francisco, CA 94107, USA",
+            "Diese Anwendung wird extern gehostet bei:\n\nNetlify, Inc.\n2325 3rd Street, Suite 296\nSan Francisco, CA 94107, USA",
         },
         {
           type: "highlight",
-          title: "Beim Besuch der Website",
+          title: "Server-Log-Dateien",
           content:
-            "werden automatisch technische Daten (z. B. IP-Adresse, Browsertyp, Zeitpunkt des Zugriffs) erfasst. Die Verarbeitung erfolgt zur sicheren und stabilen Bereitstellung der Website gemäß Art. 6 Abs. 1 lit. f DSGVO.",
+            "Beim Zugriff auf die Anwendung werden automatisch Informationen in sogenannten Server-Log-Dateien erhoben. Dies sind insbesondere IP-Adresse, Browsertyp, Betriebssystem, Referrer-URL sowie Zeitpunkt des Zugriffs. Die Verarbeitung erfolgt zur Gewährleistung eines sicheren und stabilen Betriebs der Anwendung auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse).",
         },
       ],
     },
     {
       id: 4,
-      title: "Kontaktaufnahme",
+      title: "Hochladen und Verarbeitung von Rechnungen",
       content: [
         {
           type: "text",
           value:
-            "Wenn Sie uns per E-Mail, Telefon oder Kontaktformular kontaktieren, werden Ihre Angaben zur Bearbeitung Ihrer Anfrage gespeichert.",
+            "Nutzer haben die Möglichkeit, Rechnungen in Form von PDF-Dokumenten hochzuladen. Diese Dokumente können personenbezogene Daten enthalten, insbesondere Namen, Anschriften, Rechnungsbeträge, Rechnungsdaten sowie weitere in der Rechnung enthaltene Informationen.",
+        },
+        {
+          type: "highlight",
+          title: "Zweck der Verarbeitung",
+          content:
+            "Die Verarbeitung der hochgeladenen Rechnungen erfolgt ausschließlich zum Zweck der automatisierten Kategorisierung, der Extraktion relevanter Informationen (z. B. Einnahmenhöhe und Einnahmedatum) sowie zur Bereitstellung einer strukturierten Übersicht für den Nutzer.",
         },
         {
           type: "list",
-          title: "Rechtsgrundlage",
+          title: "Verarbeitete Daten",
           items: [
-            "Art. 6 Abs. 1 lit. b DSGVO (vorvertragliche Maßnahmen)",
-            "oder Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse)",
+            "Hochgeladene Rechnungsdokumente (PDF)",
+            "Rechnungsbetrag",
+            "Datum der Einnahme",
+            "Rechnungskategorie",
+            "Weitere in der Rechnung enthaltene Daten",
           ],
         },
         {
-          type: "text",
-          value:
-            "Eine Weitergabe der Daten erfolgt nicht ohne Ihre Einwilligung. Die Daten werden gelöscht, sobald der Zweck der Speicherung entfällt und keine gesetzlichen Aufbewahrungspflichten bestehen.",
+          type: "highlight",
+          title: "Rechtsgrundlage",
+          content:
+            "Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO (Erfüllung eines Vertrags), da sie für die Nutzung der Kernfunktionen der Anwendung erforderlich ist.",
         },
       ],
     },
     {
       id: 5,
-      title: "Soziale Medien (Facebook & Instagram)",
+      title: "Speicherung der Daten (Supabase)",
       content: [
         {
           type: "text",
           value:
-            "Auf dieser Website befinden sich Verlinkungen zu sozialen Netzwerken wie Facebook und Instagram. Anbieter ist:\n\nMeta Platforms Ireland Limited\nMerrion Road, Dublin 4, Irland",
+            "Die Speicherung der hochgeladenen Rechnungen sowie der daraus extrahierten Daten erfolgt über folgenden Dienstleister:\n\nSupabase Inc.\n[Supabase Address]",
         },
         {
-          type: "text",
-          value:
-            "Beim Anklicken der jeweiligen Symbole werden Sie auf die Plattformen weitergeleitet. Dabei kann Meta personenbezogene Daten verarbeiten. Die Nutzung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an Öffentlichkeitsarbeit).",
+          type: "highlight",
+          title: "Datensicherheit",
+          content:
+            "Die Daten werden auf sicheren Servern gespeichert und sind ausschließlich für den jeweiligen Nutzer sowie für technisch notwendige Systemkomponenten zugänglich.",
         },
         {
-          type: "links",
-          title: "Weitere Informationen",
-          items: [
-            {
-              label: "Facebook Datenschutzhinweise",
-              href: "https://de-de.facebook.com/privacy/explanation",
-            },
-            {
-              label: "Instagram Datenschutzrichtlinie",
-              href: "https://privacycenter.instagram.com/policy/",
-            },
-          ],
+          type: "highlight",
+          title: "Rechtsgrundlage",
+          content:
+            "Die Speicherung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung) sowie Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer sicheren und zuverlässigen Datenverarbeitung).",
         },
       ],
     },
     {
       id: 6,
-      title: "SSL-Verschlüsselung",
+      title: "Automatisierte Datenanalyse (Google Gemini)",
       content: [
         {
           type: "text",
           value:
-            "Diese Website nutzt eine SSL- bzw. TLS-Verschlüsselung zum Schutz der Datenübertragung.",
+            "Zur automatisierten Analyse der hochgeladenen Rechnungen und zur Extraktion strukturierter Informationen wird ein KI-basierter Dienst des folgenden Anbieters eingesetzt:\n\nGoogle LLC\n[Google Address]",
+        },
+        {
+          type: "highlight",
+          title: "Umfang der Verarbeitung",
+          content:
+            "Die Inhalte der hochgeladenen Rechnungen können zum Zweck der Analyse an den KI-Dienst übermittelt werden. Die Verarbeitung erfolgt ausschließlich zur Bereitstellung der Funktionalität der Anwendung und nicht zu Werbezwecken.",
+        },
+        {
+          type: "highlight",
+          title: "Rechtsgrundlage",
+          content:
+            "Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung).",
         },
       ],
     },
     {
       id: 7,
-      title: "Ihre Rechte",
+      title: "Speicherdauer",
+      content: [
+        {
+          type: "text",
+          value:
+            "Die gespeicherten Rechnungen und extrahierten Daten werden so lange aufbewahrt, wie das Nutzerkonto besteht oder bis der Nutzer die Daten selbst löscht, sofern keine gesetzlichen Aufbewahrungspflichten einer längeren Speicherung entgegenstehen.",
+        },
+      ],
+    },
+    {
+      id: 8,
+      title: "Rechte der betroffenen Personen",
       content: [
         { type: "text", value: "Sie haben jederzeit das Recht auf:" },
         {
           type: "list",
           items: [
-            "Auskunft über Ihre gespeicherten Daten",
-            "Berichtigung oder Löschung",
-            "Einschränkung der Verarbeitung",
-            "Widerruf erteilter Einwilligungen",
-            "Beschwerde bei einer zuständigen Datenschutzaufsichtsbehörde",
+            "Auskunft über Ihre gespeicherten personenbezogenen Daten (Art. 15 DSGVO)",
+            "Berichtigung unrichtiger Daten (Art. 16 DSGVO)",
+            "Löschung Ihrer Daten (Art. 17 DSGVO)",
+            "Einschränkung der Verarbeitung (Art. 18 DSGVO)",
+            "Datenübertragbarkeit (Art. 20 DSGVO)",
+            "Widerruf erteilter Einwilligungen mit Wirkung für die Zukunft (Art. 7 Abs. 3 DSGVO)",
+            "Beschwerde bei einer zuständigen Datenschutzaufsichtsbehörde (Art. 77 DSGVO)",
           ],
         },
       ],
