@@ -18,6 +18,8 @@ import { ErrorBlock } from "../../components/errorBlock/ErrorBlock";
 import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
 import { DocumentSkeletonLoader } from "../../components/skeletonLoader/DocumentSkeletonLoader";
 import { Button } from "../../components/button/Button";
+import JSZip from "jszip";
+import { useBanner } from "../../context/banner/BannerContext";
 
 type CategoryProps = {
   title: string;
@@ -38,20 +40,22 @@ export const OtherPages = ({ title }: CategoryProps) => {
     DropdownOptions["month"][number]
   >(monthOptions[monthOptions.length - 1]);
 
-  const endMonthOptions = useMemo(
-    () => monthOptions.slice(monthOptions.indexOf(startMonthSelected)),
-    [startMonthSelected],
-  );
-
   const [contentCardData, setContentCardData] = useState<
     AllPdfTypes | undefined
   >();
+
+  const endMonthOptions = useMemo(
+    () => monthOptions.slice(monthOptions.indexOf(startMonthSelected)),
+    [startMonthSelected]
+  );
 
   const handleResetFilters = () => {
     setSortSelected(paycheckFilterOptions[0]);
     setStartMonthSelected(monthOptions[0]);
     setEndMonthSelected(monthOptions[monthOptions.length - 1]);
   };
+
+  const { showBanner } = useBanner();
 
   if (!user) return <ErrorBlock />;
 
@@ -75,14 +79,76 @@ export const OtherPages = ({ title }: CategoryProps) => {
     }
   }, [pdfs]);
 
-  useEffect(() => {
-    if (
-      monthOptions.indexOf(endMonthSelected) <
-      monthOptions.indexOf(startMonthSelected)
-    ) {
-      setEndMonthSelected(startMonthSelected);
+  const handleDownloadAll = async () => {
+    if (!contentCardData || contentCardData.pdfs.length === 0) {
+      showBanner(
+        "No PDFs to download",
+        "There are no PDFs available for download.",
+        "error"
+      );
+      return;
     }
-  }, [startMonthSelected]);
+
+    const zip = new JSZip();
+
+    const slugify = (value: string) =>
+      value.toLowerCase().trim().replace(/\s+/g, "_");
+
+    const zipName = [
+      user.email ? user.email.split("@")[0] : null,
+      startMonthSelected.label,
+      endMonthSelected.id !== startMonthSelected.id
+        ? `to_${endMonthSelected.label}`
+        : null,
+      `${year}`,
+      title,
+    ]
+      .filter((v): v is string => Boolean(v))
+      .map(slugify)
+      .join("_")
+      .concat("_documents.zip");
+
+    try {
+      await Promise.all(
+        contentCardData.pdfs.map(async (pdf, index) => {
+          if (!pdf.signedUrl) return;
+
+          const response = await fetch(pdf.signedUrl);
+          const blob = await response.blob();
+
+          const fileName =
+            pdf.title?.replace(/[^\w\d]+/g, "_") || `document_${index + 1}.pdf`;
+
+          zip.file(`${fileName}.pdf`, blob);
+        })
+      );
+
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+
+      const url = window.URL.createObjectURL(zipBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = zipName;
+
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      showBanner(
+        "Download started",
+        "Your PDFs are being downloaded as a ZIP file.",
+        "success"
+      );
+    } catch (error) {
+      showBanner(
+        "Failed to download PDFs",
+        "Something went wrong while downloading PDFs. Please try again.",
+        "error"
+      );
+    }
+  };
 
   if (!contentCardData) return <PageSkeletonLoader />;
 
@@ -95,30 +161,40 @@ export const OtherPages = ({ title }: CategoryProps) => {
         subtitle={contentCardData.totalPdf.toString() + " · Paychecks"}
         totalIncome={contentCardData.totalIncome}
       />
-      <div className="grid md:grid-cols-2 gap-2">
-        <Dropdown
-          label="Choose Month"
-          options={monthOptions}
-          onSelect={setStartMonthSelected}
-          value={startMonthSelected}
-        />
-        <Dropdown
-          label="Choose Month"
-          options={endMonthOptions}
-          onSelect={setEndMonthSelected}
-          value={endMonthSelected}
-        />
-        <Dropdown
-          label="Sort Documents"
-          options={paycheckFilterOptions}
-          onSelect={setSortSelected}
-          value={sortSelected}
-        />
+      <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-1">
+          <Dropdown
+            label="Sort Categories"
+            options={paycheckFilterOptions}
+            onSelect={setSortSelected}
+            value={sortSelected}
+          />
+        </div>
+        <div className="grid md:grid-cols-2 gap-2">
+          <Dropdown
+            label="Choose Start Month"
+            options={monthOptions}
+            onSelect={setStartMonthSelected}
+            value={startMonthSelected}
+          />
+          <Dropdown
+            label="Choose End Month"
+            options={endMonthOptions}
+            onSelect={setEndMonthSelected}
+            value={endMonthSelected}
+          />
+        </div>
       </div>
-      <div className="grid grid-cols-1 items-center">
+      <div className="grid grid-cols-1 items-center gap-5">
         <Button
           onClick={handleResetFilters}
           text="Reset Filters"
+          size="medium"
+        />
+        <Button
+          onClick={handleDownloadAll}
+          variant="secondary"
+          text="Download All Filtered PDFs"
           size="medium"
         />
       </div>
