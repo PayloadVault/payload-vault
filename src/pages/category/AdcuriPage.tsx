@@ -1,9 +1,4 @@
 import { useState, useEffect } from "react";
-import {
-  type DropdownOptions,
-  categorySortOptions,
-} from "../../components/dropdown/DropdownOption";
-import { Dropdown } from "../../components/dropdown/Dropdown";
 import { ContentCard } from "../../components/contentCard/ContentCard";
 import { TotalIncomeCard } from "../../components/totalIncomeCard/TotalIncomeCard";
 import { useAuth } from "../../context/AuthContext";
@@ -21,10 +16,6 @@ export const AdcuriPage = () => {
   const [contentCardData, setContentCardData] = useState<
     AdcuriFullData | undefined
   >();
-
-  const [sortSelected, setSortSelected] = useState<
-    DropdownOptions["categorySort"][number]
-  >(categorySortOptions[0]);
 
   if (!user) return <ErrorBlock />;
 
@@ -53,12 +44,6 @@ export const AdcuriPage = () => {
         title="Adcuri total income"
         subtitle={contentCardData.totalPdf.toString() + " · Paychecks"}
         totalIncome={contentCardData.totalIncome}
-      />
-      <Dropdown
-        label="Sort Categories"
-        options={categorySortOptions}
-        onSelect={setSortSelected}
-        value={sortSelected}
       />
       <div className="flex flex-col gap-6">
         {contentCardData.adcuriCategories.map((category, index) => (
