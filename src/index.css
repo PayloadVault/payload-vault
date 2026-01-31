@@ -94,12 +94,12 @@ button {
   --color-bg-accent: var(--color-primary);
   --color-border-light: #e2e8f0;
   --color-border-dark: #cbd5e1;
-  --color-success: #059669;
-  --color-success-border: #10b981;
-  --color-success-text: #047857;
-  --color-error: #dc2626;
-  --color-error-border: #f87171;
-  --color-error-text: #b91c1c;
+  --color-success: #4da479;
+  --color-success-border: #27ac68;
+  --color-success-text: #4a9070;
+  --color-error: #e17883;
+  --color-error-border: #e74050;
+  --color-error-text: #c45b64;
   --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
   --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.06);
   --shadow-strong:
