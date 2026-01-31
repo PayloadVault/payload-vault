@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   type DropdownOptions,
   paycheckFilterOptions,
@@ -33,17 +33,26 @@ export const OtherPages = ({ title }: CategoryProps) => {
     DropdownOptions["paycheckFilter"][number]
   >(paycheckFilterOptions[0]);
 
-  const [monthSelected, setMonthSelected] = useState<
+  const [startMonthSelected, setStartMonthSelected] = useState<
     DropdownOptions["month"][number]
   >(monthOptions[0]);
+  const [endMonthSelected, setEndMonthSelected] = useState<
+    DropdownOptions["month"][number]
+  >(monthOptions[monthOptions.length - 1]);
 
   const [contentCardData, setContentCardData] = useState<
     AllPdfTypes | undefined
   >();
 
+  const endMonthOptions = useMemo(
+    () => monthOptions.slice(monthOptions.indexOf(startMonthSelected)),
+    [startMonthSelected]
+  );
+
   const handleResetFilters = () => {
     setSortSelected(paycheckFilterOptions[0]);
-    setMonthSelected(monthOptions[0]);
+    setStartMonthSelected(monthOptions[0]);
+    setEndMonthSelected(monthOptions[monthOptions.length - 1]);
   };
 
   const { showBanner } = useBanner();
@@ -58,7 +67,8 @@ export const OtherPages = ({ title }: CategoryProps) => {
   } = usePdfs({
     userId: user.id,
     year,
-    month: Number(monthSelected.id) || undefined,
+    startMonth: Number(startMonthSelected.id) || undefined,
+    endMonth: Number(endMonthSelected.id) || undefined,
     sortBy: isSortType(sortSelected.id) ? sortSelected.id : "new",
     category: isCategoryType(title) ? title : "all",
   });
@@ -74,7 +84,7 @@ export const OtherPages = ({ title }: CategoryProps) => {
       showBanner(
         "No PDFs to download",
         "There are no PDFs available for download.",
-        "error",
+        "error"
       );
       return;
     }
@@ -86,7 +96,10 @@ export const OtherPages = ({ title }: CategoryProps) => {
 
     const zipName = [
       user.email ? user.email.split("@")[0] : null,
-      monthSelected.id !== "0" ? monthSelected.label : null,
+      startMonthSelected.label,
+      endMonthSelected.id !== startMonthSelected.id
+        ? `to_${endMonthSelected.label}`
+        : null,
       `${year}`,
       title,
     ]
@@ -107,7 +120,7 @@ export const OtherPages = ({ title }: CategoryProps) => {
             pdf.title?.replace(/[^\w\d]+/g, "_") || `document_${index + 1}.pdf`;
 
           zip.file(`${fileName}.pdf`, blob);
-        }),
+        })
       );
 
       const zipBlob = await zip.generateAsync({ type: "blob" });
@@ -126,13 +139,13 @@ export const OtherPages = ({ title }: CategoryProps) => {
       showBanner(
         "Download started",
         "Your PDFs are being downloaded as a ZIP file.",
-        "success",
+        "success"
       );
     } catch (error) {
       showBanner(
         "Failed to download PDFs",
         "Something went wrong while downloading PDFs. Please try again.",
-        "error",
+        "error"
       );
     }
   };
@@ -156,10 +169,16 @@ export const OtherPages = ({ title }: CategoryProps) => {
           value={sortSelected}
         />
         <Dropdown
-          label="Choose Month"
+          label="Choose Start Month"
           options={monthOptions}
-          onSelect={setMonthSelected}
-          value={monthSelected}
+          onSelect={setStartMonthSelected}
+          value={startMonthSelected}
+        />
+        <Dropdown
+          label="Choose End Month"
+          options={endMonthOptions}
+          onSelect={setEndMonthSelected}
+          value={endMonthSelected}
         />
       </div>
       <div className="grid grid-cols-1 items-center gap-5">

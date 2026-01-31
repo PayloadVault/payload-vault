@@ -5,16 +5,16 @@ import { FileUploadCard } from "../uploadFileCard/UploadFileCard";
 import { useModal } from "../../context/modal/ModalContext";
 
 export interface UploadProgress {
-  current: number;
+  completed: number;
   total: number;
-  currentFileName: string;
+  inProgress: boolean;
 }
 
 interface ImportPdfFormProps {
   onCancel: () => void;
   onSave: (
     files: File[],
-    onProgress: (progress: UploadProgress) => void
+    onProgress: (progress: UploadProgress) => void,
   ) => Promise<void>;
 }
 
@@ -41,7 +41,7 @@ export const ImportPdfForm = ({ onCancel, onSave }: ImportPdfFormProps) => {
   };
 
   const buttonText = progress
-    ? `Uploading ${progress.current}/${progress.total}...`
+    ? `Processing ${progress.completed}/${progress.total}...`
     : files.length > 1
       ? `Upload ${files.length} PDFs`
       : "Upload PDF";
@@ -62,15 +62,19 @@ export const ImportPdfForm = ({ onCancel, onSave }: ImportPdfFormProps) => {
       {progress && (
         <div className="flex flex-col gap-2">
           <div className="flex justify-between text-sm text-color-text-subtle">
-            <span className="truncate max-w-[200px]" title={progress.currentFileName}>
-              Processing: {progress.currentFileName}
+            <span>
+              {progress.inProgress ? "Processing files..." : "Completed"}
             </span>
-            <span>{progress.current}/{progress.total}</span>
+            <span>
+              {progress.completed}/{progress.total}
+            </span>
           </div>
           <div className="w-full bg-color-bg-dark rounded-full h-2">
             <div
               className="bg-color-primary h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(progress.current / progress.total) * 100}%` }}
+              style={{
+                width: `${(progress.completed / progress.total) * 100}%`,
+              }}
             />
           </div>
         </div>
