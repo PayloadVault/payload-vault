@@ -19,7 +19,8 @@ async function fetchPdfs({
   userId,
   category,
   year,
-  month,
+  startMonth,
+  endMonth,
   sortBy = "new",
 }: FetchPdfProps): Promise<PdfRecord[]> {
   let query = supabase.from("pdf_records").select("*").eq("user_id", userId);
@@ -29,12 +30,12 @@ async function fetchPdfs({
   }
 
   if (year) {
-    const start = `${year}-${String(month ?? 1).padStart(2, "0")}-01`;
+    const start = `${year}-${String(startMonth ?? 1).padStart(2, "0")}-01`;
 
-    const end = month
-      ? month === 12
+    const end = endMonth
+      ? endMonth === 12
         ? `${year + 1}-01-01`
-        : `${year}-${String(month + 1).padStart(2, "0")}-01`
+        : `${year}-${String(endMonth + 1).padStart(2, "0")}-01`
       : `${year + 1}-01-01`;
 
     query = query.gte("date_created", start).lt("date_created", end);
@@ -147,15 +148,16 @@ async function uploadAndInsertPdf({
 
   if (uploadError) throw uploadError;
 
-  const { data: aiData, error: aiError } = await supabase.functions.invoke<ExtractionResponse>(
-    "extract-data-from-pdf",
-    {
-      body: {
-        filePath: filePath,
-        fileType: file.type,
+  const { data: aiData, error: aiError } =
+    await supabase.functions.invoke<ExtractionResponse>(
+      "extract-data-from-pdf",
+      {
+        body: {
+          filePath: filePath,
+          fileType: file.type,
+        },
       },
-    },
-  );
+    );
 
   if (aiError) {
     // Clean up uploaded file on AI error
@@ -168,7 +170,8 @@ async function uploadAndInsertPdf({
     await supabase.storage.from("pdf_reports").remove([filePath]);
     throw new ExtractionError(
       "Document not recognized",
-      aiData?.rejection_reason || "Could not identify this document as a valid invoice.",
+      aiData?.rejection_reason ||
+        "Could not identify this document as a valid invoice.",
     );
   }
 

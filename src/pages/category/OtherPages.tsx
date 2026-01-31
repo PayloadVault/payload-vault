@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   type DropdownOptions,
   paycheckFilterOptions,
@@ -31,9 +31,17 @@ export const OtherPages = ({ title }: CategoryProps) => {
     DropdownOptions["paycheckFilter"][number]
   >(paycheckFilterOptions[0]);
 
-  const [monthSelected, setMonthSelected] = useState<
+  const [startMonthSelected, setStartMonthSelected] = useState<
     DropdownOptions["month"][number]
   >(monthOptions[0]);
+  const [endMonthSelected, setEndMonthSelected] = useState<
+    DropdownOptions["month"][number]
+  >(monthOptions[monthOptions.length - 1]);
+
+  const endMonthOptions = useMemo(
+    () => monthOptions.slice(monthOptions.indexOf(startMonthSelected)),
+    [startMonthSelected],
+  );
 
   const [contentCardData, setContentCardData] = useState<
     AllPdfTypes | undefined
@@ -41,7 +49,8 @@ export const OtherPages = ({ title }: CategoryProps) => {
 
   const handleResetFilters = () => {
     setSortSelected(paycheckFilterOptions[0]);
-    setMonthSelected(monthOptions[0]);
+    setStartMonthSelected(monthOptions[0]);
+    setEndMonthSelected(monthOptions[monthOptions.length - 1]);
   };
 
   if (!user) return <ErrorBlock />;
@@ -54,7 +63,8 @@ export const OtherPages = ({ title }: CategoryProps) => {
   } = usePdfs({
     userId: user.id,
     year,
-    month: Number(monthSelected.id) || undefined,
+    startMonth: Number(startMonthSelected.id) || undefined,
+    endMonth: Number(endMonthSelected.id) || undefined,
     sortBy: isSortType(sortSelected.id) ? sortSelected.id : "new",
     category: isCategoryType(title) ? title : "all",
   });
@@ -64,6 +74,15 @@ export const OtherPages = ({ title }: CategoryProps) => {
       setContentCardData(formatAllPdfs(pdfs));
     }
   }, [pdfs]);
+
+  useEffect(() => {
+    if (
+      monthOptions.indexOf(endMonthSelected) <
+      monthOptions.indexOf(startMonthSelected)
+    ) {
+      setEndMonthSelected(startMonthSelected);
+    }
+  }, [startMonthSelected]);
 
   if (!contentCardData) return <PageSkeletonLoader />;
 
@@ -78,16 +97,22 @@ export const OtherPages = ({ title }: CategoryProps) => {
       />
       <div className="grid md:grid-cols-2 gap-2">
         <Dropdown
-          label="Sort Categories"
-          options={paycheckFilterOptions}
-          onSelect={setSortSelected}
-          value={sortSelected}
+          label="Choose Month"
+          options={monthOptions}
+          onSelect={setStartMonthSelected}
+          value={startMonthSelected}
         />
         <Dropdown
           label="Choose Month"
-          options={monthOptions}
-          onSelect={setMonthSelected}
-          value={monthSelected}
+          options={endMonthOptions}
+          onSelect={setEndMonthSelected}
+          value={endMonthSelected}
+        />
+        <Dropdown
+          label="Sort Documents"
+          options={paycheckFilterOptions}
+          onSelect={setSortSelected}
+          value={sortSelected}
         />
       </div>
       <div className="grid grid-cols-1 items-center">
