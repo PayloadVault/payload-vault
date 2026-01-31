@@ -46,6 +46,7 @@ button {
   --color-primary: #00c4b3;
   --color-primary-dark: #009c8f;
   --color-primary-light: #33d1c2;
+  --color-secondary: #be9b53;
   --color-black: #000000;
   --color-white: #ffffff;
   --color-text-main: var(--color-white);
@@ -75,44 +76,50 @@ button {
 }
 
 :root[data-theme="light"] {
-  --color-primary: #00c4b3;
-  --color-primary-dark: #009c8f;
-  --color-primary-light: #66ddd2;
+  --color-primary: #00a99d;
+  --color-primary-dark: #008578;
+  --color-primary-light: #4dd4c8;
+  --color-secondary: #be9b53;
   --color-black: #000000;
   --color-white: #ffffff;
-  --color-text-main: #0d0d0d;
-  --color-text-secondary: #555a65;
-  --color-text-subtle: #6b7280;
+  --color-text-main: #1a1a2e;
+  --color-text-secondary: #4a5568;
+  --color-text-subtle: #64748b;
   --color-text-inverse: var(--color-white);
-  --color-text-accent: var(--color-primary-dark);
+  --color-text-accent: #008578;
   --color-bg-main: #ffffff;
-  --color-bg-alt: #f7f7f7;
-  --color-bg-dark: #e5e7eb;
-  --color-bg-card: #f3f3f3;
+  --color-bg-alt: #f8fafc;
+  --color-bg-dark: #edf2f7;
+  --color-bg-card: #ffffff;
   --color-bg-accent: var(--color-primary);
-  --color-border-light: rgb(208, 209, 212);
-  --color-border-dark: #d1d5db;
-  --color-success: #4fa866;
-  --color-success-border: #16a34a;
-  --color-success-text: #4ade80;
-  --color-error: #c45b61;
-  --color-error-border: #dc2626;
-  --color-error-text: #c31313;
-  --shadow-soft: 0 2px 6px rgba(0, 0, 0, 0.06);
-  --shadow-medium: 0 4px 10px rgba(0, 0, 0, 0.08);
-  --shadow-strong: 0 8px 20px rgba(0, 0, 0, 0.12);
+  --color-border-light: #e2e8f0;
+  --color-border-dark: #cbd5e1;
+  --color-success: #059669;
+  --color-success-border: #10b981;
+  --color-success-text: #047857;
+  --color-error: #dc2626;
+  --color-error-border: #f87171;
+  --color-error-text: #b91c1c;
+  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-strong:
+    0 10px 15px rgba(0, 0, 0, 0.06), 0 4px 6px rgba(0, 0, 0, 0.04);
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
 }
 
 @theme {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+    "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
 
   --color-color-primary: var(--color-primary);
   --color-color-primary-dark: var(--color-primary-dark);
   --color-color-primary-light: var(--color-primary-light);
+  --color-color-secondary: var(--color-secondary);
+  --color-color-secondary-dark: var(--color-secondary-dark);
+  --color-color-secondary-light: var(--color-secondary-light);
 
   --color-color-black: var(--color-black);
   --color-color-white: var(--color-white);
