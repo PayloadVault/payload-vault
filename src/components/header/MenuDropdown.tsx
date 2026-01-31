@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { LockIcon, LogoutIcon, MoonIcon, SunIcon } from "../icons";
 import { useBanner } from "../../context/banner/BannerContext";
+import { useLogoutModal } from "../../hooks/modal/UseLogoutModal";
 
 type MenuDropdownProps = {
   isOpen: boolean;
@@ -31,7 +32,7 @@ export const MenuDropdown = ({
         error.message.toLowerCase().includes("different")
       ) {
         throw new Error(
-          "New password cannot be the same as your current password.",
+          "New password cannot be the same as your current password."
         );
       }
       throw new Error("An error occurred while changing the password.");
@@ -40,7 +41,7 @@ export const MenuDropdown = ({
     showBanner(
       "Password Changed",
       "Your password has been successfully changed.",
-      "success",
+      "success"
     );
     closeModal();
   };
@@ -61,7 +62,13 @@ export const MenuDropdown = ({
     } catch (error) {
       console.error("Error logging out:", error);
     }
+
+    closeLogoutModal();
   };
+
+  const { openLogoutModal, closeModal: closeLogoutModal } = useLogoutModal({
+    onSave: handleLogout,
+  });
 
   return (
     <div
@@ -113,7 +120,7 @@ export const MenuDropdown = ({
         hover:text-color-error-text transition-colors duration-200 ease-in-out"
         onClick={() => {
           setIsOpen(false);
-          handleLogout();
+          openLogoutModal();
         }}
       >
         <LogoutIcon className="w-4 h-4" />

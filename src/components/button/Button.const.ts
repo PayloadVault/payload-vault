@@ -9,15 +9,15 @@ const sizeClasses: Record<ButtonSize, string> = {
 const variantClasses: Record<ButtonVariant, string> = {
   primary: "bg-color-primary text-black",
   secondary: "bg-color-secondary text-black",
-  approve: "bg-color-success text-white",
-  decline: "bg-color-error text-white",
+  approve: "bg-color-success-border text-white",
+  decline: "bg-color-error-border text-white",
 };
 
 const onHover: Record<ButtonVariant, string> = {
   primary: "hover:bg-color-primary/80",
   secondary: "hover:bg-color-secondary/80",
-  decline: "hover:bg-color-error/80",
-  approve: "hover:bg-color-success/80",
+  decline: "hover:bg-color-error-border/80",
+  approve: "hover:bg-color-success-border/80",
 };
 
 const iconColorByVariant: Record<ButtonVariant, string> = {
