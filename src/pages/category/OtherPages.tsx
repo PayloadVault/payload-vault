@@ -161,25 +161,29 @@ export const OtherPages = ({ title }: CategoryProps) => {
         subtitle={contentCardData.totalPdf.toString() + " · Paychecks"}
         totalIncome={contentCardData.totalIncome}
       />
-      <div className="grid md:grid-cols-2 gap-2">
-        <Dropdown
-          label="Sort Categories"
-          options={paycheckFilterOptions}
-          onSelect={setSortSelected}
-          value={sortSelected}
-        />
-        <Dropdown
-          label="Choose Start Month"
-          options={monthOptions}
-          onSelect={setStartMonthSelected}
-          value={startMonthSelected}
-        />
-        <Dropdown
-          label="Choose End Month"
-          options={endMonthOptions}
-          onSelect={setEndMonthSelected}
-          value={endMonthSelected}
-        />
+      <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-1">
+          <Dropdown
+            label="Sort Categories"
+            options={paycheckFilterOptions}
+            onSelect={setSortSelected}
+            value={sortSelected}
+          />
+        </div>
+        <div className="grid md:grid-cols-2 gap-2">
+          <Dropdown
+            label="Choose Start Month"
+            options={monthOptions}
+            onSelect={setStartMonthSelected}
+            value={startMonthSelected}
+          />
+          <Dropdown
+            label="Choose End Month"
+            options={endMonthOptions}
+            onSelect={setEndMonthSelected}
+            value={endMonthSelected}
+          />
+        </div>
       </div>
       <div className="grid grid-cols-1 items-center gap-5">
         <Button
