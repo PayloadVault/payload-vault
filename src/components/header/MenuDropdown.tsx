@@ -32,7 +32,7 @@ export const MenuDropdown = ({
         error.message.toLowerCase().includes("different")
       ) {
         throw new Error(
-          "New password cannot be the same as your current password."
+          "Das neue Passwort darf nicht mit Ihrem aktuellen Passwort identisch sein.",
         );
       }
       throw new Error("An error occurred while changing the password.");
@@ -41,7 +41,7 @@ export const MenuDropdown = ({
     showBanner(
       "Password Changed",
       "Your password has been successfully changed.",
-      "success"
+      "success",
     );
     closeModal();
   };
@@ -94,7 +94,7 @@ export const MenuDropdown = ({
         }}
       >
         <LockIcon className="w-4 h-4" />
-        Change Password
+        Passwort ändern
       </button>
 
       <button
@@ -111,7 +111,7 @@ export const MenuDropdown = ({
         ) : (
           <MoonIcon className="w-4 h-4" />
         )}
-        {theme === "dark" ? "Light Mode" : "Dark Mode"}
+        {theme === "dark" ? "Hellmodus" : "Dunkelmodus"}
       </button>
 
       <button
@@ -124,7 +124,7 @@ export const MenuDropdown = ({
         }}
       >
         <LogoutIcon className="w-4 h-4" />
-        Logout
+        Abmelden
       </button>
     </div>
   );

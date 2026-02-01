@@ -10,7 +10,7 @@ export const useChangePasswordModal = ({ onSave }: UsePasswordChangeProps) => {
 
   const openChangePasswordModal = () => {
     openModal({
-      title: "Change Password",
+      title: "Passwort ändern",
       children: <PasswordChangeForm onCancel={closeModal} onSave={onSave} />,
     });
   };
