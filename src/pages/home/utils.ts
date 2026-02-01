@@ -51,8 +51,8 @@ const formatData = (allPdfs: PdfRecord[]) => {
     totalPdf,
     allCategories: allData,
     allPdfs: {
-      title: "All PDFs",
-      subtitle: "Browse all your PDF documents · " + allPdfs.length,
+      title: "Alle Dokumente",
+      subtitle: "Alle Dokumente durchsuchen · " + allPdfs.length,
       link: "/all-pdfs",
     },
   };

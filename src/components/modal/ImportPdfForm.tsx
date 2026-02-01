@@ -44,14 +44,14 @@ export const ImportPdfForm = ({ onCancel, onSave }: ImportPdfFormProps) => {
     ? `Processing ${progress.completed}/${progress.total}...`
     : files.length > 1
       ? `Upload ${files.length} PDFs`
-      : "Upload PDF";
+      : "Dokument hochladen";
 
   return (
     <div className="flex flex-col gap-6 mt-3">
       <div className="w-full">
         <FileUploadCard
-          title="Import PDF"
-          description={`Choose up to ${MAX_FILES} files or drag and drop`}
+          title="Dokument importieren"
+          description={`Bis zu ${MAX_FILES} Dateien auswählen oder per Drag & Drop ablegen`}
           files={files}
           setFiles={setFiles}
           disabled={isLoading}
@@ -83,7 +83,7 @@ export const ImportPdfForm = ({ onCancel, onSave }: ImportPdfFormProps) => {
       <div className="mt-6 flex gap-6">
         <Button
           variant="secondary"
-          text="Cancel"
+          text="Abbrechen"
           onClick={onCancel}
           isDisabled={isLoading}
         />

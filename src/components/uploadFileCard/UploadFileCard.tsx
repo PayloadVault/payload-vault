@@ -195,7 +195,7 @@ export const FileUploadCard = ({
       {!isDragOver && (
         <Button
           variant="secondary"
-          text="Choose Files"
+          text="Dateien auswählen"
           onClick={openPicker}
           isDisabled={disabled}
         />

@@ -41,7 +41,7 @@ export const AllPdfsPage = () => {
   }>();
 
   useLayoutEffect(() => {
-    setTitle("All PDFs");
+    setTitle("Alle Dokumente");
   }, [setTitle]);
 
   const [contentCardData, setContentCardData] = useState<
@@ -63,7 +63,7 @@ export const AllPdfsPage = () => {
 
   const endMonthOptions = useMemo(
     () => monthOptions.slice(monthOptions.indexOf(startMonthSelected)),
-    [startMonthSelected]
+    [startMonthSelected],
   );
 
   const [categorySelected, setCategorySelected] = useState<
@@ -133,7 +133,7 @@ export const AllPdfsPage = () => {
       showBanner(
         "No PDFs to download",
         "There are no filtered PDFs available for download.",
-        "error"
+        "error",
       );
       return;
     }
@@ -168,7 +168,7 @@ export const AllPdfsPage = () => {
             pdf.title?.replace(/[^\w\d]+/g, "_") || `document_${index + 1}.pdf`;
 
           zip.file(`${fileName}.pdf`, blob);
-        })
+        }),
       );
 
       const zipBlob = await zip.generateAsync({ type: "blob" });
@@ -187,13 +187,13 @@ export const AllPdfsPage = () => {
       showBanner(
         "Download started",
         "Your PDFs are being downloaded as a ZIP file.",
-        "success"
+        "success",
       );
     } catch (error) {
       showBanner(
         "Failed to download PDFs",
         "Something went wrong while downloading PDFs. Please try again.",
-        "error"
+        "error",
       );
     }
   };

@@ -118,7 +118,7 @@ export const PdfImportFooter = () => {
       <Button
         onClick={openImportPdfModal}
         icon={UploadIcon}
-        text="Upload PDF"
+        text="Dokument hochladen"
       />
     </div>
   );
