@@ -6,7 +6,7 @@ import { CloseEyeIcon } from "../icons/CloseEyeIcon";
 export const PasswordInput = ({
   value,
   onChange,
-  label = "Password",
+  label = "Passwort",
   error,
   isRequired,
   isRepeated,
