@@ -82,7 +82,7 @@ export const ImportPdfForm = ({ onCancel, onSave }: ImportPdfFormProps) => {
         </div>
       )}
 
-      <div className="mt-6 flex gap-6">
+      <div className="mt-6 flex flex-wrap gap-3 sm:gap-6">
         <Button
           variant="secondary"
           text="Abbrechen"

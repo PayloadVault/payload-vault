@@ -23,13 +23,14 @@ export const Modal = ({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="flex flex-col gap-6 rounded-lg bg-color-bg-card p-6">
-        <div className="relative flex w-full items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="flex max-h-[90vh] w-full max-w-md flex-col gap-4 overflow-y-auto rounded-lg bg-color-bg-card p-4 sm:p-6">
+        <div className="flex w-full items-start justify-between gap-4">
+          <h6 className="text-[20px] font-bold">{title}</h6>
           <button
             onClick={onClose}
             disabled={disableClose}
-            className={`absolute top-3 right-3 rounded-radius-md p-2 ${
+            className={`shrink-0 rounded-radius-md p-2 ${
               disableClose
                 ? "cursor-not-allowed opacity-50"
                 : "cursor-pointer hover:bg-color-primary/20"
@@ -40,9 +41,6 @@ export const Modal = ({
         </div>
 
         <div className="flex w-full flex-col">
-          <div className="flex flex-col items-start gap-2">
-            <h6 className="text-[20px] font-bold">{title}</h6>
-          </div>
           <div>{children}</div>
         </div>
       </div>

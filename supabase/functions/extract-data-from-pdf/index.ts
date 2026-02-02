@@ -10,7 +10,7 @@ const supabase = createClient(
 
 const genAI = new GoogleGenerativeAI(Deno.env.get("GOOGLE_API_KEY") ?? "");
 const geminiModel = genAI.getGenerativeModel({
-  model: "gemini-flash-2.5",
+  model: "gemini-2.5-flash",
 });
 
 type ExtractedAIData = {
