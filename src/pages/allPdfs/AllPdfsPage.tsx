@@ -201,32 +201,32 @@ export const AllPdfsPage = () => {
   return (
     <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
       <TotalIncomeCard
-        title="Total income"
-        subtitle={contentCardData.totalPdf + " · documents"}
+        title="Gesamteinnahmen"
+        subtitle={contentCardData.totalPdf + " · Dokumente"}
         totalIncome={contentCardData.totalIncome}
       />
       <div className="flex flex-col gap-2">
         <div className="grid md:grid-cols-2 gap-2">
           <Dropdown
-            label="Sort Documents"
+            label="Sortieren nach"
             options={paycheckFilterOptions}
             onSelect={setSortSelected}
             value={sortSelected}
           />
           <Dropdown
-            label="Choose Category"
+            label="Kategorie auswählen"
             options={categoryOptions}
             onSelect={setCategorySelected}
             value={categorySelected}
           />
           <Dropdown
-            label="Choose Start Month"
+            label="Startmonat auswählen"
             options={monthOptions}
             onSelect={setStartMonthSelected}
             value={startMonthSelected}
           />
           <Dropdown
-            label="Choose End Month"
+            label="Endmonat auswählen"
             options={endMonthOptions}
             onSelect={setEndMonthSelected}
             value={endMonthSelected}
@@ -234,24 +234,24 @@ export const AllPdfsPage = () => {
         </div>
         <div className="grid grid-cols-1">
           <SearchBar
-            placeholder="Search PDFs..."
+            placeholder="Dokumente suchen..."
             onChange={setSearchQuery}
             value={searchQuery}
             debounceMs={200}
-            title="Search PDFs"
+            title="Dokumente suchen"
           />
         </div>
       </div>
       <div className="grid grid-cols-1 items-center gap-5">
         <Button
           onClick={handleResetFilters}
-          text="Reset Filters"
+          text="Filter zurücksetzen"
           size="medium"
         />
         <Button
           onClick={handleDownloadAll}
           variant="secondary"
-          text="Download All Filtered PDFs"
+          text="Alle gefilterten Dokumente herunterladen"
           size="medium"
         />
       </div>

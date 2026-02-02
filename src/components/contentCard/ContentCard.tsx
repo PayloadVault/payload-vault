@@ -67,7 +67,7 @@ export const ContentCard = (props: CombinedContentCardProps) => {
     if (!id || !onDelete) return;
 
     openModal({
-      title: "Delete Document",
+      title: "Dokument löschen",
       children: (
         <DeleteConfirmationForm
           fileName={title}

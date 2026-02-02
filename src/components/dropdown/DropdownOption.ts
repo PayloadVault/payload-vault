@@ -2,36 +2,36 @@ import type { Option } from "./Dropdown.types";
 import type { Category, HomeSort, SortTypes } from "../../hooks/usePdf/types";
 
 export const paycheckFilterOptions: Option[] = [
-  { id: "new", label: "Newest First" },
-  { id: "old", label: "Oldest First" },
-  { id: "high", label: "High To Low" },
-  { id: "low", label: "Low To High" },
+  { id: "new", label: "Neueste zuerst" },
+  { id: "old", label: "Älteste zuerst" },
+  { id: "high", label: "Höchster zuerst" },
+  { id: "low", label: "Niedrigster zuerst" },
 ];
 
 export const categorySortOptions: Option[] = [
-  { label: "High To Low", id: "high" },
-  { label: "Low To High", id: "low" },
-  { label: "Most To Least", id: "most" },
-  { label: "Least To Most", id: "least" },
+  { label: "Höchster zu niedrigster", id: "high" },
+  { label: "Niedrigster zu höchster", id: "low" },
+  { label: "Meiste zu wenigste", id: "most" },
+  { label: "Wenigste zu meiste", id: "least" },
 ];
 
 export const monthOptions: Option[] = [
-  { id: "1", label: "January" },
-  { id: "2", label: "February" },
-  { id: "3", label: "March" },
+  { id: "1", label: "Januar" },
+  { id: "2", label: "Februar" },
+  { id: "3", label: "März" },
   { id: "4", label: "April" },
-  { id: "5", label: "May" },
-  { id: "6", label: "June" },
-  { id: "7", label: "July" },
+  { id: "5", label: "Mai" },
+  { id: "6", label: "Juni" },
+  { id: "7", label: "Juli" },
   { id: "8", label: "August" },
   { id: "9", label: "September" },
-  { id: "10", label: "October" },
+  { id: "10", label: "Oktober" },
   { id: "11", label: "November" },
-  { id: "12", label: "December" },
+  { id: "12", label: "Dezember" },
 ];
 
 export const categoryOptions: Option[] = [
-  { id: "all", label: "All Categories" },
+  { id: "all", label: "Alle Kategorien" },
   { id: "Strom & Gas", label: "Strom & Gas" },
   { id: "Barmenia Abrechnung", label: "Barmenia Abrechnung" },
   { id: "IKK Abrechnung", label: "IKK Abrechnung" },

@@ -41,7 +41,7 @@ export const ImportPdfForm = ({ onCancel, onSave }: ImportPdfFormProps) => {
   };
 
   const buttonText = progress
-    ? `Processing ${progress.completed}/${progress.total}...`
+    ? `Verarbeitung ${progress.completed}/${progress.total}...`
     : files.length > 1
       ? `Upload ${files.length} PDFs`
       : "Dokument hochladen";
@@ -63,7 +63,9 @@ export const ImportPdfForm = ({ onCancel, onSave }: ImportPdfFormProps) => {
         <div className="flex flex-col gap-2">
           <div className="flex justify-between text-sm text-color-text-subtle">
             <span>
-              {progress.inProgress ? "Processing files..." : "Completed"}
+              {progress.inProgress
+                ? "Dateien werden verarbeitet..."
+                : "Abgeschlossen"}
             </span>
             <span>
               {progress.completed}/{progress.total}

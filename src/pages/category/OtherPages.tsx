@@ -46,7 +46,7 @@ export const OtherPages = ({ title }: CategoryProps) => {
 
   const endMonthOptions = useMemo(
     () => monthOptions.slice(monthOptions.indexOf(startMonthSelected)),
-    [startMonthSelected]
+    [startMonthSelected],
   );
 
   const handleResetFilters = () => {
@@ -84,7 +84,7 @@ export const OtherPages = ({ title }: CategoryProps) => {
       showBanner(
         "No PDFs to download",
         "There are no PDFs available for download.",
-        "error"
+        "error",
       );
       return;
     }
@@ -120,7 +120,7 @@ export const OtherPages = ({ title }: CategoryProps) => {
             pdf.title?.replace(/[^\w\d]+/g, "_") || `document_${index + 1}.pdf`;
 
           zip.file(`${fileName}.pdf`, blob);
-        })
+        }),
       );
 
       const zipBlob = await zip.generateAsync({ type: "blob" });
@@ -139,13 +139,13 @@ export const OtherPages = ({ title }: CategoryProps) => {
       showBanner(
         "Download started",
         "Your PDFs are being downloaded as a ZIP file.",
-        "success"
+        "success",
       );
     } catch (error) {
       showBanner(
         "Failed to download PDFs",
         "Something went wrong while downloading PDFs. Please try again.",
-        "error"
+        "error",
       );
     }
   };
@@ -158,7 +158,7 @@ export const OtherPages = ({ title }: CategoryProps) => {
     <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
       <TotalIncomeCard
         title={title}
-        subtitle={contentCardData.totalPdf.toString() + " · Paychecks"}
+        subtitle={contentCardData.totalPdf.toString() + " · Gehaltsabrechnung"}
         totalIncome={contentCardData.totalIncome}
       />
       <div className="flex flex-col gap-2">
@@ -188,13 +188,13 @@ export const OtherPages = ({ title }: CategoryProps) => {
       <div className="grid grid-cols-1 items-center gap-5">
         <Button
           onClick={handleResetFilters}
-          text="Reset Filters"
+          text="Filter zurücksetzen"
           size="medium"
         />
         <Button
           onClick={handleDownloadAll}
           variant="secondary"
-          text="Download All Filtered PDFs"
+          text="Alle gefilterten Dokumente herunterladen"
           size="medium"
         />
       </div>
