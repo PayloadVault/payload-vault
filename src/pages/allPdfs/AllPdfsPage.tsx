@@ -131,8 +131,8 @@ export const AllPdfsPage = () => {
 
     if (filteredPdfs.length === 0) {
       showBanner(
-        "No PDFs to download",
-        "There are no filtered PDFs available for download.",
+        "Keine PDFs zum Herunterladen",
+        "Es sind keine gefilterten PDFs zum Download verfügbar.",
         "error",
       );
       return;
@@ -185,14 +185,14 @@ export const AllPdfsPage = () => {
       window.URL.revokeObjectURL(url);
 
       showBanner(
-        "Download started",
-        "Your PDFs are being downloaded as a ZIP file.",
+        "Download gestartet",
+        "Deine PDFs werden als ZIP-Datei heruntergeladen.",
         "success",
       );
     } catch (error) {
       showBanner(
-        "Failed to download PDFs",
-        "Something went wrong while downloading PDFs. Please try again.",
+        "PDF-Download fehlgeschlagen",
+        "Beim Herunterladen der PDFs ist ein Fehler aufgetreten. Bitte versuche es erneut.",
         "error",
       );
     }

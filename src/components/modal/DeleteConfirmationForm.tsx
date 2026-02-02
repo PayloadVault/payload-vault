@@ -23,14 +23,14 @@ export const DeleteConfirmationForm = ({
       await onConfirm();
 
       showBanner(
-        "File Deleted",
-        `The file "${fileName}" has been successfully deleted.`,
+        "Datei gelöscht",
+        `Die Datei wurde erfolgreich gelöscht: "${fileName}"`,
         "success",
       );
     } catch (error) {
       showBanner(
-        "Error",
-        `An error occurred while deleting the file "${fileName}".`,
+        "Fehler",
+        `Beim Löschen der Datei ist ein Fehler aufgetreten.: "${fileName}".`,
         "error",
       );
     } finally {

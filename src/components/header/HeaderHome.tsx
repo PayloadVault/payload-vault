@@ -39,11 +39,13 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
   }, [selectedYear, setYear]);
 
   useEffect(() => {
-    setSelectedYear({
-      id: year.toString(),
-      label: year.toString(),
-    });
-  }, [year]);
+    if (selectedYear.id !== year.toString()) {
+      setSelectedYear({
+        id: year.toString(),
+        label: year.toString(),
+      });
+    }
+  }, [year, selectedYear.id]);
 
   const toggleTheme = () => {
     const next: Theme = theme === "dark" ? "light" : "dark";

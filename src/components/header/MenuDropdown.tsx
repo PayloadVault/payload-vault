@@ -39,8 +39,8 @@ export const MenuDropdown = ({
     }
 
     showBanner(
-      "Password Changed",
-      "Your password has been successfully changed.",
+      "Passwort geändert",
+      "Ihr Passwort wurde erfolgreich geändert.",
       "success",
     );
     closeModal();
