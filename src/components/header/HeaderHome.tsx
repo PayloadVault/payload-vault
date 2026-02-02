@@ -22,10 +22,18 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
     [availableYears],
   );
 
-  const [selectedYear, setSelectedYear] = useState({
-    id: year.toString(),
-    label: year.toString(),
-  });
+  const selectedYear = useMemo(
+    () => ({
+      id: year.toString(),
+      label: year.toString(),
+    }),
+    [year]
+  );
+
+  const handleYearChange = (option: { id: string; label: string }) => {
+    setYear(Number(option.id));
+  };
+
   const [isOpen, setIsOpen] = useState(false);
   type Theme = "light" | "dark";
 
@@ -33,19 +41,6 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
     if (typeof window === "undefined") return "dark";
     return (document.documentElement.dataset.theme as Theme) ?? "dark";
   });
-
-  useEffect(() => {
-    setYear(Number(selectedYear.id));
-  }, [selectedYear, setYear]);
-
-  useEffect(() => {
-    if (selectedYear.id !== year.toString()) {
-      setSelectedYear({
-        id: year.toString(),
-        label: year.toString(),
-      });
-    }
-  }, [year, selectedYear.id]);
 
   const toggleTheme = () => {
     const next: Theme = theme === "dark" ? "light" : "dark";
@@ -119,7 +114,7 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
             <Dropdown
               options={options}
               value={selectedYear}
-              onSelect={setSelectedYear}
+              onSelect={handleYearChange}
             />
           </div>
 
