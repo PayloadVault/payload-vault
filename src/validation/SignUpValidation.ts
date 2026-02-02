@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+const allowedEmails = import.meta.env.VITE_ALLOWED_EMAILS;
+
 export const signUpSchema = z
   .object({
     email: z
@@ -7,8 +9,9 @@ export const signUpSchema = z
       .trim()
       .min(1, "Email is required")
       .email("Please enter a valid email address")
-      .refine((email) => email.toLowerCase().endsWith("@pro-fina.de"), {
-        message: "You must use your business email (@pro-fina.de)",
+      .refine((email) => allowedEmails!.includes(email.toLowerCase()), {
+        message:
+          "Diese E-Mail-Adresse ist nicht für die Testphase freigegeben.",
       }),
 
     password: z
