@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const allowedEmails = import.meta.env.VITE_ALLOWED_EMAILS;
+const allowedEmails = import.meta.env.VITE_ALLOWED_EMAILS.split(",");;
 
 export const signUpSchema = z
   .object({
