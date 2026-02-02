@@ -117,7 +117,7 @@ export const ContentCard = (props: CombinedContentCardProps) => {
                   hover:text-color-primary rounded-radius-sm hover:bg-color-primary/10
                   transition-colors duration-200 ease-in-out"
                 onClick={handleDownloadClick}
-                aria-label="Download"
+                aria-label="Herunterladen"
               >
                 <DownloadIcon className="w-6 h-6 text-color-icon shrink-0" />
               </button>
@@ -128,7 +128,7 @@ export const ContentCard = (props: CombinedContentCardProps) => {
                   hover:text-color-primary rounded-radius-sm hover:bg-color-primary/10
                   transition-colors duration-200 ease-in-out"
                 onClick={handleOpenClick}
-                aria-label="Open"
+                aria-label="Öffnen"
               >
                 <OpenIcon className="w-6 h-6 text-color-icon shrink-0" />
               </button>
@@ -139,7 +139,7 @@ export const ContentCard = (props: CombinedContentCardProps) => {
                   hover:text-color-error-text rounded-radius-sm hover:bg-color-error/20
                   transition-colors duration-200 ease-in-out"
                 onClick={handleDeleteClick}
-                aria-label="Delete"
+                aria-label="Löschen"
               >
                 <DeleteIcon className="w-6 h-6 text-color-icon shrink-0" />
               </button>

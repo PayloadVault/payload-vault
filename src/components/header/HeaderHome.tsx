@@ -129,7 +129,7 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
             cursor-pointer p-2 rounded-radius-md
             hover:bg-color-primary/20 hover:text-color-primary
           "
-              aria-label="User menu"
+              aria-label="Benutzermenü"
               aria-haspopup="menu"
               aria-expanded={isOpen}
               type="button"

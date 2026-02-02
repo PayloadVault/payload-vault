@@ -1,8 +1,8 @@
 import { type BannerType } from "./Banner.types";
 
 const buttonText: Record<BannerType, string> = {
-  success: "Undo",
-  error: "Retry",
+  success: "Rückgängig",
+  error: "Wiederholen",
 };
 
 const bannerStyle: Record<BannerType, string> = {

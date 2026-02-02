@@ -164,7 +164,7 @@ export const OtherPages = ({ title }: CategoryProps) => {
       <div className="flex flex-col gap-2">
         <div className="grid grid-cols-1">
           <Dropdown
-            label="Sort Categories"
+            label="Sortieren nach"
             options={paycheckFilterOptions}
             onSelect={setSortSelected}
             value={sortSelected}
@@ -172,13 +172,13 @@ export const OtherPages = ({ title }: CategoryProps) => {
         </div>
         <div className="grid md:grid-cols-2 gap-2">
           <Dropdown
-            label="Choose Start Month"
+            label="Startmonat auswählen"
             options={monthOptions}
             onSelect={setStartMonthSelected}
             value={startMonthSelected}
           />
           <Dropdown
-            label="Choose End Month"
+            label="Endmonat auswählen"
             options={endMonthOptions}
             onSelect={setEndMonthSelected}
             value={endMonthSelected}

@@ -14,7 +14,7 @@ export const SearchBar = ({
   value,
   onChange,
   title,
-  placeholder = "Type something",
+  placeholder = "Etwas eingeben",
   debounceMs = 0,
 }: SearchBarProps) => {
   const [searchValue, setSearchValue] = useState(value ?? "");
