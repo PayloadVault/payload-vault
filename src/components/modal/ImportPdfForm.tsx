@@ -18,7 +18,7 @@ interface ImportPdfFormProps {
   ) => Promise<void>;
 }
 
-const MAX_FILES = 10;
+const MAX_FILES = 30;
 
 export const ImportPdfForm = ({ onCancel, onSave }: ImportPdfFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
