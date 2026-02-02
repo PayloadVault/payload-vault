@@ -56,7 +56,10 @@ export const SignUpPage = () => {
     });
 
     if (signUpError) {
-      setError(signUpError.message);
+      const errorMessage = signUpError.message.includes("User already registered")
+        ? "Benutzer ist bereits registriert"
+        : signUpError.message;
+      setError(errorMessage);
     } else if (data.user && data.session === null) {
       setIsSent(true);
     }

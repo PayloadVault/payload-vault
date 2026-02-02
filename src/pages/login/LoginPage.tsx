@@ -46,7 +46,10 @@ export const LoginPage = () => {
     });
 
     if (error) {
-      setError(error.message);
+      const errorMessage = error.message.includes("Invalid login credentials")
+        ? "Ungültige Anmeldedaten"
+        : error.message;
+      setError(errorMessage);
     }
 
     setLoading(false);
