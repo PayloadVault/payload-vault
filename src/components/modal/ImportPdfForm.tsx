@@ -43,7 +43,7 @@ export const ImportPdfForm = ({ onCancel, onSave }: ImportPdfFormProps) => {
   const buttonText = progress
     ? `Verarbeitung ${progress.completed}/${progress.total}...`
     : files.length > 1
-      ? `Upload ${files.length} PDFs`
+      ? `${files.length} PDFs hochladen`
       : "Dokument hochladen";
 
   return (
