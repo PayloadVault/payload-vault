@@ -53,16 +53,16 @@ export const FileUploadCard = ({
 
     if (invalidFormatFiles.length) {
       showBanner(
-        "Invalid file format",
-        `Only PDF files are allowed. Removed: ${invalidFormatFiles.join(", ")}`,
+        "Ungültiges Dateiformat",
+        `Nur PDF-Dateien sind erlaubt. Entfernt: ${invalidFormatFiles.join(", ")}`,
         "error",
       );
     }
 
     if (oversizedFiles.length) {
       showBanner(
-        "File too large",
-        `Files must be under ${MAX_FILE_SIZE_KB} KB. Removed: ${oversizedFiles.join(", ")}`,
+        "Datei zu groß",
+        `Dateien müssen kleiner als ${MAX_FILE_SIZE_KB} KB sein. Entfernt: ${oversizedFiles.join(", ")}`,
         "error",
       );
     }
@@ -195,7 +195,7 @@ export const FileUploadCard = ({
       {!isDragOver && (
         <Button
           variant="secondary"
-          text="Choose Files"
+          text="Dateien auswählen"
           onClick={openPicker}
           isDisabled={disabled}
         />

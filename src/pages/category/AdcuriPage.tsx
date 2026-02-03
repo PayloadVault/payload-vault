@@ -41,8 +41,8 @@ export const AdcuriPage = () => {
   return (
     <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
       <TotalIncomeCard
-        title="Adcuri total income"
-        subtitle={contentCardData.totalPdf.toString() + " · Paychecks"}
+        title="Adcuri Gesamteinnahmen"
+        subtitle={contentCardData.totalPdf.toString() + " · Gehaltsabrechnung"}
         totalIncome={contentCardData.totalIncome}
       />
       <div className="flex flex-col gap-6">
@@ -51,7 +51,7 @@ export const AdcuriPage = () => {
             key={index}
             variant="category"
             title={category.category.title}
-            subtitle={category.subtitle.toString() + " · Paychecks"}
+            subtitle={category.subtitle.toString() + " · Gehaltsabrechnung"}
             profit={category.profit}
             link={category.category.slug.split("/")[1]}
           />

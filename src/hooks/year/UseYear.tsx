@@ -5,7 +5,7 @@ export function useYear() {
   const context = useContext(YearContext);
 
   if (!context) {
-    throw new Error("useYear must be used within a YearProvider");
+    throw new Error("useYear muss innerhalb eines YearProvider verwendet werden");
   }
 
   return context;

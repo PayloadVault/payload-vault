@@ -10,7 +10,7 @@ const supabase = createClient(
 
 const genAI = new GoogleGenerativeAI(Deno.env.get("GOOGLE_API_KEY") ?? "");
 const geminiModel = genAI.getGenerativeModel({
-  model: "gemini-flash-latest",
+  model: "gemini-2.5-flash",
 });
 
 type ExtractedAIData = {
@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
       : {
         success: false,
         rejection_reason: (aiParsed?.rejection_reason as string) ||
-          "Could not identify this document as a valid invoice. Please ensure you are uploading a supported invoice type.",
+          "Dieses Dokument konnte nicht als gültige Rechnung identifiziert werden. Bitte stellen Sie sicher, dass Sie einen unterstützten Rechnungstyp hochladen.",
       };
 
     // We can keep logging on backend side for debugging purposes

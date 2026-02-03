@@ -46,7 +46,10 @@ export const LoginPage = () => {
     });
 
     if (error) {
-      setError(error.message);
+      const errorMessage = error.message.includes("Invalid login credentials")
+        ? "Ungültige Anmeldedaten"
+        : error.message;
+      setError(errorMessage);
     }
 
     setLoading(false);
@@ -58,29 +61,29 @@ export const LoginPage = () => {
         <div className="bg-color-primary/15 p-2 rounded-full mx-auto">
           <VaultIcon className="w-12 h-12 mx-auto text-color-primary" />
         </div>
-        <h3 className="font-bold text-color-text-main">Login</h3>
+        <h3 className="font-bold text-color-text-main">Anmelden</h3>
 
         {error && <Banner bannerType="error" title={error} description="" />}
 
         <InputField
           label="Email"
-          placeholder="your@email.com"
+          placeholder="nachname@pro-fina.de"
           value={email}
           onChange={(val) => setEmail(val)}
         />
 
         <PasswordInput
-          label="Password"
+          label="Passwort"
           value={password}
           onChange={(val) => setPassword(val)}
         />
 
         <div className="flex flex-col gap-3 mt-4">
-          <Button onClick={handleLogin} text="Log In" isLoading={loading} />
+          <Button onClick={handleLogin} text="Anmelden" isLoading={loading} />
         </div>
 
         <p className="text-color-text-subtle text-center text-sm mt-2">
-          Still don't have an account? <Link to="/signup">Sign Up</Link>
+          Noch kein Konto? <Link to="/signup">Registrieren</Link>
         </p>
       </div>
     </div>

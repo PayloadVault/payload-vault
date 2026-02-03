@@ -18,7 +18,7 @@ interface ImportPdfFormProps {
   ) => Promise<void>;
 }
 
-const MAX_FILES = 10;
+const MAX_FILES = 30;
 
 export const ImportPdfForm = ({ onCancel, onSave }: ImportPdfFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -41,17 +41,17 @@ export const ImportPdfForm = ({ onCancel, onSave }: ImportPdfFormProps) => {
   };
 
   const buttonText = progress
-    ? `Processing ${progress.completed}/${progress.total}...`
+    ? `Verarbeitung ${progress.completed}/${progress.total}...`
     : files.length > 1
       ? `Upload ${files.length} PDFs`
-      : "Upload PDF";
+      : "Dokument hochladen";
 
   return (
     <div className="flex flex-col gap-6 mt-3">
       <div className="w-full">
         <FileUploadCard
-          title="Import PDF"
-          description={`Choose up to ${MAX_FILES} files or drag and drop`}
+          title="Dokument importieren"
+          description={`Bis zu ${MAX_FILES} Dateien auswählen oder per Drag & Drop ablegen`}
           files={files}
           setFiles={setFiles}
           disabled={isLoading}
@@ -63,7 +63,9 @@ export const ImportPdfForm = ({ onCancel, onSave }: ImportPdfFormProps) => {
         <div className="flex flex-col gap-2">
           <div className="flex justify-between text-sm text-color-text-subtle">
             <span>
-              {progress.inProgress ? "Processing files..." : "Completed"}
+              {progress.inProgress
+                ? "Dateien werden verarbeitet..."
+                : "Abgeschlossen"}
             </span>
             <span>
               {progress.completed}/{progress.total}
@@ -80,10 +82,10 @@ export const ImportPdfForm = ({ onCancel, onSave }: ImportPdfFormProps) => {
         </div>
       )}
 
-      <div className="mt-6 flex gap-6">
+      <div className="mt-6 flex flex-wrap gap-3 sm:gap-6">
         <Button
           variant="secondary"
-          text="Cancel"
+          text="Abbrechen"
           onClick={onCancel}
           isDisabled={isLoading}
         />

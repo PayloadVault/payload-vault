@@ -1,9 +1,9 @@
 import { type ButtonVariant, type ButtonSize } from "./Button.types";
 
 const sizeClasses: Record<ButtonSize, string> = {
-  small: "h-10 px-3 py-2",
-  medium: "h-12 p-3",
-  large: "h-14 px-6 py-4",
+  small: "min-h-10 px-3 py-2",
+  medium: "min-h-12 p-3",
+  large: "min-h-14 px-6 py-4",
 };
 
 const variantClasses: Record<ButtonVariant, string> = {

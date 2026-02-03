@@ -48,24 +48,24 @@ export const PasswordChangeForm = ({
 
   return (
     <div className="flex flex-col gap-6 pt-2">
-      <div className="w-70">
+      <div className="w-full sm:w-70">
         {error && <Banner bannerType="error" description="" title={error} />}
       </div>
       <PasswordInput
-        label="New Password"
+        label="Neues Passwort"
         value={password}
         onChange={setPassword}
       />
       <PasswordInput
-        label="Confirm New Password"
+        label="Neues Passwort bestätigen"
         value={repeatPassword}
         onChange={setRepeatPassword}
         isRepeated
       />
-      <div className="mt-6 flex gap-6">
-        <Button variant="secondary" text="Cancel" onClick={onCancel} />
+      <div className="mt-6 flex flex-wrap gap-3 sm:gap-6">
+        <Button variant="secondary" text="Abbrechen" onClick={onCancel} />
         <Button
-          text="Confirm change"
+          text="Änderung bestätigen"
           icon={LockIcon}
           onClick={handleSave}
           isLoading={isLoading}

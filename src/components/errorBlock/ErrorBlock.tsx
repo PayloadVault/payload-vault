@@ -6,13 +6,16 @@ export const ErrorBlock = ({ message }: { message?: string }) => {
       <div className="flex flex-col items-center justify-center p-8 m-4 bg-color-bg-card border border-color-error rounded-radius-lg shadow-shadow-medium text-center">
         <div className="text-6xl mb-4 animate-bounce">🚨</div>
         <h2 className="text-h2 mb-2 text-color-error-text">
-          Oops! Something went wrong.
+          Hoppla! Etwas ist schiefgelaufen.
         </h2>
         <p className="text-body mb-4 text-color-text-subtle">
           {message ||
-            "We couldn't reach the server. Maybe it's hiding from us?"}
+            "Wir konnten den Server nicht erreichen. Vielleicht versteckt er sich vor uns?"}
         </p>
-        <Button text="Try again" onClick={() => window.location.reload()} />
+        <Button
+          text="Erneut versuchen"
+          onClick={() => window.location.reload()}
+        />
       </div>
     </div>
   );

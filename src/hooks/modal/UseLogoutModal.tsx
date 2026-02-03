@@ -10,7 +10,7 @@ export const useLogoutModal = ({ onSave }: UseLogoutProps) => {
 
   const openLogoutModal = () => {
     openModal({
-      title: "Logout",
+      title: "Abmelden",
       children: <LogoutModalForm onCancel={closeModal} onSave={onSave} />,
     });
   };

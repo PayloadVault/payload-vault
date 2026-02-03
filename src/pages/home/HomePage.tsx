@@ -46,8 +46,10 @@ export const HomePage = () => {
       ) : (
         <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
           <TotalIncomeCard
-            title="Total income"
-            subtitle={contentCardData.totalPdf.toString() + " · Paychecks"}
+            title="Gesamteinnahmen"
+            subtitle={
+              contentCardData.totalPdf.toString() + " · Gehaltsabrechnung"
+            }
             totalIncome={contentCardData.totalIncome}
           />
           <ContentCard
@@ -56,14 +58,14 @@ export const HomePage = () => {
             subtitle={contentCardData.allPdfs.subtitle}
             link={contentCardData.allPdfs.link}
           />
-          <h2 className="text-color-primary font-bold mx-auto">Categories</h2>
+          <h2 className="text-color-primary font-bold mx-auto">Kategorien</h2>
           <div className="flex flex-col gap-6">
             {contentCardData.allCategories.map((category, index) => (
               <ContentCard
                 key={index}
                 variant="category"
                 title={category.category.title}
-                subtitle={category.subtitle.toString() + " · Paychecks"}
+                subtitle={category.subtitle.toString() + " · Gehaltsabrechnung"}
                 profit={category.profit}
                 link={"category/" + category.category.slug}
               />

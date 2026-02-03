@@ -41,7 +41,7 @@ export const AllPdfsPage = () => {
   }>();
 
   useLayoutEffect(() => {
-    setTitle("All PDFs");
+    setTitle("Alle Dokumente");
   }, [setTitle]);
 
   const [contentCardData, setContentCardData] = useState<
@@ -63,7 +63,7 @@ export const AllPdfsPage = () => {
 
   const endMonthOptions = useMemo(
     () => monthOptions.slice(monthOptions.indexOf(startMonthSelected)),
-    [startMonthSelected]
+    [startMonthSelected],
   );
 
   const [categorySelected, setCategorySelected] = useState<
@@ -131,9 +131,9 @@ export const AllPdfsPage = () => {
 
     if (filteredPdfs.length === 0) {
       showBanner(
-        "No PDFs to download",
-        "There are no filtered PDFs available for download.",
-        "error"
+        "Keine PDFs zum Herunterladen",
+        "Es sind keine gefilterten PDFs zum Download verfügbar.",
+        "error",
       );
       return;
     }
@@ -168,7 +168,7 @@ export const AllPdfsPage = () => {
             pdf.title?.replace(/[^\w\d]+/g, "_") || `document_${index + 1}.pdf`;
 
           zip.file(`${fileName}.pdf`, blob);
-        })
+        }),
       );
 
       const zipBlob = await zip.generateAsync({ type: "blob" });
@@ -185,15 +185,15 @@ export const AllPdfsPage = () => {
       window.URL.revokeObjectURL(url);
 
       showBanner(
-        "Download started",
-        "Your PDFs are being downloaded as a ZIP file.",
-        "success"
+        "Download gestartet",
+        "Deine PDFs werden als ZIP-Datei heruntergeladen.",
+        "success",
       );
     } catch (error) {
       showBanner(
-        "Failed to download PDFs",
-        "Something went wrong while downloading PDFs. Please try again.",
-        "error"
+        "PDF-Download fehlgeschlagen",
+        "Beim Herunterladen der PDFs ist ein Fehler aufgetreten. Bitte versuche es erneut.",
+        "error",
       );
     }
   };
@@ -201,32 +201,32 @@ export const AllPdfsPage = () => {
   return (
     <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
       <TotalIncomeCard
-        title="Total income"
-        subtitle={contentCardData.totalPdf + " · documents"}
+        title="Gesamteinnahmen"
+        subtitle={contentCardData.totalPdf + " · Dokumente"}
         totalIncome={contentCardData.totalIncome}
       />
       <div className="flex flex-col gap-2">
         <div className="grid md:grid-cols-2 gap-2">
           <Dropdown
-            label="Sort Documents"
+            label="Sortieren nach"
             options={paycheckFilterOptions}
             onSelect={setSortSelected}
             value={sortSelected}
           />
           <Dropdown
-            label="Choose Category"
+            label="Kategorie auswählen"
             options={categoryOptions}
             onSelect={setCategorySelected}
             value={categorySelected}
           />
           <Dropdown
-            label="Choose Start Month"
+            label="Startmonat auswählen"
             options={monthOptions}
             onSelect={setStartMonthSelected}
             value={startMonthSelected}
           />
           <Dropdown
-            label="Choose End Month"
+            label="Endmonat auswählen"
             options={endMonthOptions}
             onSelect={setEndMonthSelected}
             value={endMonthSelected}
@@ -234,24 +234,24 @@ export const AllPdfsPage = () => {
         </div>
         <div className="grid grid-cols-1">
           <SearchBar
-            placeholder="Search PDFs..."
+            placeholder="Dokumente suchen..."
             onChange={setSearchQuery}
             value={searchQuery}
             debounceMs={200}
-            title="Search PDFs"
+            title="Dokumente suchen"
           />
         </div>
       </div>
       <div className="grid grid-cols-1 items-center gap-5">
         <Button
           onClick={handleResetFilters}
-          text="Reset Filters"
+          text="Filter zurücksetzen"
           size="medium"
         />
         <Button
           onClick={handleDownloadAll}
           variant="secondary"
-          text="Download All Filtered PDFs"
+          text="Alle gefilterten Dokumente herunterladen"
           size="medium"
         />
       </div>

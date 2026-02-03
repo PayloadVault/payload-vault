@@ -7,7 +7,7 @@ const getInputStyles = (
   isReadOnly: boolean = false
 ) => {
   const base =
-    "py-3 px-6 font-medium text-[16px] placeholder-color-text-subtle";
+    "py-3 px-3 sm:px-6 font-medium text-[16px] placeholder-color-text-subtle min-w-0";
 
   const text = isReadOnly ? "text-color-text-subtle" : "text-color-text-main";
 
@@ -38,7 +38,7 @@ const getInputStyles = (
       : "";
 
   const placeholderClasses =
-    "placeholder-[color:var(--color-text-subtle)] [&::placeholder]:opacity-50";
+    "placeholder-[color:var(--color-text-subtle)] [&::placeholder]:opacity-50 [&::placeholder]:text-ellipsis [&::placeholder]:overflow-hidden";
 
   return `${base} ${text} ${positionClasses} ${colorClasses} ${focusClasses} ${hoverClasses} ${numberInputWithoutArrows} ${placeholderClasses}`;
 };

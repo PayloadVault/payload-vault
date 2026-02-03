@@ -7,7 +7,7 @@ export function CategoryPdfsPage() {
   const fullSlug = subSlug ? `${slug}/${subSlug}` : slug;
 
   const category = categories.find((c) => c.slug === fullSlug);
-  if (!category) return <h1>Category not found: {fullSlug}</h1>;
+  if (!category) return <h1>Kategorie nicht gefunden: {fullSlug}</h1>;
 
   const { setTitle } = useOutletContext<{
     setTitle: (title: string) => void;
