@@ -11,7 +11,7 @@ import { BannerContext, type BannerState } from "./BannerContext";
 
 export const BannerProvider = ({ children }: { children: ReactNode }) => {
   const [banner, setBanner] = useState<BannerState | null>(null);
-  const timeoutRef = useRef<number | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showBanner = useCallback(
     (title: string, description: string, bannerType: BannerType) => {
@@ -21,7 +21,7 @@ export const BannerProvider = ({ children }: { children: ReactNode }) => {
 
       setBanner({ title, description, bannerType });
 
-      timeoutRef.current = window.setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         setBanner(null);
         timeoutRef.current = null;
       }, 5000);

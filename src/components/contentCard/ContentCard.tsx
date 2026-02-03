@@ -71,7 +71,7 @@ export const ContentCard = (props: CombinedContentCardProps) => {
       children: (
         <DeleteConfirmationForm
           fileName={title}
-          onConfirm={() => {
+          onConfirm={async () => {
             onDelete(id);
             closeModal();
           }}

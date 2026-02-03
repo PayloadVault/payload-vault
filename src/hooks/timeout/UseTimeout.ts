@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 
 export const useTimeout = () => {
-  const timeoutRef = useRef<number | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clear = useCallback(() => {
     if (timeoutRef.current !== null) {
