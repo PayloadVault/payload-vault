@@ -162,16 +162,16 @@ async function uploadAndInsertPdf({
   if (aiError) {
     // Clean up uploaded file on AI error
     await supabase.storage.from("pdf_reports").remove([filePath]);
-    throw new ExtractionError("AI extraction failed", aiError.message);
+    throw new ExtractionError("KI-Extraktion fehlgeschlagen", aiError.message);
   }
 
   if (!aiData?.success) {
     // Clean up uploaded file if extraction was rejected
     await supabase.storage.from("pdf_reports").remove([filePath]);
     throw new ExtractionError(
-      "Document not recognized",
+      "Dokument nicht erkannt",
       aiData?.rejection_reason ||
-        "Could not identify this document as a valid invoice.",
+        "Dieses Dokument konnte nicht als gültige Rechnung identifiziert werden.",
     );
   }
 

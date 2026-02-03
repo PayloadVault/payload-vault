@@ -19,13 +19,21 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
         label: y.toString(),
         id: y.toString(),
       })),
-    [availableYears]
+    [availableYears],
   );
 
-  const [selectedYear, setSelectedYear] = useState({
-    id: year.toString(),
-    label: year.toString(),
-  });
+  const selectedYear = useMemo(
+    () => ({
+      id: year.toString(),
+      label: year.toString(),
+    }),
+    [year]
+  );
+
+  const handleYearChange = (option: { id: string; label: string }) => {
+    setYear(Number(option.id));
+  };
+
   const [isOpen, setIsOpen] = useState(false);
   type Theme = "light" | "dark";
 
@@ -33,17 +41,6 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
     if (typeof window === "undefined") return "dark";
     return (document.documentElement.dataset.theme as Theme) ?? "dark";
   });
-
-  useEffect(() => {
-    setYear(Number(selectedYear.id));
-  }, [selectedYear, setYear]);
-
-  useEffect(() => {
-    setSelectedYear({
-      id: year.toString(),
-      label: year.toString(),
-    });
-  }, [year]);
 
   const toggleTheme = () => {
     const next: Theme = theme === "dark" ? "light" : "dark";
@@ -97,7 +94,7 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
           </div>
 
           <div className="flex flex-col min-w-0">
-            <h5 className="leading-tight">Paycheck Vault</h5>
+            <h5 className="leading-tight">Gehalts-Tresor</h5>
 
             <p className="text-[14px] sm:text-[16px] text-color-text-secondary truncate">
               {user?.email}
@@ -117,7 +114,7 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
             <Dropdown
               options={options}
               value={selectedYear}
-              onSelect={setSelectedYear}
+              onSelect={handleYearChange}
             />
           </div>
 
@@ -127,7 +124,7 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
             cursor-pointer p-2 rounded-radius-md
             hover:bg-color-primary/20 hover:text-color-primary
           "
-              aria-label="User menu"
+              aria-label="Benutzermenü"
               aria-haspopup="menu"
               aria-expanded={isOpen}
               type="button"

@@ -22,7 +22,7 @@ export const Button = ({
 
   return (
     <button
-      className={`shadow-shadow-soft cursor-pointer flex w-auto items-center justify-center gap-2 font-bold rounded-radius-md transition-colors duration-200 ease-in-out" ${
+      className={`shadow-shadow-soft cursor-pointer flex w-auto items-center justify-center gap-2 text-center sm:whitespace-nowrap font-bold rounded-radius-md transition-colors duration-200 ease-in-out" ${
         variantClasses[variant]
       } ${sizeClasses[size]} ${
         isButtonDisabled ? "cursor-not-allowed opacity-50" : onHover[variant]

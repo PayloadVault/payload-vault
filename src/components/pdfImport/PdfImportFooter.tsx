@@ -68,28 +68,32 @@ export const PdfImportFooter = () => {
 
       failedFiles.forEach(({ name, reason }) => {
         if (reason) {
-          showBanner("Extraction Failed", `${name}: ${reason}`, "error");
+          showBanner(
+            "Extraktion fehlgeschlagen",
+            `${name}: ${reason}`,
+            "error",
+          );
         }
       });
 
       if (failedCount === 0) {
         showBanner(
-          "Upload Complete",
+          "Upload abgeschlossen",
           successCount === 1
-            ? "The PDF has been successfully uploaded."
-            : `All ${successCount} PDFs have been successfully uploaded.`,
+            ? "Die PDF-Datei wurde erfolgreich hochgeladen."
+            : `Alle ${successCount} Dateien wurden erfolgreich hochgeladen.`,
           "success",
         );
       } else if (successCount === 0) {
         showBanner(
-          "Upload Failed",
-          `Failed to upload ${failedCount} file${failedCount > 1 ? "s" : ""}.`,
+          "Upload fehlgeschlagen",
+          `${failedCount} Datei${failedCount > 1 ? "en" : ""} konnten nicht hochgeladen werden.`,
           "error",
         );
       } else {
         showBanner(
-          "Partial Upload",
-          `${successCount} uploaded successfully, ${failedCount} failed.`,
+          "Teilweiser Upload",
+          `${successCount} erfolgreich hochgeladen, ${failedCount} fehlgeschlagen.`,
           "error",
         );
       }
@@ -118,7 +122,7 @@ export const PdfImportFooter = () => {
       <Button
         onClick={openImportPdfModal}
         icon={UploadIcon}
-        text="Upload PDF"
+        text="Dokument hochladen"
       />
     </div>
   );

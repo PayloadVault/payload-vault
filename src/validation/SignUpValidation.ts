@@ -1,14 +1,13 @@
 import { z } from "zod";
 
-const allowedEmails = import.meta.env.VITE_ALLOWED_EMAILS.split(",");;
+const allowedEmails = import.meta.env.VITE_ALLOWED_EMAILS.split(",");
 
 export const signUpSchema = z
   .object({
     email: z
       .string()
       .trim()
-      .min(1, "Email is required")
-      .email("Please enter a valid email address")
+      .email("Bitte geben Sie eine gültige E-Mail-Adresse ein")
       .refine((email) => allowedEmails!.includes(email.toLowerCase()), {
         message:
           "Diese E-Mail-Adresse ist nicht für die Testphase freigegeben.",
@@ -16,22 +15,22 @@ export const signUpSchema = z
 
     password: z
       .string()
-      .min(1, "Password is required")
-      .min(8, "Password must be at least 8 characters long")
-      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .min(1, "Passwort ist erforderlich")
+      .min(8, "Passwort muss mindestens 8 Zeichen lang sein")
+      .regex(/[A-Z]/, "Passwort muss mindestens einen Großbuchstaben enthalten")
       .regex(
         /[^A-Za-z0-9]/,
-        "Password must contain at least one special character"
+        "Passwort muss mindestens ein Sonderzeichen enthalten",
       ),
 
-    repeatedPassword: z.string().min(1, "Please repeat your password"),
+    repeatedPassword: z.string().min(1, "Bitte wiederholen Sie Ihr Passwort"),
   })
   .superRefine((data, ctx) => {
     if (data.password !== data.repeatedPassword) {
       ctx.addIssue({
         path: ["repeatedPassword"],
         code: z.ZodIssueCode.custom,
-        message: "Passwords do not match",
+        message: "Passwörter stimmen nicht überein",
       });
     }
   });

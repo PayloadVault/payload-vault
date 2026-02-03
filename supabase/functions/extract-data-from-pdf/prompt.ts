@@ -57,7 +57,7 @@ CATEGORY RULES:
 
 If the content is some random document but NOT a recognized invoice, return:
 - "No Category" for category
-- Include a "rejection_reason" field explaining briefly why the document was not recognized (e.g., "Document does not appear to be an invoice" or "No recognizable invoice format or provider found").
+- Include a "rejection_reason" field explaining briefly IN GERMAN why the document was not recognized (e.g., "Das Dokument scheint keine Rechnung zu sein" or "Kein erkennbares Rechnungsformat gefunden").
 
 --------------------
 OUTPUT FORMAT
@@ -77,7 +77,7 @@ For unrecognized documents, return:
   "profit": 0,
   "date_created": "YYYY-MM-DD",
   "category": "No Category",
-  "rejection_reason": "Brief explanation of why the document was not recognized"
+  "rejection_reason": "Kurze Erklärung auf Deutsch, warum das Dokument nicht erkannt wurde"
 }
 
 Do NOT include markdown.

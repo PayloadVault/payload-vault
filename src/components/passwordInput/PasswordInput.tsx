@@ -6,7 +6,7 @@ import { CloseEyeIcon } from "../icons/CloseEyeIcon";
 export const PasswordInput = ({
   value,
   onChange,
-  label = "Password",
+  label = "Passwort",
   error,
   isRequired,
   isRepeated,
@@ -38,7 +38,7 @@ export const PasswordInput = ({
           </label>
         </div>
         <div
-          className={`flex h-12 w-full rounded-lg border px-6 py-3
+          className={`flex h-12 w-full rounded-lg border px-3 py-3 sm:px-6
     ${
       error
         ? "bg-color-error/10 border-color-error"
@@ -50,11 +50,11 @@ export const PasswordInput = ({
             type={visible ? "text" : "password"}
             id={label.toLowerCase()}
             placeholder={
-              isRepeated ? "Repeat your password" : "Enter your password"
+              isRepeated ? "Passwort erneut eingeben" : "Passwort eingeben"
             }
             value={value}
             onChange={handleInputChange}
-            className={`w-full bg-transparent font-medium focus:outline-none placeholder:text-color-text-subtle placeholder:opacity-50 ${
+            className={`w-full min-w-0 bg-transparent font-medium focus:outline-none placeholder:text-color-text-subtle placeholder:opacity-50 placeholder:text-ellipsis placeholder:overflow-hidden ${
               !visible && value
                 ? "text-[16px] tracking-widest text-color-text-main"
                 : "text-[16px] text-color-text-main"

@@ -29,14 +29,14 @@ export const DropdownList = ({
     <div className="absolute z-60 mt-2 w-full overflow-hidden rounded-md border border-color-border-light bg-color-bg-dark shadow-md">
       {isSearchEnabled && (
         <div className="p-3">
-          <SearchBar value={search} onChange={setSearch} placeholder="Search" />
+          <SearchBar value={search} onChange={setSearch} placeholder="Suchen" />
         </div>
       )}
 
       <ul className="max-h-60 overflow-y-auto">
         {filtered.length === 0 && (
           <li className="p-2 text-center text-color-text-secondary">
-            No results found
+            Keine Ergebnisse gefunden
           </li>
         )}
 
