@@ -19,7 +19,7 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
         label: y.toString(),
         id: y.toString(),
       })),
-    [availableYears],
+    [availableYears]
   );
 
   const selectedYear = useMemo(
@@ -94,7 +94,7 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
           </div>
 
           <div className="flex flex-col min-w-0">
-            <h5 className="leading-tight">Gehalts-Tresor</h5>
+            <h5 className="leading-tight">Payload Vault</h5>
 
             <p className="text-[14px] sm:text-[16px] text-color-text-secondary truncate">
               {user?.email}
