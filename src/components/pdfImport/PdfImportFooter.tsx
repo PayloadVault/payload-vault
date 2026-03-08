@@ -1,6 +1,10 @@
 import { useAuth } from "../../context/AuthContext";
 import { useImportPdfModal } from "../../hooks/modal/UseImportPdfModal";
-import { usePdfs, ExtractionError } from "../../hooks/usePdf/UsePdfs";
+import {
+  usePdfs,
+  ExtractionError,
+  DuplicateFileError,
+} from "../../hooks/usePdf/UsePdfs";
 import { Button } from "../button/Button";
 import { UploadIcon } from "../icons";
 import { useBanner } from "../../context/banner/BannerContext";
@@ -27,7 +31,11 @@ export const PdfImportFooter = () => {
       let completedCount = 0;
       let successCount = 0;
       let failedCount = 0;
-      const failedFiles: { name: string; reason?: string }[] = [];
+      const failedFiles: {
+        name: string;
+        reason?: string;
+        errorType: "duplicate" | "extraction" | "unknown";
+      }[] = [];
 
       onProgress({
         completed: 0,
@@ -46,13 +54,20 @@ export const PdfImportFooter = () => {
           console.error(`Error uploading file ${file.name}:`, error);
           failedCount++;
 
-          if (error instanceof ExtractionError) {
+          if (error instanceof DuplicateFileError) {
+            failedFiles.push({
+              name: file.name,
+              reason: "Dieses Dokument wurde bereits hochgeladen.",
+              errorType: "duplicate",
+            });
+          } else if (error instanceof ExtractionError) {
             failedFiles.push({
               name: file.name,
               reason: error.rejectionReason,
+              errorType: "extraction",
             });
           } else {
-            failedFiles.push({ name: file.name });
+            failedFiles.push({ name: file.name, errorType: "unknown" });
           }
         } finally {
           completedCount++;
@@ -66,13 +81,13 @@ export const PdfImportFooter = () => {
 
       await Promise.all(uploadPromises);
 
-      failedFiles.forEach(({ name, reason }) => {
+      failedFiles.forEach(({ name, reason, errorType }) => {
         if (reason) {
-          showBanner(
-            "Extraktion fehlgeschlagen",
-            `${name}: ${reason}`,
-            "error",
-          );
+          const title =
+            errorType === "duplicate"
+              ? "Duplikat erkannt"
+              : "Extraktion fehlgeschlagen";
+          showBanner(title, `${name}: ${reason}`, "error");
         }
       });
 

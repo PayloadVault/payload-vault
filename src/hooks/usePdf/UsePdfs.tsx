@@ -126,6 +126,28 @@ export class ExtractionError extends Error {
   }
 }
 
+export class DuplicateFileError extends Error {
+  constructor(fileName: string) {
+    super(`Eine Datei mit dem Namen "${fileName}" existiert bereits.`);
+    this.name = "DuplicateFileError";
+  }
+}
+
+async function checkDuplicateFileName(
+  userId: string,
+  fileName: string,
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("pdf_records")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("file_name", fileName)
+    .limit(1);
+
+  if (error) throw error;
+  return (data?.length ?? 0) > 0;
+}
+
 type ExtractionResponse = {
   success: boolean;
   profit?: number;
@@ -138,6 +160,11 @@ async function uploadAndInsertPdf({
   file,
   userId,
 }: UploadVariables): Promise<PdfRecord> {
+  const isDuplicate = await checkDuplicateFileName(userId, file.name);
+  if (isDuplicate) {
+    throw new DuplicateFileError(file.name);
+  }
+
   const fileExt = file.name.split(".").pop();
   const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9]/g, "_")}.${fileExt}`;
   const filePath = `${userId}/${fileName}`;
