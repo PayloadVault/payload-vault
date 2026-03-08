@@ -1,6 +1,10 @@
 import { useAuth } from "../../context/AuthContext";
 import { useImportPdfModal } from "../../hooks/modal/UseImportPdfModal";
-import { usePdfs, ExtractionError } from "../../hooks/usePdf/UsePdfs";
+import {
+  usePdfs,
+  ExtractionError,
+  DuplicateFileError,
+} from "../../hooks/usePdf/UsePdfs";
 import { Button } from "../button/Button";
 import { UploadIcon } from "../icons";
 import { useBanner } from "../../context/banner/BannerContext";
@@ -46,7 +50,12 @@ export const PdfImportFooter = () => {
           console.error(`Error uploading file ${file.name}:`, error);
           failedCount++;
 
-          if (error instanceof ExtractionError) {
+          if (error instanceof DuplicateFileError) {
+            failedFiles.push({
+              name: file.name,
+              reason: "Dieses Dokument wurde bereits hochgeladen.",
+            });
+          } else if (error instanceof ExtractionError) {
             failedFiles.push({
               name: file.name,
               reason: error.rejectionReason,
