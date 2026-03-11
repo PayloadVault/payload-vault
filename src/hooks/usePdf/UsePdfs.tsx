@@ -2,13 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../../lib/supabase";
 import type { PostgrestError } from "@supabase/supabase-js";
 import type { FetchPdfProps, PdfRecord, NewPdf } from "./types";
-
-type PdfCategory =
-  | "Strom & Gas"
-  | "Barmenia Abrechnung"
-  | "IKK Abrechnung"
-  | "Adcuri Abschlussprovision"
-  | "Adcuri Bestandsprovision";
+import type { PendingUpload, PdfCategory } from "./usePendingUpload";
 
 async function deleteFileFromStorage(path: string) {
   const { error } = await supabase.storage.from("pdf_reports").remove([path]);
@@ -221,14 +215,108 @@ async function uploadAndInsertPdf({
 }
 
 function validateCategory(cat: string): PdfCategory {
-  const valid = [
+  const valid: PdfCategory[] = [
     "Strom & Gas",
     "Barmenia Abrechnung",
     "IKK Abrechnung",
     "Adcuri Abschlussprovision",
     "Adcuri Bestandsprovision",
   ];
-  return valid.includes(cat) ? (cat as PdfCategory) : "Strom & Gas";
+  return valid.includes(cat as PdfCategory)
+    ? (cat as PdfCategory)
+    : "Strom & Gas";
+}
+
+// Upload and extract only - doesn't insert to database
+type ExtractVariables = {
+  file: File;
+  userId: string;
+};
+
+export type ExtractedPendingUpload = PendingUpload;
+
+async function uploadAndExtractOnly({
+  file,
+  userId,
+}: ExtractVariables): Promise<PendingUpload> {
+  const isDuplicate = await checkDuplicateFileName(userId, file.name);
+  if (isDuplicate) {
+    throw new DuplicateFileError(file.name);
+  }
+
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9]/g, "_")}.${fileExt}`;
+  const filePath = `${userId}/${fileName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("pdf_reports")
+    .upload(filePath, file);
+
+  if (uploadError) throw uploadError;
+
+  const { data: aiData, error: aiError } =
+    await supabase.functions.invoke<ExtractionResponse>(
+      "extract-data-from-pdf",
+      {
+        body: {
+          filePath: filePath,
+          fileType: file.type,
+        },
+      },
+    );
+
+  if (aiError) {
+    await supabase.storage.from("pdf_reports").remove([filePath]);
+    throw new ExtractionError("KI-Extraktion fehlgeschlagen", aiError.message);
+  }
+
+  if (!aiData?.success) {
+    await supabase.storage.from("pdf_reports").remove([filePath]);
+    throw new ExtractionError(
+      "Dokument nicht erkannt",
+      aiData?.rejection_reason ||
+        "Dieses Dokument konnte nicht als gültige Rechnung identifiziert werden.",
+    );
+  }
+
+  return {
+    id: crypto.randomUUID(),
+    fileName: file.name,
+    filePath: filePath,
+    extractedData: {
+      category: validateCategory(aiData.category || ""),
+      profit: aiData.profit || 0,
+      dateCreated:
+        aiData.date_created || new Date().toISOString().split("T")[0],
+    },
+  };
+}
+
+// Confirm a pending upload - inserts to database
+type ConfirmVariables = {
+  userId: string;
+  pendingUpload: PendingUpload;
+};
+
+async function confirmPendingUpload({
+  userId,
+  pendingUpload,
+}: ConfirmVariables): Promise<PdfRecord> {
+  const newPdfRecord: NewPdf = {
+    user_id: userId,
+    file_name: pendingUpload.fileName,
+    pdf_url: pendingUpload.filePath,
+    category: pendingUpload.extractedData.category,
+    profit: pendingUpload.extractedData.profit,
+    date_created: pendingUpload.extractedData.dateCreated,
+  };
+
+  return insertPdf(newPdfRecord);
+}
+
+// Decline a pending upload - removes file from storage
+async function declinePendingUpload(filePath: string): Promise<void> {
+  await deleteFileFromStorage(filePath);
 }
 
 export function usePdfs(props: FetchPdfProps) {
@@ -265,5 +353,30 @@ export function usePdfs(props: FetchPdfProps) {
     },
   });
 
-  return { ...query, addPdf, uploadPdf, removePdf };
+  // New mutations for confirmation flow
+  const extractPdf = useMutation<PendingUpload, Error, ExtractVariables>({
+    mutationFn: uploadAndExtractOnly,
+  });
+
+  const confirmPdf = useMutation<PdfRecord, PostgrestError, ConfirmVariables>({
+    mutationFn: confirmPendingUpload,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pdfs"] });
+      queryClient.invalidateQueries({ queryKey: ["availableYears"] });
+    },
+  });
+
+  const declinePdf = useMutation<void, Error, string>({
+    mutationFn: declinePendingUpload,
+  });
+
+  return {
+    ...query,
+    addPdf,
+    uploadPdf,
+    removePdf,
+    extractPdf,
+    confirmPdf,
+    declinePdf,
+  };
 }

@@ -1,9 +1,12 @@
 import type { ReactNode } from "react";
 
+export type ModalSize = "default" | "large";
+
 export type ModalData = {
   title: string;
   children?: ReactNode;
   disableClose?: boolean;
+  size?: ModalSize;
 };
 
 export type ModalState = { isOpen: false } | ({ isOpen: true } & ModalData);

@@ -11,11 +11,13 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
   const closeModal = () => setModalState({ isOpen: false });
   const setDisableClose = (disabled: boolean) =>
     setModalState((prev) =>
-      prev.isOpen ? { ...prev, disableClose: disabled } : prev
+      prev.isOpen ? { ...prev, disableClose: disabled } : prev,
     );
 
   return (
-    <ModalContext.Provider value={{ modalState, openModal, closeModal, setDisableClose }}>
+    <ModalContext.Provider
+      value={{ modalState, openModal, closeModal, setDisableClose }}
+    >
       {children}
 
       {modalState.isOpen && (
@@ -23,6 +25,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
           title={modalState.title}
           onClose={closeModal}
           disableClose={modalState.disableClose}
+          size={modalState.size}
         >
           {modalState.children}
         </Modal>
