@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "../button/Button";
 import { Dropdown } from "../dropdown/Dropdown";
 import { InputField } from "../inputField/InputField";
@@ -56,6 +56,10 @@ export const PdfConfirmationForm = ({
   );
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
   const [isProcessingAll, setIsProcessingAll] = useState(false);
+
+  // Track pending uploads in ref for cleanup on unmount
+  const pendingUploadsRef = useRef<PendingUpload[]>(pendingUploads);
+  pendingUploadsRef.current = pendingUploads;
 
   const isSingleUpload = pendingUploads.length === 1;
   const hasUploads = pendingUploads.length > 0;
@@ -138,6 +142,18 @@ export const PdfConfirmationForm = ({
       onClose();
     }
   }, [hasUploads, onClose]);
+
+  // Cleanup: decline any remaining uploads when modal is closed (e.g., via X button)
+  // This prevents orphaned files in storage
+  useEffect(() => {
+    return () => {
+      const remaining = pendingUploadsRef.current;
+      if (remaining.length > 0) {
+        // Fire and forget - we're unmounting so can't await
+        onDeclineAll(remaining).catch(console.error);
+      }
+    };
+  }, [onDeclineAll]);
 
   // Don't render if no uploads
   if (!hasUploads) {
