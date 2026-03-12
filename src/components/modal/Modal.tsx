@@ -1,7 +1,6 @@
 import { type ReactNode, useEffect } from "react";
 import { CloseIcon } from "../icons";
-
-type ModalSize = "default" | "large";
+import type { ModalSize } from "../../context/modal/types";
 
 interface ModalProps {
   title: string;

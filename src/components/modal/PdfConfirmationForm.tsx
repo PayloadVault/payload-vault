@@ -136,26 +136,22 @@ export const PdfConfirmationForm = ({
     }
   };
 
-  // Close modal when all uploads are processed (using useEffect to avoid setState during render)
   useEffect(() => {
     if (!hasUploads) {
       onClose();
     }
   }, [hasUploads, onClose]);
 
-  // Cleanup: decline any remaining uploads when modal is closed (e.g., via X button)
-  // This prevents orphaned files in storage
+  // Cleanup: decline any remaining uploads when modal is closed
   useEffect(() => {
     return () => {
       const remaining = pendingUploadsRef.current;
       if (remaining.length > 0) {
-        // Fire and forget - we're unmounting so can't await
         onDeclineAll(remaining).catch(console.error);
       }
     };
   }, [onDeclineAll]);
 
-  // Don't render if no uploads
   if (!hasUploads) {
     return null;
   }
@@ -226,10 +222,14 @@ export const PdfConfirmationForm = ({
 
               {/* Date input */}
               <div className="flex flex-col gap-1">
-                <label className="flex h-6 items-center font-semibold text-color-text-secondary">
+                <label
+                  htmlFor={`date-${upload.id}`}
+                  className="flex h-6 items-center font-semibold text-color-text-secondary"
+                >
                   <span className="ml-1 text-[14px]">Datum</span>
                 </label>
                 <input
+                  id={`date-${upload.id}`}
                   type="date"
                   value={edited.dateCreated}
                   onChange={(e) =>

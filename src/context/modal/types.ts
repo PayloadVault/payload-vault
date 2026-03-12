@@ -7,6 +7,7 @@ export type ModalData = {
   children?: ReactNode;
   disableClose?: boolean;
   size?: ModalSize;
+  onClose?: () => void;
 };
 
 export type ModalState = { isOpen: false } | ({ isOpen: true } & ModalData);

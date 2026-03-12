@@ -23,7 +23,7 @@ export const PdfImportFooter = () => {
   // Track stats for final banner
   const statsRef = useRef({ confirmed: 0, declined: 0 });
 
-  if (!user) return;
+  if (!user) return null;
 
   const showFinalBanner = () => {
     const { confirmed, declined } = statsRef.current;
@@ -52,7 +52,6 @@ export const PdfImportFooter = () => {
       );
     }
 
-    // Reset stats
     statsRef.current = { confirmed: 0, declined: 0 };
   };
 
@@ -162,12 +161,9 @@ export const PdfImportFooter = () => {
           }
         });
 
-        // Close import modal
         closeImportModal();
 
-        // If we have pending uploads, open confirmation modal
         if (pendingUploads.length > 0) {
-          // Small delay to allow import modal to close
           setTimeout(() => {
             openConfirmUploadModal(pendingUploads);
           }, 100);

@@ -159,7 +159,8 @@ async function uploadAndInsertPdf({
     throw new DuplicateFileError(file.name);
   }
 
-  const fileExt = file.name.split(".").pop();
+  const lastDotIndex = file.name.lastIndexOf(".");
+  const fileExt = lastDotIndex > 0 ? file.name.slice(lastDotIndex + 1) : "pdf";
   const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9]/g, "_")}.${fileExt}`;
   const filePath = `${userId}/${fileName}`;
 
@@ -244,7 +245,8 @@ async function uploadAndExtractOnly({
     throw new DuplicateFileError(file.name);
   }
 
-  const fileExt = file.name.split(".").pop();
+  const lastDotIndex = file.name.lastIndexOf(".");
+  const fileExt = lastDotIndex > 0 ? file.name.slice(lastDotIndex + 1) : "pdf";
   const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9]/g, "_")}.${fileExt}`;
   const filePath = `${userId}/${fileName}`;
 
@@ -353,7 +355,6 @@ export function usePdfs(props: FetchPdfProps) {
     },
   });
 
-  // New mutations for confirmation flow
   const extractPdf = useMutation<PendingUpload, Error, ExtractVariables>({
     mutationFn: uploadAndExtractOnly,
   });

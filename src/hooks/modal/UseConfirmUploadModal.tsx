@@ -70,12 +70,12 @@ export const useConfirmUploadModal = ({
 
     const handleClose = () => {
       closeModal();
-      onComplete();
     };
 
     openModal({
       title,
       size,
+      onClose: onComplete,
       children: (
         <PdfConfirmationForm
           pendingUploads={pendingUploads}

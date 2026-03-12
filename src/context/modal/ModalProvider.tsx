@@ -8,7 +8,12 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
 
   const openModal = (data: ModalData) =>
     setModalState({ isOpen: true, ...data });
-  const closeModal = () => setModalState({ isOpen: false });
+  const closeModal = () => {
+    if (modalState.isOpen && modalState.onClose) {
+      modalState.onClose();
+    }
+    setModalState({ isOpen: false });
+  };
   const setDisableClose = (disabled: boolean) =>
     setModalState((prev) =>
       prev.isOpen ? { ...prev, disableClose: disabled } : prev,
