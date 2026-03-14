@@ -26,14 +26,12 @@ export const ExpensesPage = () => {
     setTitle("Steuerrelevante Ausgaben");
   }, [setTitle]);
 
-  if (!user) return <ErrorBlock />;
-
   const {
     data: pdfs,
     isLoading,
     error,
   } = usePdfs({
-    userId: user.id,
+    userId: user?.id || "",
     year,
   });
 
@@ -42,6 +40,8 @@ export const ExpensesPage = () => {
       setContentCardData(formatData(pdfs));
     }
   }, [pdfs]);
+
+  if (!user) return <ErrorBlock />;
 
   if (error) return <ErrorBlock />;
 
@@ -62,7 +62,7 @@ export const ExpensesPage = () => {
             variant="allPdf"
             title={contentCardData.allPdfs.title}
             subtitle={contentCardData.allPdfs.subtitle}
-            link={contentCardData.allPdfs.link}
+            link={"/steuerrelevante-ausgaben" + contentCardData.allPdfs.link}
           />
           <h2 className="text-color-primary font-bold mx-auto">Kategorien</h2>
           <div className="flex flex-col gap-6">
@@ -73,7 +73,10 @@ export const ExpensesPage = () => {
                 title={category.category.title}
                 subtitle={category.subtitle.toString() + " · Gehaltsabrechnung"}
                 profit={category.profit}
-                link={"kategorie/" + category.category.slug}
+                link={
+                  "/steuerrelevante-ausgaben/kategorie/" +
+                  category.category.slug
+                }
               />
             ))}
           </div>
