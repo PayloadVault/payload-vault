@@ -7,8 +7,20 @@ type ExpenseRecord = Database["public"]["Tables"]["expenses"]["Row"] & {
 type NewExpense = Database["public"]["Tables"]["expenses"]["Insert"];
 type ExpenseCategory = Database["public"]["Enums"]["expense_category"];
 
-const expenseCategories =
-    Constants.public.Enums.expense_category as readonly ExpenseCategory[];
+type ExtractedExpenseData = {
+    amount: number;
+    expense_date: string;
+    category: ExpenseCategory;
+    vendor_name: string | null;
+};
+
+type UploadExpenseResult = {
+    expense: ExpenseRecord;
+    extracted: ExtractedExpenseData;
+};
+
+const expenseCategories = Constants.public.Enums
+    .expense_category as readonly ExpenseCategory[];
 
 const DEFAULT_EXPENSE_CATEGORY: ExpenseCategory = "Sonstiges";
 
@@ -29,9 +41,12 @@ type FetchExpensesProps = {
     endMonth?: number;
 };
 
-export type { ExpenseCategory, ExpenseRecord, FetchExpensesProps, NewExpense };
-export {
-    DEFAULT_EXPENSE_CATEGORY,
-    expenseCategories,
-    isExpenseCategory,
+export type {
+    ExpenseCategory,
+    ExpenseRecord,
+    ExtractedExpenseData,
+    FetchExpensesProps,
+    NewExpense,
+    UploadExpenseResult,
 };
+export { DEFAULT_EXPENSE_CATEGORY, expenseCategories, isExpenseCategory };
