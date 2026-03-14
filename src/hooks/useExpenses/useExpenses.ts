@@ -90,7 +90,7 @@ export function useUploadAndExtract(userId: string) {
 
             try {
                 const { data, error: extractError } = await supabase.functions
-                    .invoke("extract-data-from-pdf", {
+                    .invoke("extract-data-from-expense-image", {
                         body: { filePath },
                     });
 
