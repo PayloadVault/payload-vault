@@ -12,6 +12,8 @@ type ExtractedExpenseData = {
     expense_date: string;
     category: ExpenseCategory;
     vendor_name: string | null;
+    image_url: string | null;
+    file_name: string | null;
 };
 
 type UploadExpenseResult = {

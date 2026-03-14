@@ -9,9 +9,11 @@ import type {
 } from "./types";
 
 function sanitizeFileName(fileName: string): string {
-    return fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+    return fileName
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9._-]/g, "_");
 }
-
 async function deleteImageFromStorage(path: string): Promise<void> {
     const { error } = await supabase.storage.from("expense_invoices").remove([
         path,

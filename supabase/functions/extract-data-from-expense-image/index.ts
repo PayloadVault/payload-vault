@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
         expense_date: new Date().toISOString().split("T")[0],
         category: "Mobilität",
         vendor_name: "INA",
-        image_url: filePath, // Return the path so he can show the image preview
+        image_url: filePath,
       },
     };
 
