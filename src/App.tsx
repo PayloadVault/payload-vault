@@ -11,6 +11,8 @@ import { ModalProvider } from "./context/modal/ModalProvider";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./context/ProtectedRoutes";
 import { SignUpPage } from "./pages/signup/SignupPage";
+import { ResetPasswordPage } from "./pages/reset-password/ResetPasswordPage";
+import { UpdatePasswordPage } from "./pages/update-password/UpdatePasswordPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { YearProvider } from "./context/YearContext";
 import { BannerProvider } from "./context/banner/BannerProvider";
@@ -36,6 +38,8 @@ export default function App() {
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignUpPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/update-password" element={<UpdatePasswordPage />} />
 
                 <Route
                   path="/"
