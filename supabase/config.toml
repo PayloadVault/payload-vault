@@ -391,3 +391,9 @@ entrypoint = "./functions/extract-data-from-pdf/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/extract-data-from-pdf/*.html" ]
+
+[functions.extract-data-from-expense-image]
+enabled = true
+verify_jwt = false
+import_map = "./functions/extract-data-from-expense-image/deno.json"
+entrypoint = "./functions/extract-data-from-expense-image/index.ts"

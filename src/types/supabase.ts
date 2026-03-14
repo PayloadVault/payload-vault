@@ -34,6 +34,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      expenses: {
+        Row: {
+          amount: number
+          category: Database["public"]["Enums"]["expense_category"]
+          created_at: string
+          expense_date: string
+          file_name: string
+          id: string
+          image_url: string
+          user_id: string
+          vendor_name: string | null
+        }
+        Insert: {
+          amount: number
+          category: Database["public"]["Enums"]["expense_category"]
+          created_at?: string
+          expense_date: string
+          file_name: string
+          id?: string
+          image_url: string
+          user_id: string
+          vendor_name?: string | null
+        }
+        Update: {
+          amount?: number
+          category?: Database["public"]["Enums"]["expense_category"]
+          created_at?: string
+          expense_date?: string
+          file_name?: string
+          id?: string
+          image_url?: string
+          user_id?: string
+          vendor_name?: string | null
+        }
+        Relationships: []
+      }
       pdf_records: {
         Row: {
           category: Database["public"]["Enums"]["document_category"]
@@ -89,6 +125,17 @@ export type Database = {
         | "IKK Abrechnung"
         | "Adcuri Abschlussprovision"
         | "Adcuri Bestandsprovision"
+      expense_category:
+        | "Mobilität"
+        | "Geschäftsessen"
+        | "Büro & Arbeitsmittel"
+        | "Kommunikation"
+        | "Weiterbildung"
+        | "Reisen"
+        | "Versicherungen"
+        | "Bank & Gebühren"
+        | "Marketing"
+        | "Sonstiges"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -225,6 +272,18 @@ export const Constants = {
         "IKK Abrechnung",
         "Adcuri Abschlussprovision",
         "Adcuri Bestandsprovision",
+      ],
+      expense_category: [
+        "Mobilität",
+        "Geschäftsessen",
+        "Büro & Arbeitsmittel",
+        "Kommunikation",
+        "Weiterbildung",
+        "Reisen",
+        "Versicherungen",
+        "Bank & Gebühren",
+        "Marketing",
+        "Sonstiges",
       ],
     },
   },
