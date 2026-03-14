@@ -85,6 +85,10 @@ export const LoginPage = () => {
         <p className="text-color-text-subtle text-center text-sm mt-2">
           Noch kein Konto? <Link to="/signup">Registrieren</Link>
         </p>
+        <p className="text-color-text-subtle text-center text-sm">
+          Passwort vergessen?{" "}
+          <Link to="/reset-password">Passwort zurücksetzen</Link>
+        </p>
       </div>
     </div>
   );
