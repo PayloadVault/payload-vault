@@ -5,6 +5,8 @@ import { LoginPage } from "./pages/login/LoginPage";
 import { AllPdfsPage } from "./pages/allPdfs/AllPdfsPage";
 import { CategoryPage } from "./pages/category/CategoryPage";
 import { CategoryPdfsPage } from "./pages/categoryPdfs/CategoryPdfsPage";
+import { SalesPage } from "./pages/sales/SalesPage";
+import { ExpensesPage } from "./pages/expenses/ExpensesPage";
 import { useEffect } from "react";
 import { Layout } from "./pages/layout";
 import { ModalProvider } from "./context/modal/ModalProvider";
@@ -17,12 +19,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { YearProvider } from "./context/YearContext";
 import { BannerProvider } from "./context/banner/BannerProvider";
 
+const queryClient = new QueryClient();
+
 export default function App() {
   useEffect(() => {
     const saved = localStorage.getItem("theme") as "light" | "dark" | null;
 
     const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
+      "(prefers-color-scheme: dark)",
     ).matches;
     const theme = saved ?? (prefersDark ? "dark" : "light");
 
@@ -31,15 +35,21 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <QueryClientProvider client={new QueryClient()}>
+      <QueryClientProvider client={queryClient}>
         <YearProvider>
           <BannerProvider>
             <ModalProvider>
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignUpPage />} />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
-                <Route path="/update-password" element={<UpdatePasswordPage />} />
+                <Route
+                  path="/passwort-zurucksetzen"
+                  element={<ResetPasswordPage />}
+                />
+                <Route
+                  path="/update-passwort"
+                  element={<UpdatePasswordPage />}
+                />
 
                 <Route
                   path="/"
@@ -52,7 +62,24 @@ export default function App() {
 
                 <Route element={<Layout />}>
                   <Route
-                    path="/all-pdfs"
+                    path="/einnahmen"
+                    element={
+                      <ProtectedRoute>
+                        <SalesPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/steuerrelevante-ausgaben"
+                    element={
+                      <ProtectedRoute>
+                        <ExpensesPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/einnahmen/alle-dokumente"
                     element={
                       <ProtectedRoute>
                         <AllPdfsPage />
@@ -60,7 +87,7 @@ export default function App() {
                     }
                   />
                   <Route
-                    path="/category/:slug"
+                    path="/einnahmen/kategorie/:slug"
                     element={
                       <ProtectedRoute>
                         <CategoryPage />
@@ -68,7 +95,7 @@ export default function App() {
                     }
                   />
                   <Route
-                    path="/category/:slug/pdfs"
+                    path="/einnahmen/kategorie/:slug/pdfs"
                     element={
                       <ProtectedRoute>
                         <CategoryPdfsPage />
@@ -76,7 +103,7 @@ export default function App() {
                     }
                   />
                   <Route
-                    path="/category/:slug/:subSlug"
+                    path="/einnahmen/kategorie/:slug/:subSlug"
                     element={
                       <ProtectedRoute>
                         <CategoryPage />
@@ -84,7 +111,7 @@ export default function App() {
                     }
                   />
                   <Route
-                    path="/category/:slug/:subSlug/pdfs"
+                    path="/einnahmen/kategorie/:slug/:subSlug/pdfs"
                     element={
                       <ProtectedRoute>
                         <CategoryPdfsPage />

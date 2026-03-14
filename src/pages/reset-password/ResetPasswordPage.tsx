@@ -31,7 +31,7 @@ export const ResetPasswordPage = () => {
     setLoading(true);
 
     const { error } = await supabase.auth.resetPasswordForEmail(result.data, {
-      redirectTo: `${window.location.origin}/update-password`,
+      redirectTo: `${window.location.origin}/update-passwort`,
     });
 
     if (error) {

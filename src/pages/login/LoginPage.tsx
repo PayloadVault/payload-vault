@@ -87,7 +87,7 @@ export const LoginPage = () => {
         </p>
         <p className="text-color-text-subtle text-center text-sm">
           Passwort vergessen?{" "}
-          <Link to="/reset-password">Passwort zurücksetzen</Link>
+          <Link to="/passwort-zurucksetzen">Passwort zurücksetzen</Link>
         </p>
       </div>
     </div>
