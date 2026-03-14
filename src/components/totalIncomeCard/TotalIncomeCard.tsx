@@ -1,4 +1,4 @@
-import { IncomeIcon } from "../icons";
+import { IncomeIcon, LossIcon } from "../icons";
 import type { TotalIncomeCardProps } from "./TotalIncomeCard.types";
 import { normalizeProfit } from "../contentCard/ContentCard.utils";
 
@@ -6,16 +6,27 @@ export const TotalIncomeCard = ({
   title,
   totalIncome,
   subtitle,
+  variant = "income",
 }: TotalIncomeCardProps) => {
   return (
-    <div className="bg-color-bg-accent/15 rounded-radius-lg flex p-5 justify-center">
+    <div
+      className={`${variant === "income" ? "bg-color-bg-accent/15" : "bg-color-error/15"} rounded-radius-lg flex p-5 justify-center`}
+    >
       <div className="w-[95%] flex flex-col items-baseline gap-1">
         <h4 className="text-color-text-subtle">{title}</h4>
-        <h3 className="text-color-primary">{normalizeProfit(totalIncome)} €</h3>
+        <h3
+          className={`${variant === "income" ? "text-color-primary" : "text-color-error"}`}
+        >
+          {normalizeProfit(totalIncome)} €
+        </h3>
         {subtitle && <p>{subtitle}</p>}
       </div>
       <div className="flex justify-center">
-        <IncomeIcon className="w-14 lg:w-18 text-color-primary" />
+        {variant === "income" ? (
+          <IncomeIcon className="text-color-primary w-14 lg:w-18" />
+        ) : (
+          <LossIcon className="text-color-error w-14 lg:w-18" />
+        )}
       </div>
     </div>
   );

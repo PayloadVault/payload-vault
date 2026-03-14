@@ -41,6 +41,12 @@ export const HomePage = () => {
           subtitle={contentCardData.totalPdf + " · Gehaltsabrechnung"}
           totalIncome={contentCardData.totalIncome}
         />
+        <TotalIncomeCard
+          variant="expense"
+          title="Gesamtcosten"
+          subtitle={contentCardData.totalPdf + " · Gehaltsabrechnung"}
+          totalIncome={contentCardData.totalIncome}
+        />
         <h2 className="text-color-primary font-bold mx-auto">Kategorien</h2>
         <div className="flex flex-col gap-6">
           {contentCardData.allCategories.map((category, index) => (
