@@ -4,10 +4,12 @@ import { useState } from "react";
 import { PdfImportFooter } from "../components/pdfImport/PdfImportFooter";
 import { useYear } from "../hooks/year/UseYear";
 import { HeaderHome } from "../components/header/HeaderHome";
+import { ExpensePdfImportFooter } from "../components/pdfImport/ExpensePdfImportFooter";
 
 export const Layout = () => {
   const [title, setTitle] = useState("");
   const { year } = useYear();
+  const isSales = window.location.pathname.includes("/einnahmen");
 
   return (
     <div className="flex flex-col min-h-screen overflow-hidden">
@@ -18,7 +20,7 @@ export const Layout = () => {
         <Outlet context={{ setTitle }} />
       </main>
 
-      <PdfImportFooter />
+      {isSales ? <PdfImportFooter /> : <ExpensePdfImportFooter />}
     </div>
   );
 };

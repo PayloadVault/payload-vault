@@ -3,29 +3,32 @@ import {
   type DropdownOptions,
   paycheckFilterOptions,
   monthOptions,
-  isSortType,
-  isCategoryType,
+  isExpenseCategoryType,
 } from "../../components/dropdown/DropdownOption";
 import { Dropdown } from "../../components/dropdown/Dropdown";
 import { ContentCard } from "../../components/contentCard/ContentCard";
 import { TotalIncomeCard } from "../../components/totalIncomeCard/TotalIncomeCard";
 import { useAuth } from "../../context/AuthContext";
 import { useYear } from "../../hooks/year/UseYear";
-import type { AllPdfTypes } from "../allPdfs/types";
-import { usePdfs } from "../../hooks/usePdf/UsePdfs";
-import { formatAllPdfs } from "../allPdfs/utils";
+import type { AllExpensePdfTypes } from "../allPdfs/types";
+import { formatAllPdfsExpenses } from "../allPdfs/utils";
 import { ErrorBlock } from "../../components/errorBlock/ErrorBlock";
 import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
 import { DocumentSkeletonLoader } from "../../components/skeletonLoader/DocumentSkeletonLoader";
 import { Button } from "../../components/button/Button";
 import JSZip from "jszip";
 import { useBanner } from "../../context/banner/BannerContext";
+import {
+  isSortType,
+  useFetchExpenses,
+  useRemoveExpense,
+} from "../../hooks/useExpenses/useExpenses";
 
 type CategoryProps = {
   title: string;
 };
 
-export const OtherPages = ({ title }: CategoryProps) => {
+export const OtherExpensesPages = ({ title }: CategoryProps) => {
   const { user } = useAuth();
   const { year } = useYear();
   const params = window.location.pathname.split("/")[1];
@@ -42,7 +45,7 @@ export const OtherPages = ({ title }: CategoryProps) => {
   >(monthOptions[monthOptions.length - 1]);
 
   const [contentCardData, setContentCardData] = useState<
-    AllPdfTypes | undefined
+    AllExpensePdfTypes | undefined
   >();
 
   const endMonthOptions = useMemo(
@@ -58,25 +61,22 @@ export const OtherPages = ({ title }: CategoryProps) => {
 
   const { showBanner } = useBanner();
 
-  const {
-    data: pdfs,
-    isLoading,
-    error,
-    removePdf,
-  } = usePdfs({
+  const removeFile = useRemoveExpense();
+
+  const { data, isLoading, error } = useFetchExpenses({
     userId: user?.id || "",
     year,
     startMonth: Number(startMonthSelected.id) || undefined,
     endMonth: Number(endMonthSelected.id) || undefined,
     sortBy: isSortType(sortSelected.id) ? sortSelected.id : "new",
-    category: isCategoryType(title) ? title : "all",
+    category: isExpenseCategoryType(title) ? title : "all",
   });
 
   useEffect(() => {
-    if (pdfs) {
-      setContentCardData(formatAllPdfs(pdfs));
+    if (data) {
+      setContentCardData(formatAllPdfsExpenses(data));
     }
-  }, [pdfs]);
+  }, [data]);
 
   if (!user) return <ErrorBlock />;
 
@@ -112,13 +112,14 @@ export const OtherPages = ({ title }: CategoryProps) => {
     try {
       await Promise.all(
         contentCardData.pdfs.map(async (pdf, index) => {
-          if (!pdf.signedUrl) return;
+          if (!pdf.signed_url) return;
 
-          const response = await fetch(pdf.signedUrl);
+          const response = await fetch(pdf.signed_url);
           const blob = await response.blob();
 
           const fileName =
-            pdf.title?.replace(/[^\w\d]+/g, "_") || `document_${index + 1}.pdf`;
+            pdf.file_name?.replace(/[^\w\d]+/g, "_") ||
+            `document_${index + 1}.pdf`;
 
           zip.file(`${fileName}.pdf`, blob);
         }),
@@ -213,13 +214,15 @@ export const OtherPages = ({ title }: CategoryProps) => {
             <ContentCard
               key={pdf.id || index}
               variant="document"
-              title={pdf.title}
-              date={pdf.date}
-              profit={pdf.income}
-              downloadLink={pdf.signedUrl}
-              openLink={pdf.openLink}
+              title={pdf.file_name}
+              date={pdf.expense_date}
+              profit={pdf.amount}
+              downloadLink={pdf.signed_url}
+              openLink={pdf.image_url}
               id={pdf.id}
-              onDelete={(id) => removePdf.mutate(id)}
+              onDelete={(id) =>
+                removeFile.mutate({ id, imageUrl: pdf.image_url })
+              }
             />
           ))}
         </div>

@@ -6,6 +6,7 @@ import type {
   ExtractedExpenseData,
   FetchExpensesProps,
   NewExpense,
+  SortType,
 } from "./types";
 
 function sanitizeFileName(fileName: string): string {
@@ -36,6 +37,10 @@ async function checkDuplicateFileName(
   return (data?.length ?? 0) > 0;
 }
 
+export function isSortType(value: string): value is SortType {
+  return ["new", "old", "high", "low"].includes(value);
+}
+
 export function useFetchExpenses(props: FetchExpensesProps) {
   return useQuery<ExpenseRecord[], PostgrestError>({
     queryKey: [
@@ -43,6 +48,9 @@ export function useFetchExpenses(props: FetchExpensesProps) {
       props.userId,
       props.category ?? "all",
       props.year ?? "all",
+      props.startMonth ?? "all",
+      props.endMonth ?? "all",
+      props.sortBy ?? "new",
     ],
     queryFn: async () => {
       let q = supabase.from("expenses").select("*").eq("user_id", props.userId);
@@ -52,14 +60,37 @@ export function useFetchExpenses(props: FetchExpensesProps) {
       }
 
       if (props.year) {
-        q = q
-          .gte("expense_date", `${props.year}-01-01`)
-          .lte("expense_date", `${props.year}-12-31`);
+        const startMonth = props.startMonth ?? 1;
+        const endMonth = props.endMonth ?? 12;
+
+        const startDate = `${props.year}-${String(startMonth).padStart(2, "0")}-01`;
+        const endDay = new Date(props.year, endMonth, 0).getDate(); // last day of endMonth
+        const endDate = `${props.year}-${String(endMonth).padStart(2, "0")}-${endDay}`;
+
+        q = q.gte("expense_date", startDate).lte("expense_date", endDate);
+      } else if (props.startMonth || props.endMonth) {
+        // no year selected but months are — you can decide to ignore or handle
+        // currently ignored; adjust if needed
       }
 
-      const { data, error } = await q.order("expense_date", {
-        ascending: false,
-      });
+      // Sorting
+      switch (props.sortBy) {
+        case "old":
+          q = q.order("expense_date", { ascending: true });
+          break;
+        case "high":
+          q = q.order("amount", { ascending: false });
+          break;
+        case "low":
+          q = q.order("amount", { ascending: true });
+          break;
+        case "new":
+        default:
+          q = q.order("expense_date", { ascending: false });
+          break;
+      }
+
+      const { data, error } = await q;
       if (error) throw error;
 
       const filePaths = data.map((e) => e.image_url).filter(Boolean);

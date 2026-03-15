@@ -1,7 +1,6 @@
 import { useState, useEffect, useLayoutEffect } from "react";
 import { ContentCard } from "../../components/contentCard/ContentCard";
 import { TotalIncomeCard } from "../../components/totalIncomeCard/TotalIncomeCard";
-import { PdfImportFooter } from "../../components/pdfImport/PdfImportFooter";
 import { useAuth } from "../../context/AuthContext";
 import { useYear } from "../../hooks/year/UseYear";
 import { formatExpenses } from "./utils";
@@ -10,6 +9,7 @@ import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeleton
 import { ErrorBlock } from "../../components/errorBlock/ErrorBlock";
 import { useOutletContext } from "react-router-dom";
 import { useFetchExpenses } from "../../hooks/useExpenses/useExpenses";
+import { ExpensePdfImportFooter } from "../../components/pdfImport/ExpensePdfImportFooter";
 
 export const ExpensesPage = () => {
   const { user } = useAuth();
@@ -31,7 +31,7 @@ export const ExpensesPage = () => {
     isLoading,
     error,
   } = useFetchExpenses({
-    userId: user?.id,
+    userId: user?.id || "",
     year,
   });
 
@@ -82,7 +82,7 @@ export const ExpensesPage = () => {
         </main>
       )}
 
-      <PdfImportFooter />
+      <ExpensePdfImportFooter />
     </div>
   );
 };

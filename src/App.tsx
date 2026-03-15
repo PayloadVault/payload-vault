@@ -18,6 +18,7 @@ import { UpdatePasswordPage } from "./pages/update-password/UpdatePasswordPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { YearProvider } from "./context/YearContext";
 import { BannerProvider } from "./context/banner/BannerProvider";
+import { AllExpensesPdfsPage } from "./pages/allPdfs/AllExpensesPdfPage";
 
 const queryClient = new QueryClient();
 
@@ -90,7 +91,7 @@ export default function App() {
                     path="/steuerrelevante-ausgaben/alle-dokumente"
                     element={
                       <ProtectedRoute>
-                        <AllPdfsPage />
+                        <AllExpensesPdfsPage />
                       </ProtectedRoute>
                     }
                   />

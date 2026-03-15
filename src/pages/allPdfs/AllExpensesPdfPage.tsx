@@ -1,34 +1,57 @@
-import { useState, useEffect, useMemo } from "react";
+import JSZip from "jszip";
+import { useOutletContext } from "react-router-dom";
+import {
+  useLayoutEffect,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import {
   type DropdownOptions,
   paycheckFilterOptions,
   monthOptions,
-  isSortType,
-  isCategoryType,
+  categoryExpenseOptions,
+  isExpenseCategoryType,
 } from "../../components/dropdown/DropdownOption";
+import {
+  isSortType,
+  useRemoveExpense,
+} from "../../hooks/useExpenses/useExpenses";
 import { Dropdown } from "../../components/dropdown/Dropdown";
 import { ContentCard } from "../../components/contentCard/ContentCard";
 import { TotalIncomeCard } from "../../components/totalIncomeCard/TotalIncomeCard";
+import { SearchBar } from "../../components/searchBar/SearchBar";
 import { useAuth } from "../../context/AuthContext";
 import { useYear } from "../../hooks/year/UseYear";
-import type { AllPdfTypes } from "../allPdfs/types";
-import { usePdfs } from "../../hooks/usePdf/UsePdfs";
-import { formatAllPdfs } from "../allPdfs/utils";
 import { ErrorBlock } from "../../components/errorBlock/ErrorBlock";
+import { formatAllPdfsExpenses } from "./utils";
+import type { AllExpensePdfTypes } from "./types";
 import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
 import { DocumentSkeletonLoader } from "../../components/skeletonLoader/DocumentSkeletonLoader";
 import { Button } from "../../components/button/Button";
-import JSZip from "jszip";
 import { useBanner } from "../../context/banner/BannerContext";
+import { useFetchExpenses } from "../../hooks/useExpenses/useExpenses";
 
-type CategoryProps = {
-  title: string;
-};
-
-export const OtherPages = ({ title }: CategoryProps) => {
+export const AllExpensesPdfsPage = () => {
   const { user } = useAuth();
   const { year } = useYear();
-  const params = window.location.pathname.split("/")[1];
+
+  const { showBanner } = useBanner();
+
+  const { setTitle } = useOutletContext<{
+    setTitle: (title: string) => void;
+  }>();
+
+  useLayoutEffect(() => {
+    setTitle("Alle Dokumente");
+  }, [setTitle]);
+
+  const [contentCardData, setContentCardData] = useState<
+    AllExpensePdfTypes | undefined
+  >();
+
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [sortSelected, setSortSelected] = useState<
     DropdownOptions["paycheckFilter"][number]
@@ -41,56 +64,83 @@ export const OtherPages = ({ title }: CategoryProps) => {
     DropdownOptions["month"][number]
   >(monthOptions[monthOptions.length - 1]);
 
-  const [contentCardData, setContentCardData] = useState<
-    AllPdfTypes | undefined
-  >();
-
   const endMonthOptions = useMemo(
     () => monthOptions.slice(monthOptions.indexOf(startMonthSelected)),
     [startMonthSelected],
   );
 
-  const handleResetFilters = () => {
+  const [categorySelected, setCategorySelected] = useState<
+    DropdownOptions["expenseCategory"][number]
+  >(categoryExpenseOptions[0]);
+
+  const handleResetFilters = useCallback(() => {
     setSortSelected(paycheckFilterOptions[0]);
     setStartMonthSelected(monthOptions[0]);
     setEndMonthSelected(monthOptions[monthOptions.length - 1]);
-  };
+    setCategorySelected(categoryExpenseOptions[0]);
+    setSearchQuery("");
+  }, []);
 
-  const { showBanner } = useBanner();
+  const param = window.location.pathname.split("/")[1];
 
-  const {
-    data: pdfs,
-    isLoading,
-    error,
-    removePdf,
-  } = usePdfs({
-    userId: user?.id || "",
+  const removeFile = useRemoveExpense();
+
+  const { data, isLoading, error } = useFetchExpenses({
+    userId: user?.id ?? "",
     year,
     startMonth: Number(startMonthSelected.id) || undefined,
     endMonth: Number(endMonthSelected.id) || undefined,
     sortBy: isSortType(sortSelected.id) ? sortSelected.id : "new",
-    category: isCategoryType(title) ? title : "all",
+    category: isExpenseCategoryType(categorySelected.id)
+      ? categorySelected.id
+      : "all",
   });
 
   useEffect(() => {
-    if (pdfs) {
-      setContentCardData(formatAllPdfs(pdfs));
+    if (data) {
+      setContentCardData(formatAllPdfsExpenses(data));
     }
-  }, [pdfs]);
+  }, [data]);
+
+  useEffect(() => {
+    handleResetFilters();
+  }, [year]);
+
+  useEffect(() => {
+    if (
+      monthOptions.indexOf(endMonthSelected) <
+      monthOptions.indexOf(startMonthSelected)
+    ) {
+      setEndMonthSelected(startMonthSelected);
+    }
+  }, [startMonthSelected]);
 
   if (!user) return <ErrorBlock />;
 
+  const filteredPdfs = useMemo(() => {
+    if (!contentCardData) return [];
+
+    return contentCardData.pdfs.filter((pdf) => {
+      if (searchQuery.trim() === "") return true;
+      return pdf.file_name.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+  }, [contentCardData, searchQuery]);
+
+  if (!contentCardData) return <PageSkeletonLoader />;
+
+  if (error) return <ErrorBlock />;
+
   const handleDownloadAll = async () => {
-    if (!contentCardData || contentCardData.pdfs.length === 0) {
+    const zip = new JSZip();
+
+    if (filteredPdfs.length === 0) {
       showBanner(
         "Keine PDFs zum Herunterladen",
-        "Es sind keine PDFs zum Download verfügbar.",
+        "Es sind keine gefilterten PDFs zum Download verfügbar.",
         "error",
       );
       return;
     }
-
-    const zip = new JSZip();
 
     const slugify = (value: string) =>
       value.toLowerCase().trim().replace(/\s+/g, "_");
@@ -102,7 +152,8 @@ export const OtherPages = ({ title }: CategoryProps) => {
         ? `to_${endMonthSelected.label}`
         : null,
       `${year}`,
-      title,
+      categorySelected.id,
+      searchQuery ? `search_${searchQuery}` : null,
     ]
       .filter((v): v is string => Boolean(v))
       .map(slugify)
@@ -111,14 +162,15 @@ export const OtherPages = ({ title }: CategoryProps) => {
 
     try {
       await Promise.all(
-        contentCardData.pdfs.map(async (pdf, index) => {
-          if (!pdf.signedUrl) return;
+        filteredPdfs.map(async (pdf, index) => {
+          if (!pdf.signed_url) return;
 
-          const response = await fetch(pdf.signedUrl);
+          const response = await fetch(pdf.signed_url);
           const blob = await response.blob();
 
           const fileName =
-            pdf.title?.replace(/[^\w\d]+/g, "_") || `document_${index + 1}.pdf`;
+            pdf.file_name?.replace(/[^\w\d]+/g, "_") ||
+            `document_${index + 1}.pdf`;
 
           zip.file(`${fileName}.pdf`, blob);
         }),
@@ -148,36 +200,31 @@ export const OtherPages = ({ title }: CategoryProps) => {
         "Beim Herunterladen der PDFs ist ein Fehler aufgetreten. Bitte versuche es erneut.",
         "error",
       );
-      console.error(error);
     }
   };
-
-  if (!contentCardData) return <PageSkeletonLoader />;
-
-  if (error) return <ErrorBlock />;
 
   return (
     <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
       <TotalIncomeCard
-        title={title}
-        subtitle={
-          contentCardData.totalPdf.toString() +
-          " · " +
-          (params === "einnahmen" ? "Abrechnungen" : "Rechnungen")
-        }
+        title={param === "einnahmen" ? "Gesamteinnahmen" : "Gesamtkosten"}
+        subtitle={contentCardData.totalPdf + " · Dokumente"}
         totalIncome={contentCardData.totalIncome}
-        variant={params === "einnahmen" ? "income" : "expense"}
+        variant={param === "einnahmen" ? "income" : "expense"}
       />
       <div className="flex flex-col gap-2">
-        <div className="grid grid-cols-1">
+        <div className="grid md:grid-cols-2 gap-2">
           <Dropdown
             label="Sortieren nach"
             options={paycheckFilterOptions}
             onSelect={setSortSelected}
             value={sortSelected}
           />
-        </div>
-        <div className="grid md:grid-cols-2 gap-2">
+          <Dropdown
+            label="Kategorie auswählen"
+            options={categoryExpenseOptions}
+            onSelect={setCategorySelected}
+            value={categorySelected}
+          />
           <Dropdown
             label="Startmonat auswählen"
             options={monthOptions}
@@ -189,6 +236,15 @@ export const OtherPages = ({ title }: CategoryProps) => {
             options={endMonthOptions}
             onSelect={setEndMonthSelected}
             value={endMonthSelected}
+          />
+        </div>
+        <div className="grid grid-cols-1">
+          <SearchBar
+            placeholder="Dokumente suchen..."
+            onChange={setSearchQuery}
+            value={searchQuery}
+            debounceMs={200}
+            title="Dokumente suchen"
           />
         </div>
       </div>
@@ -209,17 +265,20 @@ export const OtherPages = ({ title }: CategoryProps) => {
         <DocumentSkeletonLoader />
       ) : (
         <div className="flex flex-col gap-6">
-          {contentCardData.pdfs.map((pdf, index) => (
+          {filteredPdfs.map((pdf, index) => (
             <ContentCard
               key={pdf.id || index}
               variant="document"
-              title={pdf.title}
-              date={pdf.date}
-              profit={pdf.income}
-              downloadLink={pdf.signedUrl}
-              openLink={pdf.openLink}
+              title={pdf.file_name}
+              date={pdf.expense_date}
+              profit={pdf.amount}
+              downloadLink={pdf.signed_url}
+              openLink={pdf.image_url}
+              searchQuery={searchQuery}
               id={pdf.id}
-              onDelete={(id) => removePdf.mutate(id)}
+              onDelete={(id) =>
+                removeFile.mutate({ id, imageUrl: pdf.image_url })
+              }
             />
           ))}
         </div>

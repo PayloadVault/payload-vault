@@ -1,5 +1,11 @@
+import type { ExpenseRecord } from "../../hooks/useExpenses/types";
 import type { PdfRecord } from "../../hooks/usePdf/types";
-import type { AllPdfTypes, SinglePdf } from "./types";
+import type {
+  AllExpensePdfTypes,
+  AllPdfTypes,
+  SingleExpensePdf,
+  SinglePdf,
+} from "./types";
 
 const formatAllPdfs = (allPdfs: PdfRecord[]) => {
   let totalIncome = 0;
@@ -30,4 +36,36 @@ const formatAllPdfs = (allPdfs: PdfRecord[]) => {
   return allData;
 };
 
-export { formatAllPdfs };
+const formatAllPdfsExpenses = (allPdfs: ExpenseRecord[]) => {
+  let totalIncome = 0;
+  let totalPdf = 0;
+  const pdfs: SingleExpensePdf[] = [];
+
+  allPdfs.forEach((pdf) => {
+    totalIncome += pdf.amount;
+    totalPdf++;
+    const singlePdf: SingleExpensePdf = {
+      id: pdf.id,
+      category: pdf.category,
+      created_at: pdf.created_at,
+      expense_date: pdf.expense_date,
+      file_name: pdf.file_name,
+      image_url: pdf.image_url,
+      signed_url: pdf.signed_url || "",
+      user_id: pdf.user_id,
+      vendor_name: pdf.vendor_name || "Unbekannt",
+      amount: pdf.amount,
+    };
+    pdfs.push(singlePdf);
+  });
+
+  const allData: AllExpensePdfTypes = {
+    totalPdf,
+    totalIncome,
+    pdfs,
+  };
+
+  return allData;
+};
+
+export { formatAllPdfs, formatAllPdfsExpenses };

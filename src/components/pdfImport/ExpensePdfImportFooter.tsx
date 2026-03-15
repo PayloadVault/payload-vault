@@ -1,5 +1,4 @@
 import { useAuth } from "../../context/AuthContext";
-import { useImportPdfModal } from "../../hooks/modal/UseImportPdfModal";
 import { useConfirmUploadModal } from "../../hooks/modal/UseConfirmUploadModal";
 import {
   usePdfs,
@@ -12,8 +11,9 @@ import { useBanner } from "../../context/banner/BannerContext";
 import type { UploadProgress } from "../modal/ImportPdfForm";
 import type { PendingUpload } from "../../hooks/usePdf/usePendingUpload";
 import { useRef } from "react";
+import { useExpenseImportPdfModal } from "../../hooks/modal/UseExpenseImportPdfModal";
 
-export const PdfImportFooter = () => {
+export const ExpensePdfImportFooter = () => {
   const { user } = useAuth();
   const { extractPdf, confirmPdf, declinePdf } = usePdfs({
     userId: user?.id || "",
@@ -85,8 +85,8 @@ export const PdfImportFooter = () => {
     onComplete: showFinalBanner,
   });
 
-  const { openImportPdfModal, closeModal: closeImportModal } =
-    useImportPdfModal({
+  const { openExpenseImportPdfModal, closeModal: closeImportModal } =
+    useExpenseImportPdfModal({
       onSave: async (
         files: File[],
         onProgress: (progress: UploadProgress) => void,
@@ -195,7 +195,7 @@ export const PdfImportFooter = () => {
     "
     >
       <Button
-        onClick={openImportPdfModal}
+        onClick={openExpenseImportPdfModal}
         icon={UploadIcon}
         text="Dokument hochladen"
       />

@@ -1,5 +1,6 @@
 import type { Option } from "./Dropdown.types";
 import type { Category, HomeSort, SortTypes } from "../../hooks/usePdf/types";
+import type { ExpenseCategory } from "../../hooks/useExpenses/types";
 
 export const paycheckFilterOptions: Option[] = [
   { id: "new", label: "Neueste zuerst" },
@@ -39,11 +40,26 @@ export const categoryOptions: Option[] = [
   { id: "Adcuri Bestandsprovision", label: "Adcuri Bestandsprovision" },
 ];
 
+export const categoryExpenseOptions: Option[] = [
+  { id: "all", label: "Alle Kategorien" },
+  { id: "Mobilität", label: "Mobilität" },
+  { id: "Geschäftsessen", label: "Geschäftsessen" },
+  { id: "Büro & Arbeitsmittel", label: "Büro & Arbeitsmittel" },
+  { id: "Kommunikation", label: "Kommunikation" },
+  { id: "Weiterbildung", label: "Weiterbildung" },
+  { id: "Reisen", label: "Reisen" },
+  { id: "Versicherungen", label: "Versicherungen" },
+  { id: "Bank & Gebühren", label: "Bank & Gebühren" },
+  { id: "Marketing", label: "Marketing" },
+  { id: "Sonstiges", label: "Sonstiges" },
+];
+
 export const dropdownOptions = {
   paycheckFilter: paycheckFilterOptions,
   month: monthOptions,
   categorySort: categorySortOptions,
   category: categoryOptions,
+  expenseCategory: categoryExpenseOptions,
 } as const;
 
 export function isSortType(value: string): value is SortTypes {
@@ -62,6 +78,22 @@ export function isCategoryType(value: string): value is Category {
     "IKK Abrechnung",
     "Adcuri Abschlussprovision",
     "Adcuri Bestandsprovision",
+  ].includes(value);
+}
+
+export function isExpenseCategoryType(value: string): value is ExpenseCategory {
+  return [
+    "all",
+    "Mobilität",
+    "Geschäftsessen",
+    "Büro & Arbeitsmittel",
+    "Kommunikation",
+    "Weiterbildung",
+    "Reisen",
+    "Versicherungen",
+    "Bank & Gebühren",
+    "Marketing",
+    "Sonstiges",
   ].includes(value);
 }
 

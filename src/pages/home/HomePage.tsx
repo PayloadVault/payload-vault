@@ -40,9 +40,6 @@ export const HomePage = () => {
     allCategories: expenses ? formatExpenses(expenses).allCategories : [],
   };
 
-  console.log("Expenses:", formatExpenses(expenses || []));
-  console.log("PDFs:", formatData(pdfs || []));
-
   if (!user || !year || errorExpenses || errorPdfs) return <ErrorBlock />;
 
   return (
