@@ -28,6 +28,7 @@ type CategoryProps = {
 export const OtherPages = ({ title }: CategoryProps) => {
   const { user } = useAuth();
   const { year } = useYear();
+  const params = window.location.pathname.split("/")[1];
 
   const [sortSelected, setSortSelected] = useState<
     DropdownOptions["paycheckFilter"][number]
@@ -158,7 +159,11 @@ export const OtherPages = ({ title }: CategoryProps) => {
     <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
       <TotalIncomeCard
         title={title}
-        subtitle={contentCardData.totalPdf.toString() + " · Gehaltsabrechnung"}
+        subtitle={
+          contentCardData.totalPdf.toString() +
+          " · " +
+          (params === "einnahmen" ? "Abrechnungen" : "Rechnungen")
+        }
         totalIncome={contentCardData.totalIncome}
       />
       <div className="flex flex-col gap-2">

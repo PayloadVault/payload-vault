@@ -53,9 +53,7 @@ export const SalesPage = () => {
         <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
           <TotalIncomeCard
             title="Gesamteinnahmen"
-            subtitle={
-              contentCardData.totalPdf.toString() + " · Gehaltsabrechnung"
-            }
+            subtitle={contentCardData.totalPdf.toString() + " · Abrechnungen"}
             totalIncome={contentCardData.totalIncome}
           />
           <ContentCard
@@ -71,7 +69,7 @@ export const SalesPage = () => {
                 key={index}
                 variant="category"
                 title={category.category.title}
-                subtitle={category.subtitle.toString() + " · Gehaltsabrechnung"}
+                subtitle={category.subtitle.toString() + " · Abrechnungen"}
                 profit={category.profit}
                 link={"/einnahmen/kategorie/" + category.category.slug}
               />

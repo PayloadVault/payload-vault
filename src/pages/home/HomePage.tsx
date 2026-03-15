@@ -38,13 +38,13 @@ export const HomePage = () => {
       <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
         <TotalIncomeCard
           title="Gesamteinnahmen"
-          subtitle={contentCardData.totalPdf + " · Gehaltsabrechnung"}
+          subtitle={contentCardData.totalPdf + " · Abrechnungen"}
           totalIncome={contentCardData.totalIncome}
         />
         <TotalIncomeCard
           variant="expense"
-          title="Gesamtcosten"
-          subtitle={contentCardData.totalPdf + " · Gehaltsabrechnung"}
+          title="Gesamtkosten"
+          subtitle={contentCardData.totalPdf + " · Rechnungen"}
           totalIncome={contentCardData.totalIncome}
         />
         <h2 className="text-color-primary font-bold mx-auto">Kategorien</h2>
@@ -54,7 +54,13 @@ export const HomePage = () => {
               key={index}
               variant="category"
               title={category.category.title}
-              subtitle={category.subtitle.toString() + " · Gehaltsabrechnung"}
+              subtitle={
+                category.subtitle.toString() +
+                " · " +
+                (category.category.slug === "einnahmen"
+                  ? "Abrechnungen"
+                  : "Rechnungen")
+              }
               profit={category.profit}
               link={category.category.slug}
             />
