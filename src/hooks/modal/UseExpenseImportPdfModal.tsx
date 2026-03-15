@@ -1,7 +1,5 @@
-import {
-  ImportPdfForm,
-  type UploadProgress,
-} from "../../components/modal/ImportPdfForm";
+import { ExpenseImportPdfForm } from "../../components/modal/ExpenseImportPdfForm";
+import { type UploadProgress } from "../../components/modal/ImportPdfForm";
 import { useModal } from "../../context/modal/ModalContext";
 
 type UseExpenseImportPdfModalProps = {
@@ -19,7 +17,7 @@ export const useExpenseImportPdfModal = ({
   const openExpenseImportPdfModal = () => {
     openModal({
       title: "Expense Dokument importieren",
-      children: <ImportPdfForm onCancel={closeModal} onSave={onSave} />,
+      children: <ExpenseImportPdfForm onCancel={closeModal} onSave={onSave} />,
     });
   };
 
