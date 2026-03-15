@@ -2,6 +2,14 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 import { GoogleGenerativeAI } from "npm:@google/generative-ai";
 import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 import { INVOICE_EXTRACTION_PROMPT } from "./prompt.ts";
+import {
+  extractedAdcuriAbschlussprovision,
+  extractedAdcuriBestandsprovision,
+  extractedBarmeniaAbrechnung,
+  extractedStromUndGas,
+  processSalesData,
+  unifiedPdfExtractor,
+} from "./utils.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
@@ -77,7 +85,21 @@ Deno.serve(async (req) => {
       },
     ]);
 
-    const responseText = result.response.text();
+    console.log("Gemini raw response:", await result.response.text());
+    const responseWithoutGemini = await processSalesData({
+      data: base64Data,
+      mimeType: fileType || "application/pdf",
+    });
+
+    const extractedDataWithoutAI = unifiedPdfExtractor(responseWithoutGemini);
+
+    if (extractedDataWithoutAI) {
+      console.log("Extracted:", extractedDataWithoutAI);
+    } else {
+      console.log("Could not extract data from this PDF");
+    }
+
+    const responseText = await result.response.text();
     const aiParsed = sanitizeAIResponse(responseText);
 
     const category = aiParsed?.category as string | undefined;
@@ -85,17 +107,19 @@ Deno.serve(async (req) => {
 
     const extractedData: ExtractionResponse = isValidCategory
       ? {
-        success: true,
-        profit: (aiParsed?.profit as number) || 0,
-        date_created: (aiParsed?.date_created as string) ||
-          new Date().toISOString().split("T")[0],
-        category: category,
-      }
+          success: true,
+          profit: (aiParsed?.profit as number) || 0,
+          date_created:
+            (aiParsed?.date_created as string) ||
+            new Date().toISOString().split("T")[0],
+          category: category,
+        }
       : {
-        success: false,
-        rejection_reason: (aiParsed?.rejection_reason as string) ||
-          "Dieses Dokument konnte nicht als gültige Rechnung identifiziert werden. Bitte stellen Sie sicher, dass Sie einen unterstützten Rechnungstyp hochladen.",
-      };
+          success: false,
+          rejection_reason:
+            (aiParsed?.rejection_reason as string) ||
+            "Dieses Dokument konnte nicht als gültige Rechnung identifiziert werden. Bitte stellen Sie sicher, dass Sie einen unterstützten Rechnungstyp hochladen.",
+        };
 
     // We can keep logging on backend side for debugging purposes
     console.log("Extracted Data:", extractedData);
