@@ -2,14 +2,14 @@ import { useState, useEffect, useLayoutEffect } from "react";
 import { ContentCard } from "../../components/contentCard/ContentCard";
 import { TotalIncomeCard } from "../../components/totalIncomeCard/TotalIncomeCard";
 import { PdfImportFooter } from "../../components/pdfImport/PdfImportFooter";
-import { usePdfs } from "../../hooks/usePdf/UsePdfs";
 import { useAuth } from "../../context/AuthContext";
 import { useYear } from "../../hooks/year/UseYear";
-import { formatData } from "./utils";
+import { formatExpenses } from "./utils";
 import type { FullData } from "./types";
 import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
 import { ErrorBlock } from "../../components/errorBlock/ErrorBlock";
 import { useOutletContext } from "react-router-dom";
+import { useFetchExpenses } from "../../hooks/useExpenses/useExpenses";
 
 export const ExpensesPage = () => {
   const { user } = useAuth();
@@ -27,19 +27,19 @@ export const ExpensesPage = () => {
   }, [setTitle]);
 
   const {
-    data: pdfs,
+    data: expenses,
     isLoading,
     error,
-  } = usePdfs({
-    userId: user?.id || "",
+  } = useFetchExpenses({
+    userId: user?.id,
     year,
   });
 
   useEffect(() => {
-    if (pdfs) {
-      setContentCardData(formatData(pdfs));
+    if (expenses) {
+      setContentCardData(formatExpenses(expenses));
     }
-  }, [pdfs]);
+  }, [expenses]);
 
   if (!user) return <ErrorBlock />;
 
@@ -52,17 +52,16 @@ export const ExpensesPage = () => {
       ) : (
         <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
           <TotalIncomeCard
-            title="Gesamteinnahmen"
-            subtitle={
-              contentCardData.totalPdf.toString() + " · Gehaltsabrechnung"
-            }
+            title="Gesamtkosten"
+            subtitle={contentCardData.totalPdf.toString() + " · Rechnungen"}
             totalIncome={contentCardData.totalIncome}
+            variant="expense"
           />
           <ContentCard
             variant="allPdf"
             title={contentCardData.allPdfs.title}
             subtitle={contentCardData.allPdfs.subtitle}
-            link={"/steuerrelevante-ausgaben" + contentCardData.allPdfs.link}
+            link={"/steuerrelevante-ausgaben/alle-dokumente"}
           />
           <h2 className="text-color-primary font-bold mx-auto">Kategorien</h2>
           <div className="flex flex-col gap-6">
@@ -71,7 +70,7 @@ export const ExpensesPage = () => {
                 key={index}
                 variant="category"
                 title={category.category.title}
-                subtitle={category.subtitle.toString() + " · Gehaltsabrechnung"}
+                subtitle={category.subtitle.toString() + " · Rechnungen"}
                 profit={category.profit}
                 link={
                   "/steuerrelevante-ausgaben/kategorie/" +

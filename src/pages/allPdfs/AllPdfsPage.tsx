@@ -78,6 +78,8 @@ export const AllPdfsPage = () => {
     setSearchQuery("");
   }, []);
 
+  const param = window.location.pathname.split("/")[1];
+
   const {
     data: pdfs,
     isLoading,
@@ -201,9 +203,10 @@ export const AllPdfsPage = () => {
   return (
     <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
       <TotalIncomeCard
-        title="Gesamteinnahmen"
+        title={param === "einnahmen" ? "Gesamteinnahmen" : "Gesamtkosten"}
         subtitle={contentCardData.totalPdf + " · Dokumente"}
         totalIncome={contentCardData.totalIncome}
+        variant={param === "einnahmen" ? "income" : "expense"}
       />
       <div className="flex flex-col gap-2">
         <div className="grid md:grid-cols-2 gap-2">

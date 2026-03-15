@@ -87,6 +87,15 @@ export default function App() {
                     }
                   />
                   <Route
+                    path="/steuerrelevante-ausgaben/alle-dokumente"
+                    element={
+                      <ProtectedRoute>
+                        <AllPdfsPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
                     path="/einnahmen/kategorie/:slug"
                     element={
                       <ProtectedRoute>
@@ -95,7 +104,23 @@ export default function App() {
                     }
                   />
                   <Route
+                    path="/steuerrelevante-ausgaben/kategorie/:slug"
+                    element={
+                      <ProtectedRoute>
+                        <CategoryPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/einnahmen/kategorie/:slug/pdfs"
+                    element={
+                      <ProtectedRoute>
+                        <CategoryPdfsPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/steuerrelevante-ausgaben/kategorie/:slug/pdfs"
                     element={
                       <ProtectedRoute>
                         <CategoryPdfsPage />

@@ -1,72 +1,89 @@
+import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
 import { ContentCard } from "../../components/contentCard/ContentCard";
-import { HeaderHome } from "../../components/header/HeaderHome";
 import { TotalIncomeCard } from "../../components/totalIncomeCard/TotalIncomeCard";
+import { HeaderHome } from "../../components/header/HeaderHome";
 import { useAuth } from "../../context/AuthContext";
 import { ErrorBlock } from "../../components/errorBlock/ErrorBlock";
+import { useFetchExpenses } from "../../hooks/useExpenses/useExpenses";
+import { useYear } from "../../hooks/year/UseYear";
+import { usePdfs } from "../../hooks/usePdf/UsePdfs";
+import { formatExpenses } from "../expenses/utils";
+import { formatData } from "./utils";
 
 export const HomePage = () => {
   const { user } = useAuth();
+  const { year } = useYear();
 
-  if (!user) return <ErrorBlock />;
+  const {
+    data: expenses,
+    isLoading: isLoadingExpenses,
+    error: errorExpenses,
+  } = useFetchExpenses({
+    userId: user?.id || "",
+    year,
+  });
+
+  const {
+    data: pdfs,
+    isLoading: isLoadingPdfs,
+    error: errorPdfs,
+  } = usePdfs({
+    userId: user?.id || "",
+    year,
+  });
 
   const contentCardData = {
-    totalPdf: 15,
-    totalIncome: 124463,
-    allCategories: [
-      {
-        category: {
-          title: "Einnahmen",
-          slug: "einnahmen",
-        },
-        subtitle: 10,
-        profit: 100000,
-      },
-      {
-        category: {
-          title: "Steuerrelevante Ausgaben",
-          slug: "steuerrelevante-ausgaben",
-        },
-        subtitle: 5,
-        profit: 24463,
-      },
-    ],
+    totalPdf: pdfs ? formatData(pdfs).totalPdf : 0,
+    totalExpensePdf: expenses ? formatExpenses(expenses).totalPdf : 0,
+    totalIncome: pdfs ? formatData(pdfs).totalIncome : 0,
+    totalExpanse: expenses ? formatExpenses(expenses).totalIncome : 0,
+    allCategories: expenses ? formatExpenses(expenses).allCategories : [],
   };
+
+  console.log("Expenses:", formatExpenses(expenses || []));
+  console.log("PDFs:", formatData(pdfs || []));
+
+  if (!user || !year || errorExpenses || errorPdfs) return <ErrorBlock />;
 
   return (
     <div className="min-h-screen bg-color-bg">
-      <HeaderHome />
-      <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
-        <TotalIncomeCard
-          title="Gesamteinnahmen"
-          subtitle={contentCardData.totalPdf + " · Abrechnungen"}
-          totalIncome={contentCardData.totalIncome}
-        />
-        <TotalIncomeCard
-          variant="expense"
-          title="Gesamtkosten"
-          subtitle={contentCardData.totalPdf + " · Rechnungen"}
-          totalIncome={contentCardData.totalIncome}
-        />
-        <h2 className="text-color-primary font-bold mx-auto">Kategorien</h2>
-        <div className="flex flex-col gap-6">
-          {contentCardData.allCategories.map((category, index) => (
-            <ContentCard
-              key={index}
-              variant="category"
-              title={category.category.title}
-              subtitle={
-                category.subtitle.toString() +
-                " · " +
-                (category.category.slug === "einnahmen"
-                  ? "Abrechnungen"
-                  : "Rechnungen")
-              }
-              profit={category.profit}
-              link={category.category.slug}
+      {isLoadingExpenses || isLoadingPdfs || !expenses || !pdfs ? (
+        <PageSkeletonLoader />
+      ) : (
+        <>
+          <HeaderHome />
+          <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
+            <TotalIncomeCard
+              title="Gesamteinnahmen"
+              subtitle={contentCardData.totalPdf + " · Abrechnungen"}
+              totalIncome={contentCardData.totalIncome}
             />
-          ))}
-        </div>
-      </main>
+            <TotalIncomeCard
+              variant="expense"
+              title="Gesamtkosten"
+              subtitle={contentCardData.totalExpensePdf + " · Rechnungen"}
+              totalIncome={contentCardData.totalExpanse}
+            />
+            <h2 className="text-color-primary font-bold mx-auto">Kategorien</h2>
+            <div className="flex flex-col gap-6">
+              <ContentCard
+                variant="category"
+                title="Einnahmen"
+                subtitle={contentCardData.totalPdf + " · Abrechnungen"}
+                profit={contentCardData.totalIncome}
+                link="/einnahmen"
+              />
+              <ContentCard
+                variant="category"
+                title="Steuerrelevante Ausgaben"
+                subtitle={contentCardData.totalExpensePdf + " · Rechnungen"}
+                profit={contentCardData.totalExpanse}
+                link="/steuerrelevante-ausgaben"
+              />
+            </div>
+          </main>
+        </>
+      )}
     </div>
   );
 };

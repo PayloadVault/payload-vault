@@ -1,63 +1,52 @@
-import type { HomeSort, PdfRecord } from "../../hooks/usePdf/types";
+import type { HomeSort } from "../../hooks/usePdf/types";
+import type { ExpenseRecord } from "../../hooks/useExpenses/types";
 import type { CategoryData, FullData } from "./types";
+import { type Category } from "../../data/Categories";
 
-const formatData = (allPdfs: PdfRecord[]) => {
-  let totalIncome = 0;
-  let totalPdf = 0;
-  const allData: CategoryData[] = [
-    {
-      category: { slug: "adcuri", title: "Adcuri" },
-      profit: 0,
-      subtitle: 0,
-    },
-    {
-      category: { slug: "barmenia-abrechnung", title: "Barmenia Abrechnung" },
-      profit: 0,
-      subtitle: 0,
-    },
-    {
-      category: { slug: "ikk-abrechnung", title: "IKK Abrechnung" },
-      profit: 0,
-      subtitle: 0,
-    },
-    {
-      category: { slug: "strom-gas", title: "Strom & Gas" },
-      profit: 0,
-      subtitle: 0,
-    },
-  ];
-  allPdfs.forEach((pdf) => {
-    totalIncome += pdf.profit;
-    totalPdf++;
-    allData.forEach((data) => {
-      if (pdf.category === data.category.title) {
-        data.profit += pdf.profit;
-        data.subtitle++;
-      }
+const EXPENSE_CATEGORIES: Category[] = [
+  { slug: "mobilitaet", title: "Mobilität" },
+  { slug: "geschaeftsessen", title: "Geschäftsessen" },
+  { slug: "buero-arbeitsmittel", title: "Büro & Arbeitsmittel" },
+  { slug: "kommunikation", title: "Kommunikation" },
+  { slug: "weiterbildung", title: "Weiterbildung" },
+  { slug: "reisen", title: "Reisen" },
+  { slug: "versicherungen", title: "Versicherungen" },
+  { slug: "bank-gebuehren", title: "Bank & Gebühren" },
+  { slug: "marketing", title: "Marketing" },
+  { slug: "sonstiges", title: "Sonstiges" },
+];
 
-      if (
-        (pdf.category === "Adcuri Abschlussprovision" ||
-          pdf.category === "Adcuri Bestandsprovision") &&
-        data.category.title === "Adcuri"
-      ) {
-        data.profit += pdf.profit;
-        data.subtitle++;
-      }
-    });
+const formatExpenses = (expenses: ExpenseRecord[]): FullData => {
+  let totalAmount = 0;
+  let totalExpenses = 0;
+
+  const allData: CategoryData[] = EXPENSE_CATEGORIES.map((category) => ({
+    category,
+    profit: 0,
+    subtitle: 0,
+  }));
+
+  expenses.forEach((expense) => {
+    totalAmount += expense.amount;
+    totalExpenses++;
+
+    const match = allData.find((d) => d.category.title === expense.category);
+    if (match) {
+      match.profit += expense.amount;
+      match.subtitle++;
+    }
   });
 
-  const fullData = {
-    totalIncome,
-    totalPdf,
+  return {
+    totalIncome: totalAmount,
+    totalPdf: totalExpenses,
     allCategories: allData,
     allPdfs: {
-      title: "Alle Dokumente",
-      subtitle: "Alle Dokumente durchsuchen · " + allPdfs.length,
-      link: "/alle-dokumente",
+      title: "Alle Ausgaben",
+      subtitle: "Alle Ausgaben durchsuchen · " + expenses.length,
+      link: "/alle-ausgaben",
     },
   };
-
-  return fullData;
 };
 
 const sortData = (fullData: FullData, sort: HomeSort) => {
@@ -86,4 +75,4 @@ const sortData = (fullData: FullData, sort: HomeSort) => {
   };
 };
 
-export { formatData, sortData };
+export { formatExpenses, sortData, EXPENSE_CATEGORIES };

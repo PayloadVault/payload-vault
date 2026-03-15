@@ -165,6 +165,7 @@ export const OtherPages = ({ title }: CategoryProps) => {
           (params === "einnahmen" ? "Abrechnungen" : "Rechnungen")
         }
         totalIncome={contentCardData.totalIncome}
+        variant={params === "einnahmen" ? "income" : "expense"}
       />
       <div className="flex flex-col gap-2">
         <div className="grid grid-cols-1">
