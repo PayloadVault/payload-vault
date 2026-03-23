@@ -10,8 +10,26 @@ import type { UploadCardProps } from "./UploadfileCard.types";
 import { Button } from "../button/Button";
 import { useBanner } from "../../context/banner/BannerContext";
 
-const MAX_FILE_SIZE_KB = 500;
+const MAX_FILE_SIZE_KB = 5000;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_KB * 1024;
+
+const ACCEPTED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"];
+const ACCEPTED_PDF_EXTENSIONS = [".pdf"];
+
+function buildAcceptedExtensions(accept: string): string[] {
+  const parts = accept.split(",").map((s) => s.trim().toLowerCase());
+  const extensions: string[] = [];
+  for (const part of parts) {
+    if (part.startsWith(".")) {
+      extensions.push(part);
+    } else if (part === "image/*") {
+      extensions.push(...ACCEPTED_IMAGE_EXTENSIONS);
+    } else if (part === "application/pdf") {
+      extensions.push(...ACCEPTED_PDF_EXTENSIONS);
+    }
+  }
+  return extensions.length > 0 ? extensions : ACCEPTED_PDF_EXTENSIONS;
+}
 
 export const FileUploadCard = ({
   description,
@@ -26,12 +44,17 @@ export const FileUploadCard = ({
 
   const [isDragOver, setIsDragOver] = useState(false);
 
+  const acceptedExtensions = useMemo(() => buildAcceptedExtensions(accept), [accept]);
+
   const openPicker = () => {
     if (disabled) return;
     inputRef.current?.click();
   };
 
-  const isPdfFile = (f: File) => /\.pdf$/i.test(f.name);
+  const isAcceptedFile = (f: File) => {
+    const ext = f.name.slice(f.name.lastIndexOf(".")).toLowerCase();
+    return acceptedExtensions.includes(ext);
+  };
   const isValidSize = (f: File) => f.size <= MAX_FILE_SIZE_BYTES;
 
   const addFiles = (incoming: File[]) => {
@@ -40,7 +63,7 @@ export const FileUploadCard = ({
     const oversizedFiles: string[] = [];
 
     incoming.forEach((file) => {
-      if (!isPdfFile(file)) {
+      if (!isAcceptedFile(file)) {
         invalidFormatFiles.push(file.name);
         return;
       }
@@ -52,9 +75,10 @@ export const FileUploadCard = ({
     });
 
     if (invalidFormatFiles.length) {
+      const allowed = acceptedExtensions.join(", ");
       showBanner(
         "Ungültiges Dateiformat",
-        `Nur PDF-Dateien sind erlaubt. Entfernt: ${invalidFormatFiles.join(", ")}`,
+        `Erlaubte Formate: ${allowed}. Entfernt: ${invalidFormatFiles.join(", ")}`,
         "error",
       );
     }

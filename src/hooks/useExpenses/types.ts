@@ -46,12 +46,20 @@ type FetchExpensesProps = {
   endMonth?: number;
 };
 
+type PendingExpenseUpload = {
+  id: string;
+  fileName: string;
+  filePath: string;
+  extractedData: ExtractedExpenseData;
+};
+
 export type {
   ExpenseCategory,
   ExpenseRecord,
   ExtractedExpenseData,
   FetchExpensesProps,
   NewExpense,
+  PendingExpenseUpload,
   UploadExpenseResult,
 };
 export { DEFAULT_EXPENSE_CATEGORY, expenseCategories, isExpenseCategory };

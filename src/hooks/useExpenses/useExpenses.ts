@@ -3,11 +3,27 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../../lib/supabase";
 import type {
   ExpenseRecord,
-  ExtractedExpenseData,
   FetchExpensesProps,
   NewExpense,
+  PendingExpenseUpload,
   SortType,
 } from "./types";
+
+export class DuplicateExpenseError extends Error {
+  constructor(fileName: string) {
+    super(`File "${fileName}" already exists.`);
+    this.name = "DuplicateExpenseError";
+  }
+}
+
+export class ExtractionExpenseError extends Error {
+  rejectionReason: string;
+  constructor(reason: string) {
+    super(reason);
+    this.name = "ExtractionExpenseError";
+    this.rejectionReason = reason;
+  }
+}
 
 function sanitizeFileName(fileName: string): string {
   return fileName
@@ -63,9 +79,13 @@ export function useFetchExpenses(props: FetchExpensesProps) {
         const startMonth = props.startMonth ?? 1;
         const endMonth = props.endMonth ?? 12;
 
-        const startDate = `${props.year}-${String(startMonth).padStart(2, "0")}-01`;
+        const startDate = `${props.year}-${
+          String(startMonth).padStart(2, "0")
+        }-01`;
         const endDay = new Date(props.year, endMonth, 0).getDate(); // last day of endMonth
-        const endDate = `${props.year}-${String(endMonth).padStart(2, "0")}-${endDay}`;
+        const endDate = `${props.year}-${
+          String(endMonth).padStart(2, "0")
+        }-${endDay}`;
 
         q = q.gte("expense_date", startDate).lte("expense_date", endDate);
       } else if (props.startMonth || props.endMonth) {
@@ -96,17 +116,18 @@ export function useFetchExpenses(props: FetchExpensesProps) {
       const filePaths = data.map((e) => e.image_url).filter(Boolean);
       if (filePaths.length === 0) return data;
 
-      const { data: signedUrls, error: signedUrlsError } =
-        await supabase.storage
-          .from("expense_invoices")
-          .createSignedUrls(filePaths, 3600);
+      const { data: signedUrls, error: signedUrlsError } = await supabase
+        .storage
+        .from("expense_invoices")
+        .createSignedUrls(filePaths, 3600);
 
       if (signedUrlsError) throw signedUrlsError;
 
       return data.map((expense) => ({
         ...expense,
-        signed_url:
-          signedUrls?.find((s) => expense.image_url === s.path)?.signedUrl ??
+        signed_url: signedUrls?.find((s) =>
+          expense.image_url === s.path
+        )?.signedUrl ??
           "",
       }));
     },
@@ -115,11 +136,11 @@ export function useFetchExpenses(props: FetchExpensesProps) {
 }
 
 export function useUploadAndExtract(userId: string) {
-  return useMutation<ExtractedExpenseData, Error, File>({
+  return useMutation<PendingExpenseUpload, Error, File>({
     mutationFn: async (file) => {
       const isDuplicate = await checkDuplicateFileName(userId, file.name);
       if (isDuplicate) {
-        throw new Error(`File "${file.name}" already exists.`);
+        throw new DuplicateExpenseError(file.name);
       }
 
       const filePath = `${userId}/${Date.now()}_${sanitizeFileName(file.name)}`;
@@ -138,17 +159,33 @@ export function useUploadAndExtract(userId: string) {
         );
 
         if (extractError || !data?.success) {
-          throw new Error(data?.error || "Extraction failed");
+          throw new ExtractionExpenseError(
+            data?.error || "Extraction failed",
+          );
         }
 
         return {
-          ...data.extracted,
-          file_name: file.name,
+          id: crypto.randomUUID(),
+          fileName: file.name,
+          filePath,
+          extractedData: {
+            ...data.extracted,
+            image_url: filePath,
+            file_name: file.name,
+          },
         };
       } catch (err) {
         await deleteImageFromStorage(filePath);
         throw err;
       }
+    },
+  });
+}
+
+export function useDeclineExpenseUpload() {
+  return useMutation<void, Error, string>({
+    mutationFn: async (filePath: string) => {
+      await deleteImageFromStorage(filePath);
     },
   });
 }

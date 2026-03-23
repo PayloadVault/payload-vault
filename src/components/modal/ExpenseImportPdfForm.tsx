@@ -46,7 +46,7 @@ export const ExpenseImportPdfForm = ({
   const buttonText = progress
     ? `Verarbeitung ${progress.completed}/${progress.total}...`
     : files.length > 1
-      ? `${files.length} PDFs hochladen`
+      ? `${files.length} Dokumente hochladen`
       : "Dokument hochladen";
 
   return (
@@ -54,7 +54,8 @@ export const ExpenseImportPdfForm = ({
       <div className="w-full">
         <FileUploadCard
           title="Dokument importieren"
-          description={`Bis zu ${MAX_FILES} Dateien auswählen oder per Drag & Drop ablegen`}
+          description={`Bis zu ${MAX_FILES} Bilder oder PDFs auswählen oder per Drag & Drop ablegen`}
+          accept="image/*,.pdf,application/pdf"
           files={files}
           setFiles={setFiles}
           disabled={isLoading}

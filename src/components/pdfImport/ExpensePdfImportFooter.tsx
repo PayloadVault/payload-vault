@@ -1,26 +1,27 @@
 import { useAuth } from "../../context/AuthContext";
-import { useConfirmUploadModal } from "../../hooks/modal/UseConfirmUploadModal";
+import { useExpenseConfirmUploadModal } from "../../hooks/modal/UseExpenseConfirmUploadModal";
 import {
-  usePdfs,
-  ExtractionError,
-  DuplicateFileError,
-} from "../../hooks/usePdf/UsePdfs";
+  useUploadAndExtract,
+  useConfirmAndUploadToDatabase,
+  useDeclineExpenseUpload,
+  DuplicateExpenseError,
+  ExtractionExpenseError,
+} from "../../hooks/useExpenses/useExpenses";
+import type { PendingExpenseUpload } from "../../hooks/useExpenses/types";
 import { Button } from "../button/Button";
 import { UploadIcon } from "../icons";
 import { useBanner } from "../../context/banner/BannerContext";
-import type { UploadProgress } from "../modal/ImportPdfForm";
-import type { PendingUpload } from "../../hooks/usePdf/usePendingUpload";
+import type { UploadProgress } from "../modal/ExpenseImportPdfForm";
 import { useRef } from "react";
 import { useExpenseImportPdfModal } from "../../hooks/modal/UseExpenseImportPdfModal";
 
 export const ExpensePdfImportFooter = () => {
   const { user } = useAuth();
-  const { extractPdf, confirmPdf, declinePdf } = usePdfs({
-    userId: user?.id || "",
-  });
+  const uploadAndExtract = useUploadAndExtract(user?.id || "");
+  const confirmExpense = useConfirmAndUploadToDatabase();
+  const declineExpense = useDeclineExpenseUpload();
   const { showBanner } = useBanner();
 
-  // Track stats for final banner
   const statsRef = useRef({ confirmed: 0, declined: 0 });
 
   const showFinalBanner = () => {
@@ -30,16 +31,16 @@ export const ExpensePdfImportFooter = () => {
       showBanner(
         "Upload abgeschlossen",
         confirmed === 1
-          ? "Die PDF-Datei wurde erfolgreich hochgeladen."
-          : `Alle ${confirmed} Dateien wurden erfolgreich hochgeladen.`,
+          ? "Das Dokument wurde erfolgreich hochgeladen."
+          : `Alle ${confirmed} Dokumente wurden erfolgreich hochgeladen.`,
         "success",
       );
     } else if (confirmed === 0 && declined > 0) {
       showBanner(
         "Uploads abgelehnt",
         declined === 1
-          ? "Die PDF-Datei wurde abgelehnt."
-          : `${declined} Dateien wurden abgelehnt.`,
+          ? "Das Dokument wurde abgelehnt."
+          : `${declined} Dokumente wurden abgelehnt.`,
         "error",
       );
     } else if (confirmed > 0 && declined > 0) {
@@ -53,11 +54,16 @@ export const ExpensePdfImportFooter = () => {
     statsRef.current = { confirmed: 0, declined: 0 };
   };
 
-  const handleConfirmUpload = async (upload: PendingUpload) => {
+  const handleConfirmUpload = async (upload: PendingExpenseUpload) => {
     try {
-      await confirmPdf.mutateAsync({
-        userId: user?.id || "",
-        pendingUpload: upload,
+      await confirmExpense.mutateAsync({
+        user_id: user?.id || "",
+        category: upload.extractedData.category,
+        amount: upload.extractedData.amount,
+        expense_date: upload.extractedData.expense_date,
+        vendor_name: upload.extractedData.vendor_name,
+        image_url: upload.extractedData.image_url,
+        file_name: upload.extractedData.file_name,
       });
       statsRef.current.confirmed++;
     } catch (error) {
@@ -70,16 +76,16 @@ export const ExpensePdfImportFooter = () => {
     }
   };
 
-  const handleDeclineUpload = async (upload: PendingUpload) => {
+  const handleDeclineUpload = async (upload: PendingExpenseUpload) => {
     try {
-      await declinePdf.mutateAsync(upload.filePath);
+      await declineExpense.mutateAsync(upload.filePath);
       statsRef.current.declined++;
     } catch (error) {
       console.error("Error declining upload:", error);
     }
   };
 
-  const { openConfirmUploadModal } = useConfirmUploadModal({
+  const { openExpenseConfirmUploadModal } = useExpenseConfirmUploadModal({
     onConfirm: handleConfirmUpload,
     onDecline: handleDeclineUpload,
     onComplete: showFinalBanner,
@@ -96,7 +102,7 @@ export const ExpensePdfImportFooter = () => {
           return;
         }
 
-        const pendingUploads: PendingUpload[] = [];
+        const pendingUploads: PendingExpenseUpload[] = [];
         let completedCount = 0;
         const failedFiles: {
           name: string;
@@ -110,24 +116,20 @@ export const ExpensePdfImportFooter = () => {
           inProgress: true,
         });
 
-        // Process files in parallel
         const extractionPromises = files.map(async (file) => {
           try {
-            const pendingUpload = await extractPdf.mutateAsync({
-              file,
-              userId: user?.id || "",
-            });
+            const pendingUpload = await uploadAndExtract.mutateAsync(file);
             pendingUploads.push(pendingUpload);
           } catch (error) {
             console.error(`Error extracting file ${file.name}:`, error);
 
-            if (error instanceof DuplicateFileError) {
+            if (error instanceof DuplicateExpenseError) {
               failedFiles.push({
                 name: file.name,
                 reason: "Dieses Dokument wurde bereits hochgeladen.",
                 errorType: "duplicate",
               });
-            } else if (error instanceof ExtractionError) {
+            } else if (error instanceof ExtractionExpenseError) {
               failedFiles.push({
                 name: file.name,
                 reason: error.rejectionReason,
@@ -148,7 +150,6 @@ export const ExpensePdfImportFooter = () => {
 
         await Promise.all(extractionPromises);
 
-        // Show errors for failed extractions
         failedFiles.forEach(({ name, reason, errorType }) => {
           if (reason) {
             const title =
@@ -163,7 +164,7 @@ export const ExpensePdfImportFooter = () => {
 
         if (pendingUploads.length > 0) {
           setTimeout(() => {
-            openConfirmUploadModal(pendingUploads);
+            openExpenseConfirmUploadModal(pendingUploads);
           }, 100);
         } else if (failedFiles.length > 0) {
           showBanner(
