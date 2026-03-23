@@ -205,6 +205,7 @@ export function useConfirmAndUploadToDatabase() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["availableYears"] });
     },
   });
 }
@@ -226,6 +227,7 @@ export function useRemoveExpense() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["availableYears"] });
     },
   });
 }
