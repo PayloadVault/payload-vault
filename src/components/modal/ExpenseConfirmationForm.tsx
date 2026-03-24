@@ -1,13 +1,17 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "../button/Button";
 import { Dropdown } from "../dropdown/Dropdown";
 import { InputField } from "../inputField/InputField";
 import type { Option } from "../dropdown/Dropdown.types";
 import type {
   PendingExpenseUpload,
+  ConfirmProductPayload,
   ExpenseCategory,
 } from "../../hooks/useExpenses/types";
-import { expenseCategories } from "../../hooks/useExpenses/types";
+import {
+  expenseCategories,
+  DEFAULT_EXPENSE_CATEGORY,
+} from "../../hooks/useExpenses/types";
 
 const EXPENSE_CATEGORY_OPTIONS: Option[] = expenseCategories.map((cat) => ({
   id: cat,
@@ -16,264 +20,373 @@ const EXPENSE_CATEGORY_OPTIONS: Option[] = expenseCategories.map((cat) => ({
 
 interface ExpenseConfirmationFormProps {
   pendingUploads: PendingExpenseUpload[];
-  onConfirm: (upload: PendingExpenseUpload) => Promise<void>;
-  onDecline: (upload: PendingExpenseUpload) => Promise<void>;
-  onConfirmAll: (uploads: PendingExpenseUpload[]) => Promise<void>;
-  onDeclineAll: (uploads: PendingExpenseUpload[]) => Promise<void>;
+  onConfirmProduct: (payload: ConfirmProductPayload) => Promise<void>;
+  onDeclineProduct: () => void;
+  onDeclineReceipt: (filePath: string) => Promise<void>;
   onClose: () => void;
 }
 
-type EditableExpenseData = {
-  category: ExpenseCategory;
+type EditableProduct = {
+  id: string;
+  product_name: string;
   amount: string;
+  category: ExpenseCategory;
+};
+
+type ReceiptState = {
+  id: string;
+  fileName: string;
+  filePath: string;
   expense_date: string;
   vendor_name: string;
+  image_url: string;
+  file_name: string;
+  products: EditableProduct[];
+  confirmedAny: boolean;
 };
 
 export const ExpenseConfirmationForm = ({
-  pendingUploads: initialUploads,
-  onConfirm,
-  onDecline,
-  onConfirmAll,
-  onDeclineAll,
+  pendingUploads,
+  onConfirmProduct,
+  onDeclineProduct,
+  onDeclineReceipt,
   onClose,
 }: ExpenseConfirmationFormProps) => {
-  const [pendingUploads, setPendingUploads] =
-    useState<PendingExpenseUpload[]>(initialUploads);
-  const [editedData, setEditedData] = useState<
-    Record<string, EditableExpenseData>
-  >(() => {
-    const initial: Record<string, EditableExpenseData> = {};
-    initialUploads.forEach((upload) => {
-      initial[upload.id] = {
-        category: upload.extractedData.category,
-        amount: String(upload.extractedData.amount),
-        expense_date: upload.extractedData.expense_date,
-        vendor_name: upload.extractedData.vendor_name ?? "",
-      };
-    });
-    return initial;
-  });
+  const [receipts, setReceipts] = useState<ReceiptState[]>(() =>
+    pendingUploads.map((u) => ({
+      id: u.id,
+      fileName: u.fileName,
+      filePath: u.filePath,
+      expense_date: u.expense_date,
+      vendor_name: u.vendor_name,
+      image_url: u.image_url,
+      file_name: u.file_name,
+      confirmedAny: false,
+      products: u.products.map((p) => ({
+        id: p.id,
+        product_name: p.product_name,
+        amount: String(p.amount),
+        category: p.category,
+      })),
+    })),
+  );
+
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
   const [isProcessingAll, setIsProcessingAll] = useState(false);
+  const receiptsRef = useRef(receipts);
+  receiptsRef.current = receipts;
 
-  const pendingUploadsRef = useRef<PendingExpenseUpload[]>(pendingUploads);
-  pendingUploadsRef.current = pendingUploads;
+  const hasReceipts = receipts.length > 0;
 
-  const isSingleUpload = pendingUploads.length === 1;
-  const hasUploads = pendingUploads.length > 0;
-
-  const updateField = (
-    id: string,
-    field: keyof EditableExpenseData,
-    value: string,
-  ) => {
-    setEditedData((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], [field]: value },
-    }));
-  };
-
-  const getUploadWithEditedData = (
-    upload: PendingExpenseUpload,
-  ): PendingExpenseUpload => {
-    const edited = editedData[upload.id];
-    return {
-      ...upload,
-      extractedData: {
-        ...upload.extractedData,
-        category: edited.category,
-        amount: parseFloat(edited.amount) || 0,
-        expense_date: edited.expense_date,
-        vendor_name: edited.vendor_name || null,
-      },
-    };
-  };
-
-  const handleConfirm = async (upload: PendingExpenseUpload) => {
-    setProcessingIds((prev) => new Set(prev).add(upload.id));
-    try {
-      await onConfirm(getUploadWithEditedData(upload));
-      setPendingUploads((prev) => prev.filter((u) => u.id !== upload.id));
-    } finally {
-      setProcessingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(upload.id);
-        return next;
-      });
-    }
-  };
-
-  const handleDecline = async (upload: PendingExpenseUpload) => {
-    setProcessingIds((prev) => new Set(prev).add(upload.id));
-    try {
-      await onDecline(upload);
-      setPendingUploads((prev) => prev.filter((u) => u.id !== upload.id));
-    } finally {
-      setProcessingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(upload.id);
-        return next;
-      });
-    }
-  };
-
-  const handleConfirmAll = async () => {
-    setIsProcessingAll(true);
-    try {
-      const uploadsWithEdits = pendingUploads.map(getUploadWithEditedData);
-      await onConfirmAll(uploadsWithEdits);
-      setPendingUploads([]);
-    } finally {
-      setIsProcessingAll(false);
-    }
-  };
-
-  const handleDeclineAll = async () => {
-    setIsProcessingAll(true);
-    try {
-      await onDeclineAll(pendingUploads);
-      setPendingUploads([]);
-    } finally {
-      setIsProcessingAll(false);
-    }
-  };
-
+  // Auto-close when all receipts are done
   useEffect(() => {
-    if (!hasUploads) {
+    if (!hasReceipts) {
       onClose();
     }
-  }, [hasUploads, onClose]);
+  }, [hasReceipts, onClose]);
 
-  // Cleanup: decline any remaining uploads when modal is closed
+  // Cleanup on unmount (e.g. user clicks X) — delete images for fully-declined receipts
   useEffect(() => {
     return () => {
-      const remaining = pendingUploadsRef.current;
-      if (remaining.length > 0) {
-        onDeclineAll(remaining).catch(console.error);
-      }
+      receiptsRef.current.forEach((receipt) => {
+        if (receipt.products.length > 0 && !receipt.confirmedAny) {
+          onDeclineReceipt(receipt.filePath).catch(console.error);
+        }
+      });
     };
-  }, [onDeclineAll]);
+  }, [onDeclineReceipt]);
 
-  if (!hasUploads) {
-    return null;
-  }
+  if (!hasReceipts) return null;
 
-  const getCategoryOption = (category: ExpenseCategory): Option | null => {
-    return EXPENSE_CATEGORY_OPTIONS.find((opt) => opt.id === category) || null;
+  // --- Receipt-level field updates ---
+  const updateReceiptField = (
+    id: string,
+    field: "expense_date" | "vendor_name",
+    value: string,
+  ) => {
+    setReceipts((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, [field]: value } : r)),
+    );
   };
 
+  // --- Product-level field updates ---
+  const updateProductField = (
+    receiptId: string,
+    productId: string,
+    field: keyof EditableProduct,
+    value: string,
+  ) => {
+    setReceipts((prev) =>
+      prev.map((r) =>
+        r.id === receiptId
+          ? {
+              ...r,
+              products: r.products.map((p) =>
+                p.id === productId ? { ...p, [field]: value } : p,
+              ),
+            }
+          : r,
+      ),
+    );
+  };
+
+  // --- Add new product to a receipt ---
+  const addProduct = (receiptId: string) => {
+    setReceipts((prev) =>
+      prev.map((r) =>
+        r.id === receiptId
+          ? {
+              ...r,
+              products: [
+                ...r.products,
+                {
+                  id: crypto.randomUUID(),
+                  product_name: "",
+                  amount: "0",
+                  category: DEFAULT_EXPENSE_CATEGORY,
+                },
+              ],
+            }
+          : r,
+      ),
+    );
+  };
+
+  // --- Build payload for a single product confirmation ---
+  const buildPayload = (
+    receipt: ReceiptState,
+    product: EditableProduct,
+  ): ConfirmProductPayload => ({
+    product: {
+      id: product.id,
+      product_name: product.product_name,
+      amount: parseFloat(product.amount) || 0,
+      category: product.category,
+    },
+    expense_date: receipt.expense_date,
+    vendor_name: receipt.vendor_name,
+    image_url: receipt.image_url,
+    file_name: receipt.file_name,
+  });
+
+  // --- Confirm single product ---
+  const handleConfirm = async (
+    receipt: ReceiptState,
+    product: EditableProduct,
+  ) => {
+    setProcessingIds((prev) => new Set(prev).add(product.id));
+    try {
+      await onConfirmProduct(buildPayload(receipt, product));
+      setReceipts((prev) => {
+        const updated = prev.map((r) => {
+          if (r.id !== receipt.id) return r;
+          const remaining = r.products.filter((p) => p.id !== product.id);
+          return { ...r, products: remaining, confirmedAny: true };
+        });
+        return updated.filter((r) => r.products.length > 0);
+      });
+    } finally {
+      setProcessingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(product.id);
+        return next;
+      });
+    }
+  };
+
+  // --- Decline single product ---
+  const handleDecline = (receiptId: string, productId: string) => {
+    onDeclineProduct();
+    const receipt = receipts.find((r) => r.id === receiptId);
+    if (!receipt) return;
+
+    const remaining = receipt.products.filter((p) => p.id !== productId);
+
+    if (remaining.length === 0 && !receipt.confirmedAny) {
+      onDeclineReceipt(receipt.filePath).catch(console.error);
+    }
+
+    if (remaining.length === 0) {
+      setReceipts((prev) => prev.filter((r) => r.id !== receiptId));
+    } else {
+      setReceipts((prev) =>
+        prev.map((r) =>
+          r.id === receiptId ? { ...r, products: remaining } : r,
+        ),
+      );
+    }
+  };
+
+  // --- Confirm all products of a receipt ---
+  const handleConfirmAll = async (receipt: ReceiptState) => {
+    setIsProcessingAll(true);
+    try {
+      for (const product of receipt.products) {
+        await onConfirmProduct(buildPayload(receipt, product));
+      }
+      setReceipts((prev) => prev.filter((r) => r.id !== receipt.id));
+    } finally {
+      setIsProcessingAll(false);
+    }
+  };
+
+  // --- Decline all products of a receipt ---
+  const handleDeclineAll = (receipt: ReceiptState) => {
+    receipt.products.forEach(() => onDeclineProduct());
+    if (!receipt.confirmedAny) {
+      onDeclineReceipt(receipt.filePath).catch(console.error);
+    }
+    setReceipts((prev) => prev.filter((r) => r.id !== receipt.id));
+  };
+
+  const getCategoryOption = (category: ExpenseCategory): Option | null =>
+    EXPENSE_CATEGORY_OPTIONS.find((opt) => opt.id === category) || null;
+
   return (
-    <div className="flex flex-col gap-4">
-      {/* Multiple uploads: bulk actions */}
-      {!isSingleUpload && (
-        <div className="flex flex-wrap items-center gap-3 border-b border-color-border-light pb-4">
-          <Button
-            variant="primary"
-            text={`Alle ${pendingUploads.length} bestätigen`}
-            onClick={handleConfirmAll}
-            isDisabled={isProcessingAll}
-          />
-          <Button
-            variant="secondary"
-            text="Alle ablehnen"
-            onClick={handleDeclineAll}
-            isDisabled={isProcessingAll}
-          />
-        </div>
-      )}
+    <div className="flex flex-col gap-6 max-h-[70vh] overflow-y-auto pr-1">
+      {receipts.map((receipt) => (
+        <div
+          key={receipt.id}
+          className="flex flex-col gap-4 rounded-lg bg-color-bg-dark p-4"
+        >
+          {/* Receipt header */}
+          <h3 className="font-semibold text-color-text-main truncate">
+            {receipt.fileName}
+          </h3>
 
-      {/* Upload items */}
-      <div
-        className={`flex flex-col gap-6 ${!isSingleUpload ? "max-h-[60vh] overflow-y-auto pr-2" : ""}`}
-      >
-        {pendingUploads.map((upload) => {
-          const isProcessing = processingIds.has(upload.id) || isProcessingAll;
-          const edited = editedData[upload.id];
-
-          return (
-            <div
-              key={upload.id}
-              className="flex flex-col gap-4 rounded-lg bg-color-bg-dark p-4"
-            >
-              {/* File name as title (only for multiple uploads) */}
-              {!isSingleUpload && (
-                <h3 className="font-semibold text-color-text-main truncate">
-                  {upload.fileName}
-                </h3>
-              )}
-
-              {/* Category dropdown */}
-              <Dropdown
-                label="Kategorie"
-                options={EXPENSE_CATEGORY_OPTIONS}
-                value={getCategoryOption(edited.category)}
-                onSelect={(opt) =>
-                  updateField(
-                    upload.id,
-                    "category",
-                    opt.id as ExpenseCategory,
-                  )
+          {/* Receipt-level fields: vendor & date */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <InputField
+              label="Anbieter"
+              type="text"
+              placeholder="z.B. REWE, Shell"
+              value={receipt.vendor_name}
+              onChange={(val) =>
+                updateReceiptField(receipt.id, "vendor_name", val)
+              }
+            />
+            <div className="flex flex-col gap-1">
+              <label className="flex h-6 items-center font-semibold text-color-text-secondary">
+                <span className="ml-1 text-[14px]">Datum</span>
+              </label>
+              <input
+                type="date"
+                value={receipt.expense_date}
+                onChange={(e) =>
+                  updateReceiptField(receipt.id, "expense_date", e.target.value)
                 }
-                placeholder="Kategorie wählen"
+                className="w-full rounded-radius-md border border-color-border-light bg-main-color-bg-main px-4 py-3 text-color-text-main focus:outline-none focus:ring-2 focus:ring-color-bg-accent scheme-dark"
               />
-
-              {/* Amount input */}
-              <InputField
-                label="Betrag (€)"
-                type="number"
-                placeholder="0.00"
-                value={edited.amount}
-                onChange={(val) => updateField(upload.id, "amount", val)}
-              />
-
-              {/* Vendor input */}
-              <InputField
-                label="Anbieter"
-                type="text"
-                placeholder="z.B. Amazon, Deutsche Bahn"
-                value={edited.vendor_name}
-                onChange={(val) => updateField(upload.id, "vendor_name", val)}
-              />
-
-              {/* Date input */}
-              <div className="flex flex-col gap-1">
-                <label
-                  htmlFor={`date-${upload.id}`}
-                  className="flex h-6 items-center font-semibold text-color-text-secondary"
-                >
-                  <span className="ml-1 text-[14px]">Datum</span>
-                </label>
-                <input
-                  id={`date-${upload.id}`}
-                  type="date"
-                  value={edited.expense_date}
-                  onChange={(e) =>
-                    updateField(upload.id, "expense_date", e.target.value)
-                  }
-                  className="w-full rounded-radius-md border border-color-border-light bg-main-color-bg-main px-4 py-3 text-color-text-main focus:outline-none focus:ring-2 focus:ring-color-bg-accent scheme-dark"
-                />
-              </div>
-
-              {/* Action buttons */}
-              <div className="flex flex-wrap gap-3 pt-2">
-                <Button
-                  variant="primary"
-                  text="Bestätigen"
-                  onClick={() => handleConfirm(upload)}
-                  isDisabled={isProcessing}
-                />
-                <Button
-                  variant="secondary"
-                  text="Ablehnen"
-                  onClick={() => handleDecline(upload)}
-                  isDisabled={isProcessing}
-                />
-              </div>
             </div>
-          );
-        })}
-      </div>
+          </div>
+
+          <div className="border-t border-color-border-light" />
+
+          {/* Products header */}
+          <span className="text-sm font-semibold text-color-text-secondary">
+            Produkte ({receipt.products.length})
+          </span>
+
+          {/* Product rows */}
+          {receipt.products.map((product) => {
+            const isProcessing =
+              processingIds.has(product.id) || isProcessingAll;
+
+            return (
+              <div
+                key={product.id}
+                className="flex flex-col gap-3 rounded-md bg-color-bg-main p-3"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <InputField
+                    label="Produkt"
+                    type="text"
+                    placeholder="Produktname"
+                    value={product.product_name}
+                    onChange={(val) =>
+                      updateProductField(
+                        receipt.id,
+                        product.id,
+                        "product_name",
+                        val,
+                      )
+                    }
+                  />
+                  <InputField
+                    label="Betrag (€)"
+                    type="number"
+                    placeholder="0.00"
+                    value={product.amount}
+                    onChange={(val) =>
+                      updateProductField(receipt.id, product.id, "amount", val)
+                    }
+                  />
+                  <Dropdown
+                    label="Kategorie"
+                    options={EXPENSE_CATEGORY_OPTIONS}
+                    value={getCategoryOption(product.category)}
+                    onSelect={(opt) =>
+                      updateProductField(
+                        receipt.id,
+                        product.id,
+                        "category",
+                        opt.id as string,
+                      )
+                    }
+                    placeholder="Kategorie"
+                  />
+                </div>
+
+                {/* Per-product action buttons */}
+                <div className="flex gap-2 justify-end">
+                  <button
+                    onClick={() => handleConfirm(receipt, product)}
+                    disabled={isProcessing}
+                    className="rounded-md px-3 py-1.5 text-sm font-medium bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                  >
+                    ✓ Bestätigen
+                  </button>
+                  <button
+                    onClick={() => handleDecline(receipt.id, product.id)}
+                    disabled={isProcessing}
+                    className="rounded-md px-3 py-1.5 text-sm font-medium bg-red-600/80 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                  >
+                    ✕ Ablehnen
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Add product button */}
+          <button
+            onClick={() => addProduct(receipt.id)}
+            disabled={isProcessingAll}
+            className="flex items-center gap-2 rounded-md border border-dashed border-color-border-light px-3 py-2 text-sm text-color-text-secondary hover:bg-color-bg-main/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <span className="text-lg leading-none">+</span>
+            <span>Produkt hinzufügen</span>
+          </button>
+
+          {/* Bulk actions (only if more than 1 product) */}
+          {receipt.products.length > 1 && (
+            <div className="flex flex-wrap gap-3 pt-2 border-t border-color-border-light">
+              <Button
+                variant="primary"
+                text={`Alle ${receipt.products.length} bestätigen`}
+                onClick={() => handleConfirmAll(receipt)}
+                isDisabled={isProcessingAll}
+              />
+              <Button
+                variant="secondary"
+                text="Alle ablehnen"
+                onClick={() => handleDeclineAll(receipt)}
+                isDisabled={isProcessingAll}
+              />
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 };

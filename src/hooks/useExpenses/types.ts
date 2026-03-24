@@ -7,18 +7,19 @@ type ExpenseRecord = Database["public"]["Tables"]["expenses"]["Row"] & {
 type NewExpense = Database["public"]["Tables"]["expenses"]["Insert"];
 type ExpenseCategory = Database["public"]["Enums"]["expense_category"];
 
-type ExtractedExpenseData = {
+type ExtractedProduct = {
+  id: string;
+  product_name: string;
   amount: number;
-  expense_date: string;
   category: ExpenseCategory;
-  vendor_name: string | null;
-  image_url: string | null;
-  file_name: string | null;
 };
 
-type UploadExpenseResult = {
-  expense: ExpenseRecord;
-  extracted: ExtractedExpenseData;
+type ConfirmProductPayload = {
+  product: ExtractedProduct;
+  expense_date: string;
+  vendor_name: string;
+  image_url: string;
+  file_name: string;
 };
 
 const expenseCategories = Constants.public.Enums
@@ -50,16 +51,20 @@ type PendingExpenseUpload = {
   id: string;
   fileName: string;
   filePath: string;
-  extractedData: ExtractedExpenseData;
+  expense_date: string;
+  vendor_name: string;
+  image_url: string;
+  file_name: string;
+  products: ExtractedProduct[];
 };
 
 export type {
+  ConfirmProductPayload,
   ExpenseCategory,
   ExpenseRecord,
-  ExtractedExpenseData,
+  ExtractedProduct,
   FetchExpensesProps,
   NewExpense,
   PendingExpenseUpload,
-  UploadExpenseResult,
 };
 export { DEFAULT_EXPENSE_CATEGORY, expenseCategories, isExpenseCategory };

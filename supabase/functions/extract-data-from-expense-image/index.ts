@@ -1,6 +1,6 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { GoogleGenerativeAI } from "npm:@google/generative-ai";
-import { INVOICE_EXTRACTION_PROMPT } from "./prompt.ts";
+import { EXPENSE_RECEIPT_EXTRACTION_PROMPT } from "./prompt.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
@@ -12,42 +12,65 @@ const geminiModel = genAI.getGenerativeModel({
   model: "gemini-2.5-flash",
 });
 
+// ---------- Types ----------
+
+type ExtractedProduct = {
+  product_name: string;
+  amount: number;
+  category: string;
+};
+
 type ExtractedAIData = {
-  amount: unknown;
-  expense_date: unknown;
-  category: unknown;
-  vendor_name: unknown;
-  image_url: unknown;
-  product: unknown;
-  rejection_reason?: unknown;
+  expense_date: string;
+  vendor_name: string;
+  products: ExtractedProduct[];
+  rejection_reason?: string;
 };
 
 type ExtractionResponse = {
   success: boolean;
-  amount?: number;
-  expense_date?: string;
-  category?: string;
-  vendor_name?: string;
-  image_url?: string;
-  product?: string;
+  expense_date: string;
+  vendor_name: string;
+  image_url: string;
+  products: ExtractedProduct[];
   rejection_reason?: string;
 };
+
+// ---------- Helpers ----------
 
 function sanitizeAIResponse(raw: string): ExtractedAIData | null {
   try {
     const cleaned = raw.replace(/```json|```/g, "").trim();
-    const parsed = JSON.parse(cleaned);
-    return parsed;
+    return JSON.parse(cleaned) as ExtractedAIData;
   } catch {
     return null;
   }
 }
+
+function getMimeType(filePath: string, blobType: string): string {
+  if (blobType && blobType !== "application/octet-stream") return blobType;
+
+  const ext = filePath.split(".").pop()?.toLowerCase();
+  const mimeMap: Record<string, string> = {
+    pdf: "application/pdf",
+    png: "image/png",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    webp: "image/webp",
+    heic: "image/heic",
+  };
+  return mimeMap[ext ?? ""] ?? "application/octet-stream";
+}
+
+// ---------- CORS ----------
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
+
+// ---------- Handler ----------
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -67,6 +90,7 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Download the file (image or PDF) from storage
     const { data: fileBlob, error: downloadError } = await supabase.storage
       .from("expense_invoices")
       .download(filePath);
@@ -74,70 +98,93 @@ Deno.serve(async (req) => {
     if (downloadError) throw downloadError;
 
     const arrayBuffer = await fileBlob.arrayBuffer();
-    const base64Data = Buffer.from(arrayBuffer).toString("base64");
+    const bytes = new Uint8Array(arrayBuffer);
+    let binary = "";
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    const base64Data = btoa(binary);
+    const mimeType = getMimeType(filePath, fileBlob.type);
 
-    const result = await geminiModel.generateContent([
-      { text: INVOICE_EXTRACTION_PROMPT },
-      {
-        inlineData: {
-          data: base64Data,
-          mimeType: fileBlob.type,
+    // Call Gemini — wrapped in its own try/catch so mock data is still returned during testing
+    let aiParsed: ExtractedAIData | null = null;
+    try {
+      const result = await geminiModel.generateContent([
+        { text: EXPENSE_RECEIPT_EXTRACTION_PROMPT },
+        {
+          inlineData: {
+            data: base64Data,
+            mimeType,
+          },
         },
-      },
-    ]);
+      ]);
 
-    const responseText = result.response.text();
-    const aiParsed = sanitizeAIResponse(responseText);
+      const responseText = result.response.text();
+      aiParsed = sanitizeAIResponse(responseText);
 
-    const category = aiParsed?.category as string | undefined;
-    const isValidCategory = category && category !== "No Category";
+      console.log("AI raw response:", responseText);
+      console.log("AI parsed response:", JSON.stringify(aiParsed, null, 2));
+    } catch (aiError) {
+      const msg = aiError instanceof Error ? aiError.message : String(aiError);
+      console.error("Gemini API error (returning mock data):", msg);
+    }
 
-    const mockData = {
-      success: true,
-      extracted: {
-        amount: 123.45,
-        expense_date: new Date().toISOString().split("T")[0],
-        category: "Mobilität",
-        vendor_name: "INA",
-        image_url: filePath,
-      },
-    };
+    const hasProducts =
+      aiParsed !== null && aiParsed.products && aiParsed.products.length > 0;
 
-    const extractedData: ExtractionResponse = isValidCategory
+    const extractedData: ExtractionResponse = hasProducts
       ? {
           success: true,
-          amount: (aiParsed?.amount as number) || 0,
           expense_date:
-            (aiParsed?.expense_date as string) ||
-            new Date().toISOString().split("T")[0],
-          category: category,
-          vendor_name: (aiParsed?.vendor_name as string) || "Unbekannt",
-          image_url: (aiParsed?.image_url as string) || "",
-          product: (aiParsed?.product as string) || "Unbekannt",
+            aiParsed!.expense_date || new Date().toISOString().split("T")[0],
+          vendor_name: aiParsed!.vendor_name || "Unbekannt",
+          image_url: filePath,
+          products: aiParsed!.products,
         }
       : {
           success: false,
+          expense_date:
+            aiParsed?.expense_date || new Date().toISOString().split("T")[0],
+          vendor_name: aiParsed?.vendor_name || "Unbekannt",
+          image_url: filePath,
+          products: [],
           rejection_reason:
-            (aiParsed?.rejection_reason as string) ||
-            "Dieses Dokument konnte nicht als gültige Rechnung identifiziert werden. Bitte stellen Sie sicher, dass Sie einen unterstützten Rechnungstyp hochladen.",
+            aiParsed?.rejection_reason ||
+            "Dieses Dokument konnte nicht als gültiger Beleg identifiziert werden. Bitte stellen Sie sicher, dass Sie einen Kassenbon oder eine Rechnung hochladen.",
         };
 
-    // We can keep logging on backend side for debugging purposes
-    console.log("Extracted Data:", extractedData);
+    console.log("Extracted Data:", JSON.stringify(extractedData, null, 2));
 
-    console.log("mockData", mockData);
+    // ---- Mock data returned while testing ----
+    const mockData: ExtractionResponse = {
+      success: true,
+      expense_date: new Date().toISOString().split("T")[0],
+      vendor_name: "REWE",
+      image_url: filePath,
+      products: [
+        {
+          product_name: "Super E10 Benzin",
+          amount: 65.37,
+          category: "Mobilität",
+        },
+        {
+          product_name: "Kaugummi Spearmint",
+          amount: 1.49,
+          category: "Sonstiges",
+        },
+      ],
+    };
 
-    return new Response(JSON.stringify(mockData), {
+    return new Response(JSON.stringify(extractedData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
-    return new Response(
-      JSON.stringify({ success: false, error: error.message }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
-      },
-    );
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Edge function error:", message);
+    return new Response(JSON.stringify({ success: false, error: message }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 400,
+    });
   }
 });

@@ -8,6 +8,7 @@ import type {
   PendingExpenseUpload,
   SortType,
 } from "./types";
+import { isExpenseCategory, DEFAULT_EXPENSE_CATEGORY } from "./types";
 
 export class DuplicateExpenseError extends Error {
   constructor(fileName: string) {
@@ -79,13 +80,15 @@ export function useFetchExpenses(props: FetchExpensesProps) {
         const startMonth = props.startMonth ?? 1;
         const endMonth = props.endMonth ?? 12;
 
-        const startDate = `${props.year}-${
-          String(startMonth).padStart(2, "0")
-        }-01`;
+        const startDate = `${props.year}-${String(startMonth).padStart(
+          2,
+          "0",
+        )}-01`;
         const endDay = new Date(props.year, endMonth, 0).getDate(); // last day of endMonth
-        const endDate = `${props.year}-${
-          String(endMonth).padStart(2, "0")
-        }-${endDay}`;
+        const endDate = `${props.year}-${String(endMonth).padStart(
+          2,
+          "0",
+        )}-${endDay}`;
 
         q = q.gte("expense_date", startDate).lte("expense_date", endDate);
       } else if (props.startMonth || props.endMonth) {
@@ -116,18 +119,17 @@ export function useFetchExpenses(props: FetchExpensesProps) {
       const filePaths = data.map((e) => e.image_url).filter(Boolean);
       if (filePaths.length === 0) return data;
 
-      const { data: signedUrls, error: signedUrlsError } = await supabase
-        .storage
-        .from("expense_invoices")
-        .createSignedUrls(filePaths, 3600);
+      const { data: signedUrls, error: signedUrlsError } =
+        await supabase.storage
+          .from("expense_invoices")
+          .createSignedUrls(filePaths, 3600);
 
       if (signedUrlsError) throw signedUrlsError;
 
       return data.map((expense) => ({
         ...expense,
-        signed_url: signedUrls?.find((s) =>
-          expense.image_url === s.path
-        )?.signedUrl ??
+        signed_url:
+          signedUrls?.find((s) => expense.image_url === s.path)?.signedUrl ??
           "",
       }));
     },
@@ -158,9 +160,39 @@ export function useUploadAndExtract(userId: string) {
           },
         );
 
-        if (extractError || !data?.success) {
+        if (extractError) {
+          // Try to read the error body from a FunctionsHttpError
+          let message = "Extraction failed";
+          try {
+            if (
+              extractError &&
+              typeof extractError === "object" &&
+              "context" in extractError
+            ) {
+              const body = await (
+                extractError as {
+                  context: {
+                    json: () => Promise<{
+                      error?: string;
+                      rejection_reason?: string;
+                    }>;
+                  };
+                }
+              ).context.json();
+              message =
+                body?.rejection_reason || body?.error || extractError.message;
+            } else {
+              message = extractError.message || message;
+            }
+          } catch {
+            message = extractError.message || message;
+          }
+          throw new ExtractionExpenseError(message);
+        }
+
+        if (!data?.success) {
           throw new ExtractionExpenseError(
-            data?.error || "Extraction failed",
+            data?.rejection_reason || data?.error || "Extraction failed",
           );
         }
 
@@ -168,11 +200,25 @@ export function useUploadAndExtract(userId: string) {
           id: crypto.randomUUID(),
           fileName: file.name,
           filePath,
-          extractedData: {
-            ...data.extracted,
-            image_url: filePath,
-            file_name: file.name,
-          },
+          expense_date:
+            data.expense_date || new Date().toISOString().split("T")[0],
+          vendor_name: data.vendor_name || "Unbekannt",
+          image_url: filePath,
+          file_name: file.name,
+          products: (data.products || []).map(
+            (p: {
+              product_name: string;
+              amount: number;
+              category: string;
+            }) => ({
+              id: crypto.randomUUID(),
+              product_name: p.product_name || "Unbekannt",
+              amount: typeof p.amount === "number" ? p.amount : 0,
+              category: isExpenseCategory(p.category)
+                ? p.category
+                : DEFAULT_EXPENSE_CATEGORY,
+            }),
+          ),
         };
       } catch (err) {
         await deleteImageFromStorage(filePath);

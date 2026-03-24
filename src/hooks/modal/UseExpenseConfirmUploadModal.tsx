@@ -1,17 +1,21 @@
 import { ExpenseConfirmationForm } from "../../components/modal/ExpenseConfirmationForm";
 import { useModal } from "../../context/modal/ModalContext";
-import type { PendingExpenseUpload } from "../useExpenses/types";
-import type { ModalSize } from "../../context/modal/types";
+import type {
+  PendingExpenseUpload,
+  ConfirmProductPayload,
+} from "../useExpenses/types";
 
 type UseExpenseConfirmUploadModalProps = {
-  onConfirm: (upload: PendingExpenseUpload) => Promise<void>;
-  onDecline: (upload: PendingExpenseUpload) => Promise<void>;
+  onConfirmProduct: (payload: ConfirmProductPayload) => Promise<void>;
+  onDeclineProduct: () => void;
+  onDeclineReceipt: (filePath: string) => Promise<void>;
   onComplete: () => void;
 };
 
 export const useExpenseConfirmUploadModal = ({
-  onConfirm,
-  onDecline,
+  onConfirmProduct,
+  onDeclineProduct,
+  onDeclineReceipt,
   onComplete,
 }: UseExpenseConfirmUploadModalProps) => {
   const { openModal, closeModal, setDisableClose } = useModal();
@@ -24,68 +28,33 @@ export const useExpenseConfirmUploadModal = ({
       return;
     }
 
-    const isSingleUpload = pendingUploads.length === 1;
-    const title = isSingleUpload
-      ? pendingUploads[0].fileName
-      : `${pendingUploads.length} Dokumente bestätigen`;
-    const size: ModalSize = isSingleUpload ? "default" : "large";
-
-    const handleConfirmAll = async (uploads: PendingExpenseUpload[]) => {
-      setDisableClose(true);
-      try {
-        for (const upload of uploads) {
-          await onConfirm(upload);
-        }
-      } finally {
-        setDisableClose(false);
-      }
-    };
-
-    const handleDeclineAll = async (uploads: PendingExpenseUpload[]) => {
-      setDisableClose(true);
-      try {
-        for (const upload of uploads) {
-          await onDecline(upload);
-        }
-      } finally {
-        setDisableClose(false);
-      }
-    };
-
-    const handleConfirmSingle = async (upload: PendingExpenseUpload) => {
-      setDisableClose(true);
-      try {
-        await onConfirm(upload);
-      } finally {
-        setDisableClose(false);
-      }
-    };
-
-    const handleDeclineSingle = async (upload: PendingExpenseUpload) => {
-      setDisableClose(true);
-      try {
-        await onDecline(upload);
-      } finally {
-        setDisableClose(false);
-      }
-    };
-
-    const handleClose = () => {
-      closeModal();
-    };
+    const totalProducts = pendingUploads.reduce(
+      (sum, u) => sum + u.products.length,
+      0,
+    );
+    const title =
+      pendingUploads.length === 1
+        ? pendingUploads[0].fileName
+        : `${pendingUploads.length} Belege · ${totalProducts} Produkte`;
 
     openModal({
       title,
-      size,
+      size: "large",
       onClose: onComplete,
       children: (
         <ExpenseConfirmationForm
           pendingUploads={pendingUploads}
-          onConfirm={handleConfirmSingle}
-          onDecline={handleDeclineSingle}
-          onConfirmAll={handleConfirmAll}
-          onDeclineAll={handleDeclineAll}
-          onClose={handleClose}
+          onConfirmProduct={async (payload) => {
+            setDisableClose(true);
+            try {
+              await onConfirmProduct(payload);
+            } finally {
+              setDisableClose(false);
+            }
+          }}
+          onDeclineProduct={onDeclineProduct}
+          onDeclineReceipt={onDeclineReceipt}
+          onClose={closeModal}
         />
       ),
     });

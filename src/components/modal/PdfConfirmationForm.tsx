@@ -241,18 +241,20 @@ export const PdfConfirmationForm = ({
 
               {/* Action buttons */}
               <div className="flex flex-wrap gap-3 pt-2">
-                <Button
-                  variant="primary"
-                  text="Bestätigen"
+                <button
                   onClick={() => handleConfirm(upload)}
-                  isDisabled={isProcessing}
-                />
-                <Button
-                  variant="secondary"
-                  text="Ablehnen"
+                  disabled={isProcessing}
+                  className="rounded-md px-3 py-1.5 text-sm font-medium bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                >
+                  ✓ Bestätigen
+                </button>
+                <button
                   onClick={() => handleDecline(upload)}
-                  isDisabled={isProcessing}
-                />
+                  disabled={isProcessing}
+                  className="rounded-md px-3 py-1.5 text-sm font-medium bg-red-600/80 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                >
+                  ✕ Ablehnen
+                </button>
               </div>
             </div>
           );
