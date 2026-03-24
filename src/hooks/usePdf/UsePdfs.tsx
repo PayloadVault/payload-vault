@@ -120,6 +120,20 @@ export class DuplicateFileError extends Error {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+async function checkDuplicateFileName(
+  userId: string,
+  fileName: string,
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("pdf_records")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("file_name", fileName)
+    .limit(1);
+
+  if (error) throw error;
+  return (data?.length ?? 0) > 0;
+}
 
 function validateCategory(cat: string): PdfCategory {
   const valid: PdfCategory[] = [
@@ -132,20 +146,6 @@ function validateCategory(cat: string): PdfCategory {
   return valid.includes(cat as PdfCategory)
     ? (cat as PdfCategory)
     : "Strom & Gas";
-}
-
-async function checkDuplicateFileName(
-  userId: string,
-  fileName: string,
-): Promise<boolean> {
-  const { data, error } = await supabase
-    .from("pdf_records")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("file_name", fileName)
-    .limit(1);
-  if (error) throw error;
-  return (data?.length ?? 0) > 0;
 }
 
 function buildStoragePath(userId: string, fileName: string): string {
@@ -319,8 +319,8 @@ export function usePdfs(props: FetchPdfProps) {
 
   return {
     ...query,
-    addPdf,
     uploadPdf,
+    addPdf,
     removePdf,
     extractPdf,
     confirmPdf,
