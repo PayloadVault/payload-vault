@@ -47,7 +47,7 @@ async function checkDuplicateFileName(
     .from("expenses")
     .select("id")
     .eq("user_id", userId)
-    .eq("file_name", fileName)
+    .or(`file_name.eq.${fileName},file_name.like.${fileName}__p%`)
     .limit(1);
 
   if (error) throw error;
