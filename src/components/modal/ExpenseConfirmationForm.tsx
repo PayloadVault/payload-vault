@@ -156,18 +156,27 @@ export const ExpenseConfirmationForm = ({
   const buildPayload = (
     receipt: ReceiptState,
     product: EditableProduct,
-  ): ConfirmProductPayload => ({
-    product: {
-      id: product.id,
-      product_name: product.product_name,
-      amount: parseFloat(product.amount) || 0,
-      category: product.category,
-    },
-    expense_date: receipt.expense_date,
-    vendor_name: receipt.vendor_name,
-    image_url: receipt.image_url,
-    file_name: receipt.file_name,
-  });
+    productIndex: number,
+  ): ConfirmProductPayload => {
+    const totalProducts = receipt.products.length;
+    const fileName =
+      totalProducts > 1
+        ? `${receipt.file_name}__p${productIndex + 1}`
+        : receipt.file_name;
+
+    return {
+      product: {
+        id: product.id,
+        product_name: product.product_name,
+        amount: parseFloat(product.amount) || 0,
+        category: product.category,
+      },
+      expense_date: receipt.expense_date,
+      vendor_name: receipt.vendor_name,
+      image_url: receipt.image_url,
+      file_name: fileName,
+    };
+  };
 
   // --- Confirm single product ---
   const handleConfirm = async (
@@ -176,7 +185,10 @@ export const ExpenseConfirmationForm = ({
   ) => {
     setProcessingIds((prev) => new Set(prev).add(product.id));
     try {
-      await onConfirmProduct(buildPayload(receipt, product));
+      const productIndex = receipt.products.findIndex(
+        (p) => p.id === product.id,
+      );
+      await onConfirmProduct(buildPayload(receipt, product, productIndex));
       setReceipts((prev) => {
         const updated = prev.map((r) => {
           if (r.id !== receipt.id) return r;
@@ -221,8 +233,8 @@ export const ExpenseConfirmationForm = ({
   const handleConfirmAll = async (receipt: ReceiptState) => {
     setIsProcessingAll(true);
     try {
-      for (const product of receipt.products) {
-        await onConfirmProduct(buildPayload(receipt, product));
+      for (let i = 0; i < receipt.products.length; i++) {
+        await onConfirmProduct(buildPayload(receipt, receipt.products[i], i));
       }
       setReceipts((prev) => prev.filter((r) => r.id !== receipt.id));
     } finally {
