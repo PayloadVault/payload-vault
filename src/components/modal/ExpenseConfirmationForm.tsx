@@ -275,7 +275,7 @@ export const ExpenseConfirmationForm = ({
                 onChange={(e) =>
                   updateReceiptField(receipt.id, "expense_date", e.target.value)
                 }
-                className="w-full rounded-radius-md border border-color-border-light bg-main-color-bg-main px-4 py-3 text-color-text-main focus:outline-none focus:ring-2 focus:ring-color-bg-accent scheme-dark"
+                className="w-full rounded-radius-md border border-color-border-light bg-color-bg-main px-4 py-3 text-color-text-main transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-color-bg-accent"
               />
             </div>
           </div>
@@ -342,14 +342,14 @@ export const ExpenseConfirmationForm = ({
                   <button
                     onClick={() => handleConfirm(receipt, product)}
                     disabled={isProcessing}
-                    className="rounded-md px-3 py-1.5 text-sm font-medium bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                    className="rounded-md px-3 py-1.5 text-sm font-medium bg-color-success-border text-white hover:bg-color-success-border/80 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200 active:scale-95"
                   >
                     ✓ Bestätigen
                   </button>
                   <button
                     onClick={() => handleDecline(receipt.id, product.id)}
                     disabled={isProcessing}
-                    className="rounded-md px-3 py-1.5 text-sm font-medium bg-red-600/80 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                    className="rounded-md px-3 py-1.5 text-sm font-medium bg-color-error-border text-white hover:bg-color-error-border/80 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200 active:scale-95"
                   >
                     ✕ Ablehnen
                   </button>
@@ -362,7 +362,7 @@ export const ExpenseConfirmationForm = ({
           <button
             onClick={() => addProduct(receipt.id)}
             disabled={isProcessingAll}
-            className="flex items-center gap-2 rounded-md border border-dashed border-color-border-light px-3 py-2 text-sm text-color-text-secondary hover:bg-color-bg-main/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 rounded-md border border-dashed border-color-border-light px-3 py-2 text-sm text-color-text-secondary hover:bg-color-bg-main/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:border-color-primary/50"
           >
             <span className="text-lg leading-none">+</span>
             <span>Produkt hinzufügen</span>

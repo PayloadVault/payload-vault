@@ -47,7 +47,7 @@ export const UpdatePasswordPage = () => {
   if (isUpdated) {
     return (
       <div className="flex items-center justify-center w-screen h-screen p-4">
-        <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card p-8 rounded-xl border border-color-border-light text-center">
+        <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card p-8 rounded-xl border border-color-border-light text-center shadow-shadow-strong animate-scale-in">
           <h3 className="font-bold text-color-text-main">
             Passwort aktualisiert
           </h3>
@@ -62,7 +62,7 @@ export const UpdatePasswordPage = () => {
 
   return (
     <div className="flex items-center justify-center w-screen h-screen p-4">
-      <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card p-8 rounded-xl border border-color-border-light">
+      <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card p-8 rounded-xl border border-color-border-light shadow-shadow-strong animate-scale-in">
         <div className="bg-color-primary/15 p-2 rounded-full mx-auto">
           <VaultIcon className="w-12 h-12 mx-auto text-color-primary" />
         </div>

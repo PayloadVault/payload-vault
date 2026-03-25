@@ -19,7 +19,7 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
         label: y.toString(),
         id: y.toString(),
       })),
-    [availableYears]
+    [availableYears],
   );
 
   const selectedYear = useMemo(
@@ -27,7 +27,7 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
       id: year.toString(),
       label: year.toString(),
     }),
-    [year]
+    [year],
   );
 
   const handleYearChange = (option: { id: string; label: string }) => {
@@ -123,6 +123,7 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
               className="
             cursor-pointer p-2 rounded-radius-md
             hover:bg-color-primary/20 hover:text-color-primary
+            transition-all duration-200 ease-in-out active:scale-95
           "
               aria-label="Benutzermenü"
               aria-haspopup="menu"

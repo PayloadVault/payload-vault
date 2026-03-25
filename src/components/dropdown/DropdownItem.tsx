@@ -12,7 +12,7 @@ export const DropdownItem = ({ option, onClick }: DropdownItemProps) => {
   return (
     <button
       className="flex h-12 w-full cursor-pointer items-center gap-4 hover:bg-color-primary/20
-        transition-colors duration-200 ease-in-out"
+        transition-all duration-200 ease-in-out active:bg-color-primary/30"
       onClick={handleClick}
     >
       {Icon && <Icon />}

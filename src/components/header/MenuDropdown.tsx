@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useChangePasswordModal } from "../../hooks/modal/UsePasswordChangeModal";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
@@ -20,6 +21,22 @@ export const MenuDropdown = ({
 }: MenuDropdownProps) => {
   const navigate = useNavigate();
   const { showBanner } = useBanner();
+  const [isVisible, setIsVisible] = useState(false);
+  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true);
+      setIsAnimatingOut(false);
+    } else if (isVisible) {
+      setIsAnimatingOut(true);
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+        setIsAnimatingOut(false);
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   const handleChangePassword = async (newPassword: string) => {
     const { error } = await supabase.auth.updateUser({
@@ -50,8 +67,6 @@ export const MenuDropdown = ({
     onSave: handleChangePassword,
   });
 
-  if (!isOpen) return null;
-
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -70,10 +85,12 @@ export const MenuDropdown = ({
     onSave: handleLogout,
   });
 
+  if (!isVisible) return null;
+
   return (
     <div
       role="menu"
-      className="
+      className={`
               absolute right-0 top-full mt-2
               min-w-55
               rounded-radius-md
@@ -82,12 +99,13 @@ export const MenuDropdown = ({
               shadow-lg
               z-50
               overflow-hidden
-            "
+              ${isAnimatingOut ? "animate-slide-up-out" : "animate-slide-down"}
+            `}
     >
       <button
         role="menuitem"
         className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2
-        hover:text-color-text-main text-color-text-subtle transition-colors duration-200 ease-in-out"
+        hover:text-color-text-main text-color-text-subtle transition-all duration-200 ease-in-out active:bg-color-primary/30"
         onClick={() => {
           openChangePasswordModal();
           setIsOpen(false);
@@ -100,7 +118,7 @@ export const MenuDropdown = ({
       <button
         role="menuitem"
         className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2
-        hover:text-color-text-main text-color-text-subtle transition-colors duration-200 ease-in-out"
+        hover:text-color-text-main text-color-text-subtle transition-all duration-200 ease-in-out active:bg-color-primary/30"
         onClick={() => {
           toggleTheme();
           setIsOpen(false);
@@ -117,7 +135,7 @@ export const MenuDropdown = ({
       <button
         role="menuitem"
         className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2 text-color-error-text/75
-        hover:text-color-error-text transition-colors duration-200 ease-in-out"
+        hover:text-color-error-text transition-all duration-200 ease-in-out active:bg-color-error/20"
         onClick={() => {
           setIsOpen(false);
           openLogoutModal();

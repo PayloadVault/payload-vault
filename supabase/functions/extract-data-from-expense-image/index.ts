@@ -21,10 +21,15 @@ type ExtractedProduct = {
 };
 
 type ExtractedAIData = {
-  expense_date: string;
-  vendor_name: string;
-  products: ExtractedProduct[];
-  rejection_reason?: string;
+  expense_date?: unknown;
+  vendor_name?: unknown;
+  products?: unknown;
+  rejection_reason?: unknown;
+  total_amount?: unknown;
+  total?: unknown;
+  amount?: unknown;
+  gross_total?: unknown;
+  final_amount?: unknown;
 };
 
 type ExtractionResponse = {
@@ -47,6 +52,126 @@ function sanitizeAIResponse(raw: string): ExtractedAIData | null {
   }
 }
 
+const VALID_CATEGORIES = new Set([
+  "Mobilität",
+  "Geschäftsessen",
+  "Büro & Arbeitsmittel",
+  "Kommunikation",
+  "Weiterbildung",
+  "Reisen",
+  "Versicherungen",
+  "Bank & Gebühren",
+  "Marketing",
+  "Sonstiges",
+]);
+
+function normalizeCategory(category: unknown): string {
+  if (typeof category === "string" && VALID_CATEGORIES.has(category)) {
+    return category;
+  }
+  return "Sonstiges";
+}
+
+function parseAmount(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const normalized = value
+      .replace(/\s/g, "")
+      .replace(/€/g, "")
+      .replace(/EUR/gi, "")
+      .replace(/[^\d,.-]/g, "")
+      .replace(/\.(?=\d{3}(\D|$))/g, "")
+      .replace(",", ".");
+
+    const parsed = Number.parseFloat(normalized);
+    if (Number.isFinite(parsed) && parsed > 0) {
+      return parsed;
+    }
+  }
+
+  return null;
+}
+
+function normalizeVendorName(vendorName: unknown): string {
+  return typeof vendorName === "string" && vendorName.trim().length > 0
+    ? vendorName.trim()
+    : "Unbekannt";
+}
+
+function normalizeExpenseDate(expenseDate: unknown): string {
+  if (typeof expenseDate === "string" && expenseDate.trim().length > 0) {
+    return expenseDate;
+  }
+  return new Date().toISOString().split("T")[0];
+}
+
+function buildProducts(aiParsed: ExtractedAIData | null): ExtractedProduct[] {
+  if (!aiParsed) return [];
+
+  if (Array.isArray(aiParsed.products)) {
+    const normalizedProducts = aiParsed.products
+      .map((product) => {
+        if (!product || typeof product !== "object") return null;
+
+        const candidate = product as {
+          product_name?: unknown;
+          name?: unknown;
+          description?: unknown;
+          amount?: unknown;
+          total?: unknown;
+          price?: unknown;
+          category?: unknown;
+        };
+
+        const amount =
+          parseAmount(candidate.amount) ??
+          parseAmount(candidate.total) ??
+          parseAmount(candidate.price);
+
+        if (!amount) return null;
+
+        const productName =
+          (typeof candidate.product_name === "string" &&
+            candidate.product_name.trim()) ||
+          (typeof candidate.name === "string" && candidate.name.trim()) ||
+          (typeof candidate.description === "string" &&
+            candidate.description.trim()) ||
+          "Unbekannt";
+
+        return {
+          product_name: productName,
+          amount,
+          category: normalizeCategory(candidate.category),
+        };
+      })
+      .filter((p): p is ExtractedProduct => p !== null);
+
+    if (normalizedProducts.length > 0) {
+      return normalizedProducts;
+    }
+  }
+
+  const fallbackAmount =
+    parseAmount(aiParsed.total_amount) ??
+    parseAmount(aiParsed.total) ??
+    parseAmount(aiParsed.amount) ??
+    parseAmount(aiParsed.gross_total) ??
+    parseAmount(aiParsed.final_amount);
+
+  if (!fallbackAmount) return [];
+
+  return [
+    {
+      product_name: normalizeVendorName(aiParsed.vendor_name),
+      amount: fallbackAmount,
+      category: "Sonstiges",
+    },
+  ];
+}
+
 function getMimeType(filePath: string, blobType: string): string {
   if (blobType && blobType !== "application/octet-stream") return blobType;
 
@@ -62,6 +187,18 @@ function getMimeType(filePath: string, blobType: string): string {
   return mimeMap[ext ?? ""] ?? "application/octet-stream";
 }
 
+function toBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  const chunkSize = 0x8000;
+
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+
+  return btoa(binary);
+}
+
 // ---------- CORS ----------
 
 const corsHeaders = {
@@ -72,7 +209,7 @@ const corsHeaders = {
 
 // ---------- Handler ----------
 
-Deno.serve(async (req) => {
+Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -98,12 +235,7 @@ Deno.serve(async (req) => {
     if (downloadError) throw downloadError;
 
     const arrayBuffer = await fileBlob.arrayBuffer();
-    const bytes = new Uint8Array(arrayBuffer);
-    let binary = "";
-    for (let i = 0; i < bytes.length; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    const base64Data = btoa(binary);
+    const base64Data = toBase64(arrayBuffer);
     const mimeType = getMimeType(filePath, fileBlob.type);
 
     // Call Gemini — wrapped in its own try/catch so mock data is still returned during testing
@@ -129,51 +261,30 @@ Deno.serve(async (req) => {
       console.error("Gemini API error (returning mock data):", msg);
     }
 
-    const hasProducts =
-      aiParsed !== null && aiParsed.products && aiParsed.products.length > 0;
+    const normalizedProducts = buildProducts(aiParsed);
+    const hasProducts = normalizedProducts.length > 0;
 
     const extractedData: ExtractionResponse = hasProducts
       ? {
           success: true,
-          expense_date:
-            aiParsed!.expense_date || new Date().toISOString().split("T")[0],
-          vendor_name: aiParsed!.vendor_name || "Unbekannt",
+          expense_date: normalizeExpenseDate(aiParsed?.expense_date),
+          vendor_name: normalizeVendorName(aiParsed?.vendor_name),
           image_url: filePath,
-          products: aiParsed!.products,
+          products: normalizedProducts,
         }
       : {
           success: false,
-          expense_date:
-            aiParsed?.expense_date || new Date().toISOString().split("T")[0],
-          vendor_name: aiParsed?.vendor_name || "Unbekannt",
+          expense_date: normalizeExpenseDate(aiParsed?.expense_date),
+          vendor_name: normalizeVendorName(aiParsed?.vendor_name),
           image_url: filePath,
           products: [],
           rejection_reason:
-            aiParsed?.rejection_reason ||
+            (typeof aiParsed?.rejection_reason === "string" &&
+              aiParsed.rejection_reason) ||
             "Dieses Dokument konnte nicht als gültiger Beleg identifiziert werden. Bitte stellen Sie sicher, dass Sie einen Kassenbon oder eine Rechnung hochladen.",
         };
 
     console.log("Extracted Data:", JSON.stringify(extractedData, null, 2));
-
-    // ---- Mock data returned while testing ----
-    const mockData: ExtractionResponse = {
-      success: true,
-      expense_date: new Date().toISOString().split("T")[0],
-      vendor_name: "REWE",
-      image_url: filePath,
-      products: [
-        {
-          product_name: "Super E10 Benzin",
-          amount: 65.37,
-          category: "Mobilität",
-        },
-        {
-          product_name: "Kaugummi Spearmint",
-          amount: 1.49,
-          category: "Sonstiges",
-        },
-      ],
-    };
 
     return new Response(JSON.stringify(extractedData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

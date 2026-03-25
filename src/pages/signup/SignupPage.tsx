@@ -56,7 +56,9 @@ export const SignUpPage = () => {
     });
 
     if (signUpError) {
-      const errorMessage = signUpError.message.includes("User already registered")
+      const errorMessage = signUpError.message.includes(
+        "User already registered",
+      )
         ? "Benutzer ist bereits registriert"
         : signUpError.message;
       setError(errorMessage);
@@ -73,7 +75,7 @@ export const SignUpPage = () => {
 
   return (
     <div className="flex justify-center items-center w-screen h-screen p-4">
-      <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card border border-color-border-light p-8 rounded-xl">
+      <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card border border-color-border-light p-8 rounded-xl shadow-shadow-strong animate-scale-in">
         <div className="bg-color-primary/15 p-2 rounded-full mx-auto">
           <VaultIcon className="w-12 h-12 mx-auto text-color-primary" />
         </div>

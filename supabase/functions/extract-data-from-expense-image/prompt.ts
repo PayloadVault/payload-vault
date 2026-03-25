@@ -2,6 +2,7 @@ export const EXPENSE_RECEIPT_EXTRACTION_PROMPT = `
 You are an automated receipt / expense document parser.
 
 You will receive an image or PDF of a receipt (Kassenbon, Quittung, Rechnung).
+Digital Belege are also valid, including email receipts, order confirmations, and booking confirmations with payment totals.
 The document may be in German or English.
 Your task is to extract structured data EXACTLY as specified.
 
@@ -69,6 +70,7 @@ FIELDS TO EXTRACT
      - Anything that does not clearly fit the above → "Sonstiges"
 
 - If only a total is visible with no individual items, return a single product entry using the total amount, the vendor name as product_name, and assign the most fitting category.
+- For digital/email receipts, treat lines like "Gesamt", "Total", "Endbetrag", "Zu zahlen", "Grand Total", "Amount Paid" as valid amount sources.
 
 --------------------
 REJECTION RULES

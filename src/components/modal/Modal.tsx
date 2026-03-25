@@ -31,19 +31,19 @@ export const Modal = ({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in">
       <div
-        className={`flex max-h-[90vh] w-full ${sizeClasses[size]} flex-col gap-4 overflow-y-auto rounded-lg bg-color-bg-card p-4 sm:p-6`}
+        className={`flex max-h-[90vh] w-full ${sizeClasses[size]} flex-col gap-4 overflow-y-auto rounded-lg bg-color-bg-card p-4 sm:p-6 shadow-shadow-strong animate-scale-in`}
       >
         <div className="flex w-full items-start justify-between gap-4">
           <h6 className="text-[20px] font-bold">{title}</h6>
           <button
             onClick={onClose}
             disabled={disableClose}
-            className={`shrink-0 rounded-radius-md p-2 ${
+            className={`shrink-0 rounded-radius-md p-2 transition-all duration-200 ease-in-out ${
               disableClose
                 ? "cursor-not-allowed opacity-50"
-                : "cursor-pointer hover:bg-color-primary/20"
+                : "cursor-pointer hover:bg-color-primary/20 active:scale-90"
             }`}
           >
             <CloseIcon />

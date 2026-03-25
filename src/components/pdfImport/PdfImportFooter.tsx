@@ -20,6 +20,54 @@ export const PdfImportFooter = () => {
   });
   const { showBanner } = useBanner();
 
+  const classifyImportError = (
+    error: unknown,
+  ): {
+    reason: string;
+    errorType: "duplicate" | "extraction" | "unknown";
+  } => {
+    if (error instanceof DuplicateFileError) {
+      return {
+        reason: "Eine Datei mit diesem Namen existiert bereits.",
+        errorType: "duplicate",
+      };
+    }
+
+    if (error instanceof ExtractionError) {
+      return {
+        reason:
+          error.rejectionReason ||
+          "Dieses Dokument konnte nicht verarbeitet werden.",
+        errorType: "extraction",
+      };
+    }
+
+    const message =
+      error instanceof Error
+        ? error.message.toLowerCase()
+        : typeof error === "string"
+          ? error.toLowerCase()
+          : "";
+
+    if (
+      message.includes("duplicate") ||
+      message.includes("already exists") ||
+      message.includes("existiert bereits") ||
+      message.includes("bereits vorhanden") ||
+      message.includes("23505")
+    ) {
+      return {
+        reason: "Eine Datei mit diesem Namen existiert bereits.",
+        errorType: "duplicate",
+      };
+    }
+
+    return {
+      reason: "Import fehlgeschlagen. Bitte Datei prüfen und erneut versuchen.",
+      errorType: "unknown",
+    };
+  };
+
   // Track stats for final banner
   const statsRef = useRef({ confirmed: 0, declined: 0 });
 
@@ -120,22 +168,12 @@ export const PdfImportFooter = () => {
             pendingUploads.push(pendingUpload);
           } catch (error) {
             console.error(`Error extracting file ${file.name}:`, error);
-
-            if (error instanceof DuplicateFileError) {
-              failedFiles.push({
-                name: file.name,
-                reason: "Dieses Dokument wurde bereits hochgeladen.",
-                errorType: "duplicate",
-              });
-            } else if (error instanceof ExtractionError) {
-              failedFiles.push({
-                name: file.name,
-                reason: error.rejectionReason,
-                errorType: "extraction",
-              });
-            } else {
-              failedFiles.push({ name: file.name, errorType: "unknown" });
-            }
+            const classifiedError = classifyImportError(error);
+            failedFiles.push({
+              name: file.name,
+              reason: classifiedError.reason,
+              errorType: classifiedError.errorType,
+            });
           } finally {
             completedCount++;
             onProgress({
@@ -192,6 +230,7 @@ export const PdfImportFooter = () => {
       items-center
       bg-color-bg-main
       z-50
+      shadow-[0_-4px_12px_rgba(0,0,0,0.1)]
     "
     >
       <Button

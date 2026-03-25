@@ -10,7 +10,7 @@ export const TotalIncomeCard = ({
 }: TotalIncomeCardProps) => {
   return (
     <div
-      className={`${variant === "income" ? "bg-color-bg-accent/15" : "bg-color-error/15"} rounded-radius-lg flex p-5 justify-center`}
+      className={`${variant === "income" ? "bg-color-bg-accent/15" : "bg-color-error/15"} rounded-radius-lg flex p-5 justify-center transition-all duration-200 ease-in-out hover:shadow-shadow-medium`}
     >
       <div className="w-[95%] flex flex-col items-baseline gap-1">
         <h4 className="text-color-text-subtle">{title}</h4>
