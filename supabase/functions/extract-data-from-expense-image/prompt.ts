@@ -69,6 +69,16 @@ FIELDS TO EXTRACT
      - Flyers, business cards, ads, promotional items → "Marketing"
      - Anything that does not clearly fit the above → "Sonstiges"
 
+  ADDITIONAL NORMALIZATION RULES (IMPORTANT)
+  - Discounts are NEVER standalone products.
+  - If a discount line appears (e.g. "Rabatt", "Discount", "-4,00", "Coupon", "Preisnachlass"), find the most likely product it refers to and subtract it from that product's amount.
+  - Example: Beef 20.00 and Discount -4.00 on beef → return beef amount as 16.00, and do NOT return a separate discount item.
+  - If multiple discounts clearly map to different products, apply each to its matching product.
+  - If a discount is clearly a basket-level/total discount and no reliable product mapping exists, apply it to the most expensive relevant product instead of creating a discount item.
+  - "Urheberrechtsgebühr" (copyright fee) or similar media/device levy is NEVER a standalone product.
+  - Add "Urheberrechtsgebühr" amount to the product it refers to (e.g. monitor/device/media item), and output only the combined product price.
+  - Do NOT output discount/fee rows as separate products.
+
 - If only a total is visible with no individual items, return a single product entry using the total amount, the vendor name as product_name, and assign the most fitting category.
 - For digital/email receipts, treat lines like "Gesamt", "Total", "Endbetrag", "Zu zahlen", "Grand Total", "Amount Paid" as valid amount sources.
 
