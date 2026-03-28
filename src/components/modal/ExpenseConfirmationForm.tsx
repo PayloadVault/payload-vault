@@ -85,9 +85,13 @@ export const ExpenseConfirmationForm = ({
     }
   }, [hasReceipts, onClose]);
 
+  // Track whether the form has been interacted with (guards against React Strict Mode double-mount cleanup)
+  const hasInteractedRef = useRef(false);
+
   // Cleanup on unmount (e.g. user clicks X) — delete images for fully-declined receipts
   useEffect(() => {
     return () => {
+      if (!hasInteractedRef.current) return;
       receiptsRef.current.forEach((receipt) => {
         if (receipt.products.length > 0 && !receipt.confirmedAny) {
           onDeclineReceipt(receipt.filePath).catch(console.error);
@@ -183,6 +187,7 @@ export const ExpenseConfirmationForm = ({
     receipt: ReceiptState,
     product: EditableProduct,
   ) => {
+    hasInteractedRef.current = true;
     setProcessingIds((prev) => new Set(prev).add(product.id));
     try {
       const productIndex = receipt.products.findIndex(
@@ -208,6 +213,7 @@ export const ExpenseConfirmationForm = ({
 
   // --- Decline single product ---
   const handleDecline = (receiptId: string, productId: string) => {
+    hasInteractedRef.current = true;
     onDeclineProduct();
     const receipt = receipts.find((r) => r.id === receiptId);
     if (!receipt) return;
@@ -231,6 +237,7 @@ export const ExpenseConfirmationForm = ({
 
   // --- Confirm all products of a receipt ---
   const handleConfirmAll = async (receipt: ReceiptState) => {
+    hasInteractedRef.current = true;
     setIsProcessingAll(true);
     try {
       for (let i = 0; i < receipt.products.length; i++) {
@@ -244,6 +251,7 @@ export const ExpenseConfirmationForm = ({
 
   // --- Decline all products of a receipt ---
   const handleDeclineAll = (receipt: ReceiptState) => {
+    hasInteractedRef.current = true;
     receipt.products.forEach(() => onDeclineProduct());
     if (!receipt.confirmedAny) {
       onDeclineReceipt(receipt.filePath).catch(console.error);

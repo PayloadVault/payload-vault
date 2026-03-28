@@ -218,7 +218,7 @@ export const OtherExpensesPages = ({ title }: CategoryProps) => {
               date={pdf.expense_date}
               profit={pdf.amount}
               downloadLink={pdf.signed_url}
-              openLink={pdf.image_url}
+              openLink={pdf.signed_url}
               id={pdf.id}
               onDelete={(id) =>
                 removeFile.mutate({ id, imageUrl: pdf.image_url })

@@ -273,7 +273,7 @@ export const AllExpensesPdfsPage = () => {
               date={pdf.expense_date}
               profit={pdf.amount}
               downloadLink={pdf.signed_url}
-              openLink={pdf.image_url}
+              openLink={pdf.signed_url}
               searchQuery={searchQuery}
               id={pdf.id}
               onDelete={(id) =>
