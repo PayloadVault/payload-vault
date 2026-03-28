@@ -268,7 +268,15 @@ export function useRemoveExpense() {
       if (dbError) throw dbError;
 
       if (imageUrl) {
-        await deleteImageFromStorage(imageUrl);
+        // Only delete from storage if no other expenses reference the same image
+        const { count } = await supabase
+          .from("expenses")
+          .select("id", { count: "exact", head: true })
+          .eq("image_url", imageUrl);
+
+        if (count === 0) {
+          await deleteImageFromStorage(imageUrl);
+        }
       }
     },
     onSuccess: () => {
