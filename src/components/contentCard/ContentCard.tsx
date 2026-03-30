@@ -66,10 +66,11 @@ export const ContentCard = (props: CombinedContentCardProps) => {
       };
       el.addEventListener("transitionend", onEnd, { once: true });
     } else {
+      // Snap to current height, then collapse
       el.style.height = el.scrollHeight + "px";
-      // Force reflow so the browser registers the explicit height before collapsing
-      el.offsetHeight;
-      el.style.height = "0px";
+      requestAnimationFrame(() => {
+        el.style.height = "0px";
+      });
     }
   }, [isExpanded]);
 
@@ -233,7 +234,7 @@ export const ContentCard = (props: CombinedContentCardProps) => {
                   )}
                 </div>
 
-                {/* Mobile three-dot menu — visible only on mobile */}
+                {/* Mobile three-dot menu — visible only on mobile, opens UPWARD */}
                 <div className="relative sm:hidden" ref={menuRef}>
                   <button
                     type="button"
@@ -248,10 +249,10 @@ export const ContentCard = (props: CombinedContentCardProps) => {
 
                   {mobileMenuOpen && (
                     <div
-                      className="absolute right-0 top-full mt-1 z-50
+                      className="absolute right-0 bottom-full mb-1 z-50
                         w-52 rounded-radius-md border border-color-border-light
                         bg-color-bg-card shadow-shadow-strong
-                        overflow-hidden animate-fade-in"
+                        overflow-hidden animate-slide-up origin-bottom"
                     >
                       <button
                         type="button"
