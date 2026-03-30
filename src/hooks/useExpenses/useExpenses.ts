@@ -143,7 +143,7 @@ export function useFetchExpenses(props: FetchExpensesProps) {
       const { data: signedUrls, error: signedUrlsError } =
         await supabase.storage
           .from("expense_invoices")
-          .createSignedUrls(filePaths, 3600);
+          .createSignedUrls(filePaths, 900);
 
       if (signedUrlsError) throw signedUrlsError;
 

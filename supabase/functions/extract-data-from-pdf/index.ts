@@ -38,7 +38,7 @@ function sanitizeAIResponse(raw: string): ExtractedAIData | null {
   }
 }
 
-const allowedOrigin = Deno.env.get("APP_ORIGIN") ?? "*";
+const allowedOrigin = Deno.env.get("APP_ORIGIN") ?? "";
 const corsHeaders = {
   "Access-Control-Allow-Origin": allowedOrigin,
   "Access-Control-Allow-Headers":
@@ -48,7 +48,7 @@ const corsHeaders = {
 
 // Simple in-memory rate limiter (per warm instance)
 const requestCounts = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 30;
+const RATE_LIMIT = 10;
 const WINDOW_MS = 60_000;
 
 function checkRateLimit(userId: string): boolean {
@@ -103,13 +103,21 @@ Deno.serve(async (req) => {
     }
 
     // Prevent path traversal and enforce ownership
-    if (filePath.includes("..") || filePath.includes("\0")) {
+    const normalizedPath = filePath.replace(/\\/g, "/");
+    if (
+      normalizedPath.includes("..") ||
+      normalizedPath.includes("\0") ||
+      normalizedPath.startsWith("/") ||
+      normalizedPath.includes("//") ||
+      /[%]/.test(filePath) ||
+      filePath.length > 512
+    ) {
       return new Response(JSON.stringify({ error: "Invalid file path" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    if (!filePath.startsWith(`${user.id}/`)) {
+    if (!normalizedPath.startsWith(`${user.id}/`)) {
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -133,7 +141,9 @@ Deno.serve(async (req) => {
       {
         inlineData: {
           data: base64Data,
-          mimeType: fileType || "application/pdf",
+          mimeType: ["application/pdf", "image/png", "image/jpeg", "image/webp"].includes(fileType)
+            ? fileType
+            : "application/pdf",
         },
       },
     ]);
@@ -158,8 +168,7 @@ Deno.serve(async (req) => {
           "Dieses Dokument konnte nicht als gültige Rechnung identifiziert werden. Bitte stellen Sie sicher, dass Sie einen unterstützten Rechnungstyp hochladen.",
       };
 
-    // We can keep logging on backend side for debugging purposes
-    console.log("Extracted Data:", extractedData);
+    // Extracted data logging omitted in production for data privacy
 
     return new Response(JSON.stringify(extractedData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -60,7 +60,7 @@ async function fetchPdfs({
 
   const { data: signedUrls, error: signError } = await supabase.storage
     .from("pdf_reports")
-    .createSignedUrls(filePaths, 3600);
+    .createSignedUrls(filePaths, 900);
 
   if (signError) throw signError;
   return data.map((pdf, index) => ({

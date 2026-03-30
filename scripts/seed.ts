@@ -3,8 +3,8 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "../src/types/supabase";
 
-const supabaseUrl = "http://127.0.0.1:54321";
-const serviceRoleKey = "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz";
+const supabaseUrl = process.env.SUPABASE_URL ?? "http://127.0.0.1:54321";
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
 // Connecting to local supabase instance as admin
 const supabaseAdmin = createClient<Database>(supabaseUrl, serviceRoleKey, {
