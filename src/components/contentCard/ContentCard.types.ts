@@ -1,5 +1,6 @@
 import type { IconProps } from "../icons/Icon.types";
 import { type ComponentType } from "react";
+import type { StoredProduct } from "../../hooks/useExpenses/types";
 
 type ContentCardVariant = "allPdf" | "category" | "document";
 
@@ -38,6 +39,8 @@ type CombinedContentCardProps = {
   searchQuery?: string;
   id?: string;
   onDelete?: (id: string) => void;
+  products?: StoredProduct[];
+  vendorName?: string;
 };
 
 type SvgIcon = ComponentType<IconProps>;

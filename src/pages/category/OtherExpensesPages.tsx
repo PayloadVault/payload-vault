@@ -223,6 +223,8 @@ export const OtherExpensesPages = ({ title }: CategoryProps) => {
               onDelete={(id) =>
                 removeFile.mutate({ id, imageUrl: pdf.image_url })
               }
+              products={pdf.products}
+              vendorName={pdf.vendor_name}
             />
           ))}
         </div>

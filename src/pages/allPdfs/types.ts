@@ -1,5 +1,5 @@
 import type { Category } from "../../hooks/usePdf/types";
-import type { ExpenseCategory } from "../../hooks/useExpenses/types";
+import type { ExpenseCategory, StoredProduct } from "../../hooks/useExpenses/types";
 
 type SinglePdf = {
   id: string;
@@ -22,6 +22,7 @@ type SingleExpensePdf = {
   signed_url: string;
   user_id: string;
   vendor_name: string;
+  products: StoredProduct[];
 };
 
 type AllPdfTypes = {

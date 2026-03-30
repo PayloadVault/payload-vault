@@ -1,4 +1,4 @@
-import type { ExpenseRecord } from "../../hooks/useExpenses/types";
+import type { ExpenseRecord, StoredProduct } from "../../hooks/useExpenses/types";
 import type { PdfRecord } from "../../hooks/usePdf/types";
 import type {
   AllExpensePdfTypes,
@@ -55,6 +55,7 @@ const formatAllPdfsExpenses = (allPdfs: ExpenseRecord[]) => {
       user_id: pdf.user_id,
       vendor_name: pdf.vendor_name || "Unbekannt",
       amount: pdf.amount,
+      products: Array.isArray(pdf.products) ? pdf.products as StoredProduct[] : [],
     };
     pdfs.push(singlePdf);
   });

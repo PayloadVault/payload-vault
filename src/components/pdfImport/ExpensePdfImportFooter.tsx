@@ -9,7 +9,7 @@ import {
 } from "../../hooks/useExpenses/useExpenses";
 import type {
   PendingExpenseUpload,
-  ConfirmProductPayload,
+  ConfirmReceiptPayload,
 } from "../../hooks/useExpenses/types";
 import { Button } from "../button/Button";
 import { UploadIcon } from "../icons";
@@ -82,16 +82,16 @@ export const ExpensePdfImportFooter = () => {
       showBanner(
         "Upload abgeschlossen",
         confirmed === 1
-          ? "1 Produkt wurde erfolgreich gespeichert."
-          : `${confirmed} Produkte wurden erfolgreich gespeichert.`,
+          ? "1 Beleg wurde erfolgreich gespeichert."
+          : `${confirmed} Belege wurden erfolgreich gespeichert.`,
         "success",
       );
     } else if (confirmed === 0 && declined > 0) {
       showBanner(
         "Alle abgelehnt",
         declined === 1
-          ? "1 Produkt wurde abgelehnt."
-          : `${declined} Produkte wurden abgelehnt.`,
+          ? "1 Beleg wurde abgelehnt."
+          : `${declined} Belege wurden abgelehnt.`,
         "error",
       );
     } else if (confirmed > 0 && declined > 0) {
@@ -105,43 +105,34 @@ export const ExpensePdfImportFooter = () => {
     statsRef.current = { confirmed: 0, declined: 0 };
   };
 
-  const handleConfirmProduct = async (payload: ConfirmProductPayload) => {
+  const handleConfirmReceipt = async (payload: ConfirmReceiptPayload) => {
     try {
       await confirmExpense.mutateAsync({
         user_id: user?.id || "",
-        category: payload.product.category,
-        amount: payload.product.amount,
-        expense_date: payload.expense_date,
-        vendor_name: payload.vendor_name,
-        image_url: payload.image_url,
-        file_name: payload.file_name,
+        ...payload,
       });
       statsRef.current.confirmed++;
     } catch (error) {
-      console.error("Error confirming product:", error);
+      console.error("Error confirming receipt:", error);
       showBanner(
         "Fehler",
-        `Bestätigung fehlgeschlagen: ${payload.product.product_name}`,
+        `Bestätigung fehlgeschlagen: ${payload.file_name}`,
         "error",
       );
     }
   };
 
-  const handleDeclineProduct = () => {
-    statsRef.current.declined++;
-  };
-
   const handleDeclineReceipt = async (filePath: string) => {
     try {
       await declineExpense.mutateAsync(filePath);
+      statsRef.current.declined++;
     } catch (error) {
       console.error("Error cleaning up receipt:", error);
     }
   };
 
   const { openExpenseConfirmUploadModal } = useExpenseConfirmUploadModal({
-    onConfirmProduct: handleConfirmProduct,
-    onDeclineProduct: handleDeclineProduct,
+    onConfirmReceipt: handleConfirmReceipt,
     onDeclineReceipt: handleDeclineReceipt,
     onComplete: showFinalBanner,
   });
