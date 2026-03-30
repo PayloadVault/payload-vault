@@ -80,6 +80,7 @@ export const PdfConfirmationForm = ({
     return {
       ...upload,
       extractedData: {
+        ...upload.extractedData,
         category: edited.category,
         profit: parseFloat(edited.profit) || 0,
         dateCreated: edited.dateCreated,

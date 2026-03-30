@@ -192,6 +192,7 @@ async function extractLocally(file: File) {
     category: validateCategory(extracted.category ?? ""),
     profit: extracted.profit,
     dateCreated: extracted.date_created,
+    general_grant: extracted.general_grant,
   };
 }
 
@@ -247,6 +248,9 @@ async function uploadAndInsertPdf({
     category: extractedData.category,
     profit: extractedData.profit,
     date_created: extractedData.dateCreated,
+    ...(extractedData.general_grant != null && {
+      general_grant: extractedData.general_grant,
+    }),
   });
 }
 
@@ -265,6 +269,9 @@ async function confirmPendingUpload({
     category: pendingUpload.extractedData.category,
     profit: pendingUpload.extractedData.profit,
     date_created: pendingUpload.extractedData.dateCreated,
+    ...(pendingUpload.extractedData.general_grant != null && {
+      general_grant: pendingUpload.extractedData.general_grant,
+    }),
   });
 }
 

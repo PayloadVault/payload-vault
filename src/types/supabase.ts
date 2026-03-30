@@ -77,6 +77,7 @@ export type Database = {
           date_created: string
           date_uploaded: string
           file_name: string
+           general_grant: number
           id: string
           pdf_url: string
           profit: number
@@ -88,6 +89,7 @@ export type Database = {
           date_created: string
           date_uploaded?: string
           file_name: string
+           general_grant?: number
           id?: string
           pdf_url: string
           profit?: number
@@ -99,6 +101,7 @@ export type Database = {
           date_created?: string
           date_uploaded?: string
           file_name?: string
+           general_grant?: number
           id?: string
           pdf_url?: string
           profit?: number
