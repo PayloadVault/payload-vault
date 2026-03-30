@@ -56,12 +56,11 @@ export const SignUpPage = () => {
     });
 
     if (signUpError) {
-      const errorMessage = signUpError.message.includes(
-        "User already registered",
-      )
-        ? "Benutzer ist bereits registriert"
-        : signUpError.message;
-      setError(errorMessage);
+      setError(
+        signUpError.message.includes("User already registered")
+          ? "Benutzer ist bereits registriert"
+          : "Registrierung fehlgeschlagen. Bitte versuchen Sie es später erneut.",
+      );
     } else if (data.user && data.session === null) {
       setIsSent(true);
     }

@@ -38,11 +38,30 @@ function sanitizeAIResponse(raw: string): ExtractedAIData | null {
   }
 }
 
+const allowedOrigin = Deno.env.get("APP_ORIGIN") ?? "*";
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": allowedOrigin,
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+
+// Simple in-memory rate limiter (per warm instance)
+const requestCounts = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 30;
+const WINDOW_MS = 60_000;
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const entry = requestCounts.get(userId);
+  if (!entry || now > entry.resetAt) {
+    requestCounts.set(userId, { count: 1, resetAt: now + WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT) return false;
+  entry.count++;
+  return true;
+}
 
 Deno.serve(async (req) => {
   // Handle CORS
@@ -50,10 +69,52 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  // Validate JWT — ensure caller is an authenticated user
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  const { data: { user }, error: authError } = await supabase.auth.getUser(
+    authHeader.replace("Bearer ", ""),
+  );
+  if (authError || !user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Rate limiting
+  if (!checkRateLimit(user.id)) {
+    return new Response(JSON.stringify({ error: "Too many requests" }), {
+      status: 429,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const { filePath, fileType } = await req.json();
 
-    if (!filePath) throw new Error("No filePath provided");
+    if (!filePath || typeof filePath !== "string") {
+      throw new Error("No filePath provided");
+    }
+
+    // Prevent path traversal and enforce ownership
+    if (filePath.includes("..") || filePath.includes("\0")) {
+      return new Response(JSON.stringify({ error: "Invalid file path" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!filePath.startsWith(`${user.id}/`)) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Download the file from Supabase Storage
     const { data: fileData, error: downloadError } = await supabase.storage
@@ -104,10 +165,14 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error("Edge function error:", msg);
+    return new Response(
+      JSON.stringify({ error: "Verarbeitung fehlgeschlagen. Bitte erneut versuchen." }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      },
+    );
   }
 });

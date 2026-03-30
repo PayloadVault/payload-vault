@@ -35,7 +35,9 @@ export const ResetPasswordPage = () => {
     });
 
     if (error) {
-      setError(error.message);
+      setError(
+        "Der Link konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.",
+      );
     } else {
       setIsSent(true);
     }
