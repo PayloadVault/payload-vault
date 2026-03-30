@@ -1,10 +1,16 @@
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { cardIcon } from "./ContentCard.const";
 import type { CombinedContentCardProps } from "./ContentCard.types";
 import { useNavigate } from "react-router-dom";
 import { TitleSide } from "./TitleSide";
 import { normalizeProfit } from "./ContentCard.utils";
-import { ArrowIcon, DeleteIcon, DownloadIcon, OpenIcon } from "../icons";
+import {
+  ArrowIcon,
+  DeleteIcon,
+  DownloadIcon,
+  OpenIcon,
+  MoreIcon,
+} from "../icons";
 import { useModal } from "../../context/modal/ModalContext";
 import { DeleteConfirmationForm } from "../modal/DeleteConfirmationForm";
 
@@ -12,6 +18,9 @@ export const ContentCard = (props: CombinedContentCardProps) => {
   const navigate = useNavigate();
   const { openModal, closeModal } = useModal();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const expandRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const {
     variant,
@@ -33,6 +42,37 @@ export const ContentCard = (props: CombinedContentCardProps) => {
   const hasProducts = products && products.length > 0;
   const isExpandable = variant === "document" && hasProducts;
 
+  // Close mobile menu on outside click
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMobileMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [mobileMenuOpen]);
+
+  // Animate expand height
+  useEffect(() => {
+    const el = expandRef.current;
+    if (!el) return;
+
+    if (isExpanded) {
+      el.style.height = el.scrollHeight + "px";
+      const onEnd = () => {
+        el.style.height = "auto";
+      };
+      el.addEventListener("transitionend", onEnd, { once: true });
+    } else {
+      el.style.height = el.scrollHeight + "px";
+      // Force reflow so the browser registers the explicit height before collapsing
+      el.offsetHeight;
+      el.style.height = "0px";
+    }
+  }, [isExpanded]);
+
   const handleNavigate = () => {
     if (link && variant !== "document") {
       navigate(link);
@@ -47,57 +87,80 @@ export const ContentCard = (props: CombinedContentCardProps) => {
     }
   };
 
-  const handleDownloadClick = async (e: React.MouseEvent) => {
+  const handleDownload = useCallback(
+    async (e?: React.MouseEvent) => {
+      e?.stopPropagation();
+      setMobileMenuOpen(false);
+      if (!downloadLink) return;
+      try {
+        const response = await fetch(downloadLink);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = title || "document.pdf";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } catch {
+        window.open(downloadLink, "_blank", "noopener,noreferrer");
+      }
+    },
+    [downloadLink, title],
+  );
+
+  const handleOpen = useCallback(
+    (e?: React.MouseEvent) => {
+      e?.stopPropagation();
+      setMobileMenuOpen(false);
+      if (!openLink) return;
+      window.open(openLink, "_blank", "noopener,noreferrer");
+    },
+    [openLink],
+  );
+
+  const handleDelete = useCallback(
+    (e?: React.MouseEvent) => {
+      e?.stopPropagation();
+      setMobileMenuOpen(false);
+      if (!id || !onDelete) return;
+      openModal({
+        title: "Dokument löschen",
+        children: (
+          <DeleteConfirmationForm
+            fileName={title}
+            onConfirm={async () => {
+              onDelete(id);
+              closeModal();
+            }}
+            onCancel={closeModal}
+          />
+        ),
+      });
+    },
+    [id, onDelete, title, openModal, closeModal],
+  );
+
+  const handleExpand = useCallback(
+    (e?: React.MouseEvent) => {
+      e?.stopPropagation();
+      setMobileMenuOpen(false);
+      if (isExpandable) {
+        setIsExpanded((prev) => !prev);
+      }
+    },
+    [isExpandable],
+  );
+
+  const handleMoreClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!downloadLink) return;
-    try {
-      const response = await fetch(downloadLink);
-      const blob = await response.blob();
-
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = title || "document.pdf";
-
-      document.body.appendChild(link);
-      link.click();
-
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Download failed:", error);
-      window.open(downloadLink, "_blank", "noopener,noreferrer");
-    }
-  };
-
-  const handleOpenClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!openLink) return;
-    window.open(openLink, "_blank", "noopener,noreferrer");
-  };
-
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!id || !onDelete) return;
-
-    openModal({
-      title: "Dokument löschen",
-      children: (
-        <DeleteConfirmationForm
-          fileName={title}
-          onConfirm={async () => {
-            onDelete(id);
-            closeModal();
-          }}
-          onCancel={closeModal}
-        />
-      ),
-    });
+    setMobileMenuOpen((prev) => !prev);
   };
 
   return (
     <div
-      className={`w-full bg-color-bg-card border border-color-border-light
+      className={`relative w-full bg-color-bg-card border border-color-border-light
         rounded-radius-md shadow-shadow-medium
         transition-all duration-200 ease-in-out
         ${
@@ -125,48 +188,124 @@ export const ContentCard = (props: CombinedContentCardProps) => {
             )}
 
             {variant === "document" ? (
-              <div className="flex items-center gap-2 sm:gap-5">
-                <button
-                  type="button"
-                  className="cursor-pointer p-2 sm:p-1 items-center justify-center flex
-                    hover:text-color-primary rounded-radius-sm hover:bg-color-primary/10
-                    transition-all duration-200 ease-in-out active:scale-90"
-                  onClick={handleDownloadClick}
-                  aria-label="Herunterladen"
-                >
-                  <DownloadIcon className="w-6 h-6 text-color-icon shrink-0" />
-                </button>
+              <>
+                {/* Desktop actions — hidden on mobile */}
+                <div className="hidden sm:flex items-center gap-5">
+                  <button
+                    type="button"
+                    className="cursor-pointer p-1 items-center justify-center flex
+                      hover:text-color-primary rounded-radius-sm hover:bg-color-primary/10
+                      transition-all duration-200 ease-in-out active:scale-90"
+                    onClick={(e) => handleDownload(e)}
+                    aria-label="Herunterladen"
+                  >
+                    <DownloadIcon className="w-6 h-6 text-color-icon shrink-0" />
+                  </button>
 
-                <button
-                  type="button"
-                  className="cursor-pointer p-2 sm:p-1 items-center justify-center flex
-                    hover:text-color-primary rounded-radius-sm hover:bg-color-primary/10
-                    transition-all duration-200 ease-in-out active:scale-90"
-                  onClick={handleOpenClick}
-                  aria-label="Öffnen"
-                >
-                  <OpenIcon className="w-6 h-6 text-color-icon shrink-0" />
-                </button>
+                  <button
+                    type="button"
+                    className="cursor-pointer p-1 items-center justify-center flex
+                      hover:text-color-primary rounded-radius-sm hover:bg-color-primary/10
+                      transition-all duration-200 ease-in-out active:scale-90"
+                    onClick={(e) => handleOpen(e)}
+                    aria-label="Öffnen"
+                  >
+                    <OpenIcon className="w-6 h-6 text-color-icon shrink-0" />
+                  </button>
 
-                <button
-                  type="button"
-                  className="cursor-pointer p-2 sm:p-1 items-center justify-center flex
-                    hover:text-color-error-text rounded-radius-sm hover:bg-color-error/20
-                    transition-all duration-200 ease-in-out active:scale-90"
-                  onClick={handleDeleteClick}
-                  aria-label="Löschen"
-                >
-                  <DeleteIcon className="w-6 h-6 text-color-icon shrink-0" />
-                </button>
+                  <button
+                    type="button"
+                    className="cursor-pointer p-1 items-center justify-center flex
+                      hover:text-color-error-text rounded-radius-sm hover:bg-color-error/20
+                      transition-all duration-200 ease-in-out active:scale-90"
+                    onClick={(e) => handleDelete(e)}
+                    aria-label="Löschen"
+                  >
+                    <DeleteIcon className="w-6 h-6 text-color-icon shrink-0" />
+                  </button>
 
-                {isExpandable && (
-                  <ArrowIcon
-                    className={`w-4 h-4 text-color-icon shrink-0 transition-transform duration-200 ${
-                      isExpanded ? "rotate-90" : "rotate-180"
-                    }`}
-                  />
-                )}
-              </div>
+                  {isExpandable && (
+                    <ArrowIcon
+                      className={`w-4 h-4 text-color-icon shrink-0 transition-transform duration-300 ${
+                        isExpanded ? "rotate-90" : "rotate-180"
+                      }`}
+                    />
+                  )}
+                </div>
+
+                {/* Mobile three-dot menu — visible only on mobile */}
+                <div className="relative sm:hidden" ref={menuRef}>
+                  <button
+                    type="button"
+                    className="cursor-pointer p-2 flex items-center justify-center
+                      rounded-radius-sm hover:bg-color-primary/10
+                      transition-all duration-200 active:scale-90"
+                    onClick={handleMoreClick}
+                    aria-label="Aktionen"
+                  >
+                    <MoreIcon className="w-5 h-5 text-color-icon" />
+                  </button>
+
+                  {mobileMenuOpen && (
+                    <div
+                      className="absolute right-0 top-full mt-1 z-50
+                        w-52 rounded-radius-md border border-color-border-light
+                        bg-color-bg-card shadow-shadow-strong
+                        overflow-hidden animate-fade-in"
+                    >
+                      <button
+                        type="button"
+                        className="w-full flex items-center gap-3 px-4 py-3
+                          text-sm text-color-text-main hover:bg-color-primary/10
+                          transition-colors duration-150"
+                        onClick={(e) => handleDownload(e)}
+                      >
+                        <DownloadIcon className="w-5 h-5 text-color-icon shrink-0" />
+                        <span>Herunterladen</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className="w-full flex items-center gap-3 px-4 py-3
+                          text-sm text-color-text-main hover:bg-color-primary/10
+                          transition-colors duration-150"
+                        onClick={(e) => handleOpen(e)}
+                      >
+                        <OpenIcon className="w-5 h-5 text-color-icon shrink-0" />
+                        <span>In neuem Tab öffnen</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className="w-full flex items-center gap-3 px-4 py-3
+                          text-sm text-color-error-text hover:bg-color-error/10
+                          transition-colors duration-150"
+                        onClick={(e) => handleDelete(e)}
+                      >
+                        <DeleteIcon className="w-5 h-5 text-color-error-text shrink-0" />
+                        <span>Löschen</span>
+                      </button>
+
+                      {isExpandable && (
+                        <button
+                          type="button"
+                          className="w-full flex items-center gap-3 px-4 py-3
+                            text-sm text-color-text-main hover:bg-color-primary/10
+                            transition-colors duration-150"
+                          onClick={(e) => handleExpand(e)}
+                        >
+                          <ArrowIcon
+                            className={`w-5 h-5 text-color-icon shrink-0 transition-transform duration-300 ${
+                              isExpanded ? "rotate-90" : "rotate-180"
+                            }`}
+                          />
+                          <span>{isExpanded ? "Details ausblenden" : "Details anzeigen"}</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </>
             ) : (
               <ArrowIcon className="w-4 h-4 text-color-icon shrink-0 rotate-180" />
             )}
@@ -174,33 +313,42 @@ export const ContentCard = (props: CombinedContentCardProps) => {
         </div>
       </div>
 
-      {/* Expanded products section */}
-      {isExpandable && isExpanded && (
-        <div className="border-t border-color-border-light px-4 pb-4 pt-3">
-          {vendorName && (
-            <p className="text-sm text-color-text-secondary mb-3">
-              Anbieter: <span className="font-medium text-color-text-main">{vendorName}</span>
-            </p>
-          )}
-          <div className="flex flex-col gap-2">
-            {products.map((product, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between rounded-md bg-color-bg-dark px-3 py-2"
-              >
-                <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                  <span className="text-sm font-medium text-color-text-main truncate">
-                    {product.product_name}
-                  </span>
-                  <span className="text-xs text-color-text-secondary">
-                    {product.category}
+      {/* Animated expandable products section */}
+      {isExpandable && (
+        <div
+          ref={expandRef}
+          className="overflow-hidden transition-[height] duration-300 ease-in-out"
+          style={{ height: 0 }}
+        >
+          <div className="border-t border-color-border-light px-4 pb-4 pt-3">
+            {vendorName && (
+              <p className="text-sm text-color-text-secondary mb-3">
+                Anbieter:{" "}
+                <span className="font-medium text-color-text-main">
+                  {vendorName}
+                </span>
+              </p>
+            )}
+            <div className="flex flex-col gap-2">
+              {products.map((product, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between rounded-md bg-color-bg-dark px-3 py-2"
+                >
+                  <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                    <span className="text-sm font-medium text-color-text-main truncate">
+                      {product.product_name}
+                    </span>
+                    <span className="text-xs text-color-text-secondary">
+                      {product.category}
+                    </span>
+                  </div>
+                  <span className="text-sm font-semibold text-color-primary whitespace-nowrap ml-4">
+                    {normalizeProfit(product.amount)} €
                   </span>
                 </div>
-                <span className="text-sm font-semibold text-color-primary whitespace-nowrap ml-4">
-                  {normalizeProfit(product.amount)} €
-                </span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       )}
