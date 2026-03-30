@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   type DropdownOptions,
   paycheckFilterOptions,
@@ -10,7 +10,7 @@ import { ContentCard } from "../../components/contentCard/ContentCard";
 import { TotalIncomeCard } from "../../components/totalIncomeCard/TotalIncomeCard";
 import { useAuth } from "../../context/AuthContext";
 import { useYear } from "../../hooks/year/UseYear";
-import type { AllExpensePdfTypes } from "../allPdfs/types";
+
 import { formatAllPdfsExpenses } from "../allPdfs/utils";
 import { ErrorBlock } from "../../components/errorBlock/ErrorBlock";
 import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
@@ -23,6 +23,7 @@ import {
   useFetchExpenses,
   useRemoveExpense,
 } from "../../hooks/useExpenses/useExpenses";
+import type { StoredProduct } from "../../hooks/useExpenses/types";
 
 type CategoryProps = {
   title: string;
@@ -44,9 +45,6 @@ export const OtherExpensesPages = ({ title }: CategoryProps) => {
     DropdownOptions["month"][number]
   >(monthOptions[monthOptions.length - 1]);
 
-  const [contentCardData, setContentCardData] = useState<
-    AllExpensePdfTypes | undefined
-  >();
 
   const endMonthOptions = useMemo(
     () => monthOptions.slice(monthOptions.indexOf(startMonthSelected)),
@@ -69,14 +67,29 @@ export const OtherExpensesPages = ({ title }: CategoryProps) => {
     startMonth: Number(startMonthSelected.id) || undefined,
     endMonth: Number(endMonthSelected.id) || undefined,
     sortBy: isSortType(sortSelected.id) ? sortSelected.id : "new",
-    category: isExpenseCategoryType(title) ? title : "all",
   });
 
-  useEffect(() => {
-    if (data) {
-      setContentCardData(formatAllPdfsExpenses(data));
-    }
-  }, [data]);
+  const filteredData = useMemo(() => {
+    if (!data) return undefined;
+    const categoryTitle = isExpenseCategoryType(title) ? title : null;
+    if (!categoryTitle) return data;
+
+    return data.filter((expense) => {
+      const products = Array.isArray(expense.products)
+        ? (expense.products as StoredProduct[])
+        : [];
+      if (products.length > 0) {
+        return products.some((p) => p.category === categoryTitle);
+      }
+      return expense.category === categoryTitle;
+    });
+  }, [data, title]);
+
+  const contentCardData = useMemo(() => {
+    if (!filteredData) return undefined;
+    const categoryTitle = isExpenseCategoryType(title) ? title : undefined;
+    return formatAllPdfsExpenses(filteredData, categoryTitle);
+  }, [filteredData, title]);
 
   if (!user) return <ErrorBlock />;
 
@@ -225,6 +238,7 @@ export const OtherExpensesPages = ({ title }: CategoryProps) => {
               }
               products={pdf.products}
               vendorName={pdf.vendor_name}
+              activeCategory={isExpenseCategoryType(title) ? title : undefined}
             />
           ))}
         </div>

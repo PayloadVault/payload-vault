@@ -36,14 +36,31 @@ const formatAllPdfs = (allPdfs: PdfRecord[]) => {
   return allData;
 };
 
-const formatAllPdfsExpenses = (allPdfs: ExpenseRecord[]) => {
+const formatAllPdfsExpenses = (
+  allPdfs: ExpenseRecord[],
+  activeCategory?: string,
+) => {
   let totalIncome = 0;
   let totalPdf = 0;
   const pdfs: SingleExpensePdf[] = [];
 
   allPdfs.forEach((pdf) => {
-    totalIncome += pdf.amount;
+    const products = Array.isArray(pdf.products)
+      ? (pdf.products as StoredProduct[])
+      : [];
+
+    let displayAmount: number;
+    if (activeCategory && products.length > 0) {
+      displayAmount = products
+        .filter((p) => p.category === activeCategory)
+        .reduce((sum, p) => sum + p.amount, 0);
+    } else {
+      displayAmount = pdf.amount;
+    }
+
+    totalIncome += displayAmount;
     totalPdf++;
+
     const singlePdf: SingleExpensePdf = {
       id: pdf.id,
       category: pdf.category,
@@ -54,8 +71,8 @@ const formatAllPdfsExpenses = (allPdfs: ExpenseRecord[]) => {
       signed_url: pdf.signed_url || "",
       user_id: pdf.user_id,
       vendor_name: pdf.vendor_name || "Unbekannt",
-      amount: pdf.amount,
-      products: Array.isArray(pdf.products) ? pdf.products as StoredProduct[] : [],
+      amount: displayAmount,
+      products,
     };
     pdfs.push(singlePdf);
   });

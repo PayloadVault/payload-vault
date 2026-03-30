@@ -41,6 +41,7 @@ type CombinedContentCardProps = {
   onDelete?: (id: string) => void;
   products?: StoredProduct[];
   vendorName?: string;
+  activeCategory?: string;
 };
 
 type SvgIcon = ComponentType<IconProps>;

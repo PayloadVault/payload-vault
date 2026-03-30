@@ -36,6 +36,7 @@ export const ContentCard = (props: CombinedContentCardProps) => {
     onDelete,
     products,
     vendorName,
+    activeCategory,
   } = props;
 
   const Icon = cardIcon[props.variant];
@@ -331,24 +332,44 @@ export const ContentCard = (props: CombinedContentCardProps) => {
               </p>
             )}
             <div className="flex flex-col gap-2">
-              {products.map((product, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between rounded-md bg-color-bg-dark px-3 py-2"
-                >
-                  <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                    <span className="text-sm font-medium text-color-text-main truncate">
-                      {product.product_name}
-                    </span>
-                    <span className="text-xs text-color-text-secondary">
-                      {product.category}
+              {products.map((product, index) => {
+                const isDimmed =
+                  !!activeCategory && product.category !== activeCategory;
+                return (
+                  <div
+                    key={index}
+                    className={`flex items-center justify-between rounded-md px-3 py-2 ${
+                      isDimmed
+                        ? "bg-color-bg-dark/50 opacity-40"
+                        : "bg-color-bg-dark"
+                    }`}
+                  >
+                    <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                      <span
+                        className={`text-sm truncate ${
+                          isDimmed
+                            ? "font-normal text-color-text-secondary line-through"
+                            : "font-medium text-color-text-main"
+                        }`}
+                      >
+                        {product.product_name}
+                      </span>
+                      <span className="text-xs text-color-text-secondary">
+                        {product.category}
+                      </span>
+                    </div>
+                    <span
+                      className={`text-sm whitespace-nowrap ml-4 ${
+                        isDimmed
+                          ? "font-normal text-color-text-secondary"
+                          : "font-semibold text-color-primary"
+                      }`}
+                    >
+                      {normalizeProfit(product.amount)} €
                     </span>
                   </div>
-                  <span className="text-sm font-semibold text-color-primary whitespace-nowrap ml-4">
-                    {normalizeProfit(product.amount)} €
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
