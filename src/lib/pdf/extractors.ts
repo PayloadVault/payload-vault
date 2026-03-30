@@ -14,10 +14,17 @@ export const extractedBarmeniaAbrechnung = (text: string): ExtractedData => {
 
   if (!date || !saldo || !category) return null;
 
+  const generalGrantMatch = text.match(
+    /Allgemeiner Zuschuss[\s\S]*?(\d{1,3}(?:\.\d{3})*,\d{2})/,
+  )?.[1];
+
   return {
     profit: normalizeSaldo(saldo),
     date_created: normalizeDate(date),
     category,
+    ...(generalGrantMatch && {
+      general_grant: normalizeSaldo(generalGrantMatch),
+    }),
   };
 };
 
