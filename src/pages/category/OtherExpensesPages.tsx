@@ -22,8 +22,12 @@ import {
   isSortType,
   useFetchExpenses,
   useRemoveExpense,
+  useUpdateExpense,
 } from "../../hooks/useExpenses/useExpenses";
 import type { StoredProduct } from "../../hooks/useExpenses/types";
+import { useModal } from "../../context/modal/ModalContext";
+import { ExpenseEditForm } from "../../components/modal/ExpenseEditForm";
+import { useCallback } from "react";
 
 type CategoryProps = {
   title: string;
@@ -58,8 +62,10 @@ export const OtherExpensesPages = ({ title }: CategoryProps) => {
   };
 
   const { showBanner } = useBanner();
+  const { openModal, closeModal } = useModal();
 
   const removeFile = useRemoveExpense();
+  const updateExpense = useUpdateExpense();
 
   const { data, isLoading, error } = useFetchExpenses({
     userId: user?.id || "",
@@ -90,6 +96,36 @@ export const OtherExpensesPages = ({ title }: CategoryProps) => {
     const categoryTitle = isExpenseCategoryType(title) ? title : undefined;
     return formatAllPdfsExpenses(filteredData, categoryTitle);
   }, [filteredData, title]);
+
+  const handleEditExpense = useCallback(
+    (id: string) => {
+      const expense = data?.find((e) => e.id === id);
+      if (!expense) return;
+
+      const products = Array.isArray(expense.products)
+        ? (expense.products as StoredProduct[])
+        : [];
+
+      openModal({
+        title: "Beleg bearbeiten",
+        size: "large",
+        children: (
+          <ExpenseEditForm
+            expenseId={expense.id}
+            fileName={expense.file_name}
+            expenseDate={expense.expense_date}
+            vendorName={expense.vendor_name || ""}
+            products={products}
+            onSave={async (payload) => {
+              await updateExpense.mutateAsync(payload);
+            }}
+            onCancel={closeModal}
+          />
+        ),
+      });
+    },
+    [data, openModal, closeModal, updateExpense],
+  );
 
   if (!user) return <ErrorBlock />;
 
@@ -236,6 +272,7 @@ export const OtherExpensesPages = ({ title }: CategoryProps) => {
               onDelete={(id) =>
                 removeFile.mutate({ id, imageUrl: pdf.image_url })
               }
+              onEdit={handleEditExpense}
               products={pdf.products}
               vendorName={pdf.vendor_name}
               activeCategory={isExpenseCategoryType(title) ? title : undefined}

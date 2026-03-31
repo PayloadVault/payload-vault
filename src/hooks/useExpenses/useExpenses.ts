@@ -3,10 +3,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../../lib/supabase";
 import type {
   ConfirmReceiptPayload,
+  ExpenseCategory,
   ExpenseRecord,
   FetchExpensesProps,
   PendingExpenseUpload,
   SortType,
+  StoredProduct,
 } from "./types";
 import { isExpenseCategory, DEFAULT_EXPENSE_CATEGORY } from "./types";
 
@@ -248,6 +250,44 @@ export function useConfirmAndUploadToDatabase() {
           file_name: payload.file_name,
           products: JSON.parse(JSON.stringify(payload.products)),
         })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["availableYears"] });
+    },
+  });
+}
+
+export function useUpdateExpense() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ExpenseRecord,
+    PostgrestError,
+    {
+      id: string;
+      category: ExpenseCategory;
+      amount: number;
+      expense_date: string;
+      vendor_name: string;
+      products: StoredProduct[];
+    }
+  >({
+    mutationFn: async (payload) => {
+      const { data, error } = await supabase
+        .from("expenses")
+        .update({
+          category: payload.category,
+          amount: payload.amount,
+          expense_date: payload.expense_date,
+          vendor_name: payload.vendor_name,
+          products: JSON.parse(JSON.stringify(payload.products)),
+        })
+        .eq("id", payload.id)
         .select()
         .single();
       if (error) throw error;

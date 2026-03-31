@@ -39,6 +39,7 @@ type CombinedContentCardProps = {
   searchQuery?: string;
   id?: string;
   onDelete?: (id: string) => void;
+  onEdit?: (id: string) => void;
   products?: StoredProduct[];
   vendorName?: string;
   activeCategory?: string;

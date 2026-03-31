@@ -23,3 +23,4 @@ export { DeleteIcon } from "./DeleteIcon";
 export { LossIcon } from "./LossIcon";
 export { CameraIcon } from "./CameraIcon";
 export { MoreIcon } from "./MoreIcon";
+export { EditIcon } from "./EditIcon";

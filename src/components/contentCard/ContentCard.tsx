@@ -8,6 +8,7 @@ import {
   ArrowIcon,
   DeleteIcon,
   DownloadIcon,
+  EditIcon,
   OpenIcon,
   MoreIcon,
 } from "../icons";
@@ -34,6 +35,7 @@ export const ContentCard = (props: CombinedContentCardProps) => {
     searchQuery,
     id,
     onDelete,
+    onEdit,
     products,
     vendorName,
     activeCategory,
@@ -120,6 +122,16 @@ export const ContentCard = (props: CombinedContentCardProps) => {
       window.open(openLink, "_blank", "noopener,noreferrer");
     },
     [openLink],
+  );
+
+  const handleEdit = useCallback(
+    (e?: React.MouseEvent) => {
+      e?.stopPropagation();
+      setMobileMenuOpen(false);
+      if (!id || !onEdit) return;
+      onEdit(id);
+    },
+    [id, onEdit],
   );
 
   const handleDelete = useCallback(
@@ -215,6 +227,19 @@ export const ContentCard = (props: CombinedContentCardProps) => {
                     <OpenIcon className="w-6 h-6 text-color-icon shrink-0" />
                   </button>
 
+                  {onEdit && (
+                    <button
+                      type="button"
+                      className="cursor-pointer p-1 items-center justify-center flex
+                        hover:text-color-primary rounded-radius-sm hover:bg-color-primary/10
+                        transition-all duration-200 ease-in-out active:scale-90"
+                      onClick={(e) => handleEdit(e)}
+                      aria-label="Bearbeiten"
+                    >
+                      <EditIcon className="w-6 h-6 text-color-icon shrink-0" />
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     className="cursor-pointer p-1 items-center justify-center flex
@@ -276,6 +301,19 @@ export const ContentCard = (props: CombinedContentCardProps) => {
                         <OpenIcon className="w-5 h-5 text-color-icon shrink-0" />
                         <span>In neuem Tab öffnen</span>
                       </button>
+
+                      {onEdit && (
+                        <button
+                          type="button"
+                          className="w-full flex items-center gap-3 px-4 py-3
+                            text-sm text-color-text-main hover:bg-color-primary/10
+                            transition-colors duration-150"
+                          onClick={(e) => handleEdit(e)}
+                        >
+                          <EditIcon className="w-5 h-5 text-color-icon shrink-0" />
+                          <span>Bearbeiten</span>
+                        </button>
+                      )}
 
                       <button
                         type="button"
