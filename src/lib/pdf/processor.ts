@@ -1,7 +1,6 @@
 import * as pdfjsLib from "pdfjs-dist";
 import PdfjsWorker from "pdfjs-dist/build/pdf.worker.mjs?worker";
-import type { InlineData, PdfTextItem, ExtractedData } from "./types";
-import { unifiedPdfExtractor } from "./extractors";
+import type { InlineData, PdfTextItem } from "./types";
 
 // Point pdfjs at its worker. Adjust the path to match your public/ output.
 // If you don't need a separate worker thread, set this to "" and pdfjs will
@@ -125,12 +124,3 @@ export const processSalesData = async (input: InlineData): Promise<string> => {
   }
 };
 
-/**
- * Convenience: extract text AND run the unified extractor in one call.
- */
-export const processSalesDataAndExtract = async (
-  input: InlineData,
-): Promise<ExtractedData> => {
-  const text = await processSalesData(input);
-  return unifiedPdfExtractor(text);
-};
