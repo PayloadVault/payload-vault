@@ -25,27 +25,43 @@ export const Dropdown = ({
 }: DropdownProps) => {
   const id = useId();
   const [isOpen, setIsOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const animateClose = () => {
+    if (isClosing) return;
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsOpen(false);
+      setIsClosing(false);
+    }, 150);
+  };
+
   const handleSelect = (option: Option) => {
-    setIsOpen(false);
+    animateClose();
     onSelect(option);
   };
-  const handleToggle = () => setIsOpen((prev) => !prev);
+  const handleToggle = () => {
+    if (isOpen && !isClosing) {
+      animateClose();
+    } else if (!isOpen) {
+      setIsOpen(true);
+    }
+  };
 
   const MainIcon: ComponentType<SVGProps<SVGSVGElement>> | undefined =
     customIcon ?? value?.icon;
 
   const isPlaceholderActive = !value && !!placeholder;
-  const displayText = isPlaceholderActive ? placeholder : value?.label ?? "";
+  const displayText = isPlaceholderActive ? placeholder : (value?.label ?? "");
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || isClosing) return;
 
     const handleClickOutside = (e: MouseEvent) => {
       if (!dropdownRef.current) return;
       if (!dropdownRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
+        animateClose();
       }
     };
 
@@ -53,7 +69,7 @@ export const Dropdown = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen, isClosing]);
 
   return (
     <div ref={dropdownRef} className="flex flex-col gap-1">
@@ -82,11 +98,12 @@ export const Dropdown = ({
             px-4 py-3
             ${radiusVariants[variant]}
             ring-2 ring-transparent
-            ${isOpen ? "ring-color-bg-accent" : ""}
+            transition-all duration-200 ease-in-out
+            ${isOpen && !isClosing ? "ring-color-bg-accent" : ""}
             ${
               error
                 ? "border border-color-error-border bg-color-error/10"
-                : "border border-color-border-light bg-main-color-bg-main "
+                : "border border-color-border-light bg-color-bg-main"
             }`}
         >
           <div className="flex items-center gap-3">
@@ -104,16 +121,17 @@ export const Dropdown = ({
 
           <ArrowIcon
             className={`text-color-text-secondary transition-transform duration-400 ease-in-out ${
-              isOpen ? "rotate-90" : "-rotate-90"
+              isOpen && !isClosing ? "rotate-90" : "-rotate-90"
             }`}
           />
         </button>
 
-        {isOpen && (
+        {(isOpen || isClosing) && (
           <DropdownList
             options={options}
             isSearchEnabled={isSearchEnabled}
             onSelect={handleSelect}
+            isClosing={isClosing}
           />
         )}
       </div>

@@ -38,13 +38,13 @@ export const PasswordInput = ({
           </label>
         </div>
         <div
-          className={`flex h-12 w-full rounded-lg border px-3 py-3 sm:px-6
+          className={`flex h-12 w-full rounded-lg border px-3 py-3 sm:px-6 transition-all duration-200 ease-in-out
     ${
       error
         ? "bg-color-error/10 border-color-error"
         : "border-color-border-light bg-color-bg-dark"
     }
-    focus-within:border-color-bg-accent`}
+    focus-within:border-color-bg-accent focus-within:shadow-shadow-medium`}
         >
           <input
             type={visible ? "text" : "password"}

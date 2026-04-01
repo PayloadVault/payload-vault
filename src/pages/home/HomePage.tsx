@@ -1,80 +1,86 @@
-import { useState, useEffect } from "react";
-import { ContentCard } from "../../components/contentCard/ContentCard";
-import { HeaderHome } from "../../components/header/HeaderHome";
-import { TotalIncomeCard } from "../../components/totalIncomeCard/TotalIncomeCard";
-import { PdfImportFooter } from "../../components/pdfImport/PdfImportFooter";
-import { usePdfs } from "../../hooks/usePdf/UsePdfs";
-import { useAuth } from "../../context/AuthContext";
-import { useYear } from "../../hooks/year/UseYear";
-import { formatData } from "./utils";
-import type { FullData } from "./types";
 import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
+import { ContentCard } from "../../components/contentCard/ContentCard";
+import { TotalIncomeCard } from "../../components/totalIncomeCard/TotalIncomeCard";
+import { HeaderHome } from "../../components/header/HeaderHome";
+import { useAuth } from "../../context/AuthContext";
 import { ErrorBlock } from "../../components/errorBlock/ErrorBlock";
+import { useFetchExpenses } from "../../hooks/useExpenses/useExpenses";
+import { useYear } from "../../hooks/year/UseYear";
+import { usePdfs } from "../../hooks/usePdf/UsePdfs";
+import { formatExpenses } from "../expenses/utils";
+import { formatData } from "./utils";
 
 export const HomePage = () => {
   const { user } = useAuth();
   const { year } = useYear();
-  const [contentCardData, setContentCardData] = useState<
-    FullData | undefined
-  >();
-
-  if (!user) return <ErrorBlock />;
 
   const {
-    data: pdfs,
-    isLoading,
-    error,
-  } = usePdfs({
-    userId: user.id,
+    data: expenses,
+    isLoading: isLoadingExpenses,
+    error: errorExpenses,
+  } = useFetchExpenses({
+    userId: user?.id || "",
     year,
   });
 
-  useEffect(() => {
-    if (pdfs) {
-      setContentCardData(formatData(pdfs));
-    }
-  }, [pdfs]);
+  const {
+    data: pdfs,
+    isLoading: isLoadingPdfs,
+    error: errorPdfs,
+  } = usePdfs({
+    userId: user?.id || "",
+    year,
+  });
 
-  if (error) return <ErrorBlock />;
+  const contentCardData = {
+    totalPdf: pdfs ? formatData(pdfs).totalPdf : 0,
+    totalExpensePdf: expenses ? formatExpenses(expenses).totalPdf : 0,
+    totalIncome: pdfs ? formatData(pdfs).totalIncome : 0,
+    totalExpanse: expenses ? formatExpenses(expenses).totalIncome : 0,
+    allCategories: expenses ? formatExpenses(expenses).allCategories : [],
+  };
+
+  if (!user || !year || errorExpenses || errorPdfs) return <ErrorBlock />;
 
   return (
     <div className="min-h-screen bg-color-bg">
-      <HeaderHome />
-
-      {isLoading || !contentCardData ? (
+      {isLoadingExpenses || isLoadingPdfs || !expenses || !pdfs ? (
         <PageSkeletonLoader />
       ) : (
-        <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
-          <TotalIncomeCard
-            title="Gesamteinnahmen"
-            subtitle={
-              contentCardData.totalPdf.toString() + " · Gehaltsabrechnung"
-            }
-            totalIncome={contentCardData.totalIncome}
-          />
-          <ContentCard
-            variant="allPdf"
-            title={contentCardData.allPdfs.title}
-            subtitle={contentCardData.allPdfs.subtitle}
-            link={contentCardData.allPdfs.link}
-          />
-          <h2 className="text-color-primary font-bold mx-auto">Kategorien</h2>
-          <div className="flex flex-col gap-6">
-            {contentCardData.allCategories.map((category, index) => (
+        <>
+          <HeaderHome />
+          <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
+            <TotalIncomeCard
+              title="Gesamteinnahmen"
+              subtitle={contentCardData.totalPdf + " · Abrechnungen"}
+              totalIncome={contentCardData.totalIncome}
+            />
+            <TotalIncomeCard
+              variant="expense"
+              title="Gesamtkosten"
+              subtitle={contentCardData.totalExpensePdf + " · Rechnungen"}
+              totalIncome={contentCardData.totalExpanse}
+            />
+            <h2 className="text-color-primary font-bold mx-auto">Kategorien</h2>
+            <div className="flex flex-col gap-6">
               <ContentCard
-                key={index}
                 variant="category"
-                title={category.category.title}
-                subtitle={category.subtitle.toString() + " · Gehaltsabrechnung"}
-                profit={category.profit}
-                link={"category/" + category.category.slug}
+                title="Einnahmen"
+                subtitle={contentCardData.totalPdf + " · Abrechnungen"}
+                profit={contentCardData.totalIncome}
+                link="/einnahmen"
               />
-            ))}
-          </div>
-        </main>
+              <ContentCard
+                variant="category"
+                title="Steuerrelevante Ausgaben"
+                subtitle={contentCardData.totalExpensePdf + " · Rechnungen"}
+                profit={contentCardData.totalExpanse}
+                link="/steuerrelevante-ausgaben"
+              />
+            </div>
+          </main>
+        </>
       )}
-
-      <PdfImportFooter />
     </div>
   );
 };

@@ -7,17 +7,19 @@ interface DropdownListProps {
   options: Option[];
   isSearchEnabled: boolean;
   onSelect: (item: Option) => void;
+  isClosing?: boolean;
 }
 
 export const DropdownList = ({
   options,
   isSearchEnabled,
   onSelect,
+  isClosing = false,
 }: DropdownListProps) => {
   const [search, setSearch] = useState("");
 
   const filtered = options.filter((option) =>
-    option.label.toLowerCase().includes(search.toLowerCase())
+    option.label.toLowerCase().includes(search.toLowerCase()),
   );
 
   const handleSelectItem = (option: Option) => {
@@ -26,7 +28,9 @@ export const DropdownList = ({
   };
 
   return (
-    <div className="absolute z-60 mt-2 w-full overflow-hidden rounded-md border border-color-border-light bg-color-bg-dark shadow-md">
+    <div
+      className={`absolute z-60 mt-2 w-full overflow-hidden rounded-md border border-color-border-light bg-color-bg-dark shadow-md ${isClosing ? "animate-slide-up-out" : "animate-slide-down"}`}
+    >
       {isSearchEnabled && (
         <div className="p-3">
           <SearchBar value={search} onChange={setSearch} placeholder="Suchen" />

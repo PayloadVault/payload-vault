@@ -28,6 +28,7 @@ type CategoryProps = {
 export const OtherPages = ({ title }: CategoryProps) => {
   const { user } = useAuth();
   const { year } = useYear();
+  const params = window.location.pathname.split("/")[1];
 
   const [sortSelected, setSortSelected] = useState<
     DropdownOptions["paycheckFilter"][number]
@@ -57,15 +58,13 @@ export const OtherPages = ({ title }: CategoryProps) => {
 
   const { showBanner } = useBanner();
 
-  if (!user) return <ErrorBlock />;
-
   const {
     data: pdfs,
     isLoading,
     error,
     removePdf,
   } = usePdfs({
-    userId: user.id,
+    userId: user?.id || "",
     year,
     startMonth: Number(startMonthSelected.id) || undefined,
     endMonth: Number(endMonthSelected.id) || undefined,
@@ -78,6 +77,8 @@ export const OtherPages = ({ title }: CategoryProps) => {
       setContentCardData(formatAllPdfs(pdfs));
     }
   }, [pdfs]);
+
+  if (!user) return <ErrorBlock />;
 
   const handleDownloadAll = async () => {
     if (!contentCardData || contentCardData.pdfs.length === 0) {
@@ -147,6 +148,7 @@ export const OtherPages = ({ title }: CategoryProps) => {
         "Beim Herunterladen der PDFs ist ein Fehler aufgetreten. Bitte versuche es erneut.",
         "error",
       );
+      console.error(error);
     }
   };
 
@@ -158,8 +160,13 @@ export const OtherPages = ({ title }: CategoryProps) => {
     <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
       <TotalIncomeCard
         title={title}
-        subtitle={contentCardData.totalPdf.toString() + " · Gehaltsabrechnung"}
+        subtitle={
+          contentCardData.totalPdf.toString() +
+          " · " +
+          (params === "einnahmen" ? "Abrechnungen" : "Rechnungen")
+        }
         totalIncome={contentCardData.totalIncome}
+        variant={params === "einnahmen" ? "income" : "expense"}
       />
       <div className="flex flex-col gap-2">
         <div className="grid grid-cols-1">

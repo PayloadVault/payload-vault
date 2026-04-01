@@ -3,6 +3,7 @@ import { supabase } from "../../lib/supabase";
 import type { PostgrestError } from "@supabase/supabase-js";
 import type { FetchPdfProps, PdfRecord, NewPdf } from "./types";
 import type { PendingUpload, PdfCategory } from "./usePendingUpload";
+import { processSalesData, unifiedPdfExtractor } from "../../lib/pdf";
 
 async function deleteFileFromStorage(path: string) {
   const { error } = await supabase.storage.from("pdf_reports").remove([path]);
@@ -25,13 +26,11 @@ async function fetchPdfs({
 
   if (year) {
     const start = `${year}-${String(startMonth ?? 1).padStart(2, "0")}-01`;
-
     const end = endMonth
       ? endMonth === 12
         ? `${year + 1}-01-01`
         : `${year}-${String(endMonth + 1).padStart(2, "0")}-01`
       : `${year + 1}-01-01`;
-
     query = query.gte("date_created", start).lt("date_created", end);
   }
 
@@ -76,7 +75,6 @@ async function insertPdf(pdf: NewPdf): Promise<PdfRecord> {
     .insert(pdf)
     .select()
     .single();
-
   if (error) throw error;
   return data;
 }
@@ -89,10 +87,7 @@ async function deletePdfAndFile(id: string): Promise<PdfRecord> {
     .single();
 
   if (fetchError) throw fetchError;
-
-  if (record?.pdf_url) {
-    await deleteFileFromStorage(record.pdf_url);
-  }
+  if (record?.pdf_url) await deleteFileFromStorage(record.pdf_url);
 
   const { data, error } = await supabase
     .from("pdf_records")
@@ -105,10 +100,7 @@ async function deletePdfAndFile(id: string): Promise<PdfRecord> {
   return data;
 }
 
-type UploadVariables = {
-  file: File;
-  userId: string;
-};
+// ── Errors ────────────────────────────────────────────────────────────────────
 
 export class ExtractionError extends Error {
   constructor(
@@ -127,6 +119,7 @@ export class DuplicateFileError extends Error {
   }
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
 async function checkDuplicateFileName(
   userId: string,
   fileName: string,
@@ -142,79 +135,6 @@ async function checkDuplicateFileName(
   return (data?.length ?? 0) > 0;
 }
 
-type ExtractionResponse = {
-  success: boolean;
-  profit?: number;
-  date_created?: string;
-  category?: string;
-  rejection_reason?: string;
-};
-
-async function uploadAndInsertPdf({
-  file,
-  userId,
-}: UploadVariables): Promise<PdfRecord> {
-  const isDuplicate = await checkDuplicateFileName(userId, file.name);
-  if (isDuplicate) {
-    throw new DuplicateFileError(file.name);
-  }
-
-  const lastDotIndex = file.name.lastIndexOf(".");
-  const fileExt = lastDotIndex > 0 ? file.name.slice(lastDotIndex + 1) : "pdf";
-  const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9]/g, "_")}.${fileExt}`;
-  const filePath = `${userId}/${fileName}`;
-
-  const { error: uploadError } = await supabase.storage
-    .from("pdf_reports")
-    .upload(filePath, file);
-
-  if (uploadError) throw uploadError;
-
-  const { data: aiData, error: aiError } =
-    await supabase.functions.invoke<ExtractionResponse>(
-      "extract-data-from-pdf",
-      {
-        body: {
-          filePath: filePath,
-          fileType: file.type,
-        },
-      },
-    );
-
-  if (aiError) {
-    // Clean up uploaded file on AI error
-    await supabase.storage.from("pdf_reports").remove([filePath]);
-    throw new ExtractionError("KI-Extraktion fehlgeschlagen", aiError.message);
-  }
-
-  if (!aiData?.success) {
-    // Clean up uploaded file if extraction was rejected
-    await supabase.storage.from("pdf_reports").remove([filePath]);
-    throw new ExtractionError(
-      "Dokument nicht erkannt",
-      aiData?.rejection_reason ||
-        "Dieses Dokument konnte nicht als gültige Rechnung identifiziert werden.",
-    );
-  }
-
-  const metadata = {
-    profit: aiData.profit || 0,
-    date_created: aiData.date_created || new Date().toISOString().split("T")[0],
-    category: validateCategory(aiData.category || ""),
-  };
-
-  const newPdfRecord: NewPdf = {
-    user_id: userId,
-    file_name: file.name,
-    pdf_url: filePath,
-    category: metadata.category as PdfCategory,
-    profit: metadata.profit,
-    date_created: metadata.date_created,
-  };
-
-  return insertPdf(newPdfRecord);
-}
-
 function validateCategory(cat: string): PdfCategory {
   const valid: PdfCategory[] = [
     "Strom & Gas",
@@ -228,101 +148,139 @@ function validateCategory(cat: string): PdfCategory {
     : "Strom & Gas";
 }
 
-// Upload and extract only - doesn't insert to database
-type ExtractVariables = {
-  file: File;
-  userId: string;
-};
+function buildStoragePath(userId: string, fileName: string): string {
+  const lastDot = fileName.lastIndexOf(".");
+  const ext = lastDot > 0 ? fileName.slice(lastDot + 1) : "pdf";
+  const safeName = `${Date.now()}_${fileName.replace(/[^a-zA-Z0-9]/g, "_")}.${ext}`;
+  return `${userId}/${safeName}`;
+}
 
-export type ExtractedPendingUpload = PendingUpload;
+async function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      // result is "data:<mime>;base64,<data>" — strip the prefix
+      const result = reader.result as string;
+      resolve(result.split(",")[1]);
+    };
+    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.readAsDataURL(file);
+  });
+}
 
+// ── Core extraction (local, no Gemini/edge function) ─────────────────────────
+
+type ExtractVariables = { file: File; userId: string };
+type UploadVariables = { file: File; userId: string };
+
+async function extractLocally(file: File) {
+  const base64 = await fileToBase64(file);
+  const text = await processSalesData({
+    data: base64,
+    mimeType: "application/pdf",
+  });
+  const extracted = unifiedPdfExtractor(text);
+
+  if (!extracted) {
+    throw new ExtractionError(
+      "Dokument nicht erkannt",
+      "Dieses Dokument konnte nicht als gültige Rechnung identifiziert werden.",
+    );
+  }
+
+  return {
+    category: validateCategory(extracted.category ?? ""),
+    profit: extracted.profit,
+    dateCreated: extracted.date_created,
+  };
+}
+
+// Extract only — upload to storage only after successful extraction
 async function uploadAndExtractOnly({
   file,
   userId,
 }: ExtractVariables): Promise<PendingUpload> {
   const isDuplicate = await checkDuplicateFileName(userId, file.name);
-  if (isDuplicate) {
-    throw new DuplicateFileError(file.name);
-  }
+  if (isDuplicate) throw new DuplicateFileError(file.name);
 
-  const lastDotIndex = file.name.lastIndexOf(".");
-  const fileExt = lastDotIndex > 0 ? file.name.slice(lastDotIndex + 1) : "pdf";
-  const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9]/g, "_")}.${fileExt}`;
-  const filePath = `${userId}/${fileName}`;
+  // Extract first — don't waste a storage upload on a bad file
+  const extractedData = await extractLocally(file);
 
+  const filePath = buildStoragePath(userId, file.name);
   const { error: uploadError } = await supabase.storage
     .from("pdf_reports")
     .upload(filePath, file);
 
-  if (uploadError) throw uploadError;
-
-  const { data: aiData, error: aiError } =
-    await supabase.functions.invoke<ExtractionResponse>(
-      "extract-data-from-pdf",
-      {
-        body: {
-          filePath: filePath,
-          fileType: file.type,
-        },
-      },
-    );
-
-  if (aiError) {
-    await supabase.storage.from("pdf_reports").remove([filePath]);
-    throw new ExtractionError("KI-Extraktion fehlgeschlagen", aiError.message);
-  }
-
-  if (!aiData?.success) {
-    await supabase.storage.from("pdf_reports").remove([filePath]);
-    throw new ExtractionError(
-      "Dokument nicht erkannt",
-      aiData?.rejection_reason ||
-        "Dieses Dokument konnte nicht als gültige Rechnung identifiziert werden.",
-    );
-  }
+  if (uploadError)
+    throw new ExtractionError("Upload fehlgeschlagen", uploadError.message);
 
   return {
     id: crypto.randomUUID(),
     fileName: file.name,
-    filePath: filePath,
-    extractedData: {
-      category: validateCategory(aiData.category || ""),
-      profit: aiData.profit || 0,
-      dateCreated:
-        aiData.date_created || new Date().toISOString().split("T")[0],
-    },
+    filePath,
+    extractedData,
   };
 }
 
-// Confirm a pending upload - inserts to database
-type ConfirmVariables = {
-  userId: string;
-  pendingUpload: PendingUpload;
-};
+// Legacy: extract + immediately insert (used by uploadPdf mutation)
+async function uploadAndInsertPdf({
+  file,
+  userId,
+}: UploadVariables): Promise<PdfRecord> {
+  const isDuplicate = await checkDuplicateFileName(userId, file.name);
+  if (isDuplicate) throw new DuplicateFileError(file.name);
+
+  const extractedData = await extractLocally(file);
+
+  const filePath = buildStoragePath(userId, file.name);
+  const { error: uploadError } = await supabase.storage
+    .from("pdf_reports")
+    .upload(filePath, file);
+
+  if (uploadError)
+    throw new ExtractionError("Upload fehlgeschlagen", uploadError.message);
+
+  return insertPdf({
+    user_id: userId,
+    file_name: file.name,
+    pdf_url: filePath,
+    category: extractedData.category,
+    profit: extractedData.profit,
+    date_created: extractedData.dateCreated,
+  });
+}
+
+// ── Confirm / decline pending uploads ────────────────────────────────────────
+
+type ConfirmVariables = { userId: string; pendingUpload: PendingUpload };
 
 async function confirmPendingUpload({
   userId,
   pendingUpload,
 }: ConfirmVariables): Promise<PdfRecord> {
-  const newPdfRecord: NewPdf = {
+  return insertPdf({
     user_id: userId,
     file_name: pendingUpload.fileName,
     pdf_url: pendingUpload.filePath,
     category: pendingUpload.extractedData.category,
     profit: pendingUpload.extractedData.profit,
     date_created: pendingUpload.extractedData.dateCreated,
-  };
-
-  return insertPdf(newPdfRecord);
+  });
 }
 
-// Decline a pending upload - removes file from storage
 async function declinePendingUpload(filePath: string): Promise<void> {
   await deleteFileFromStorage(filePath);
 }
 
+// ── Hook ──────────────────────────────────────────────────────────────────────
+
 export function usePdfs(props: FetchPdfProps) {
   const queryClient = useQueryClient();
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ["pdfs"] });
+    queryClient.invalidateQueries({ queryKey: ["availableYears"] });
+  };
 
   const query = useQuery<PdfRecord[], PostgrestError>({
     queryKey: ["pdfs", props],
@@ -333,26 +291,17 @@ export function usePdfs(props: FetchPdfProps) {
 
   const addPdf = useMutation<PdfRecord, PostgrestError, NewPdf>({
     mutationFn: insertPdf,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pdfs"] });
-      queryClient.invalidateQueries({ queryKey: ["availableYears"] });
-    },
+    onSuccess: invalidate,
   });
 
-  const uploadPdf = useMutation<PdfRecord, PostgrestError, UploadVariables>({
+  const uploadPdf = useMutation<PdfRecord, Error, UploadVariables>({
     mutationFn: uploadAndInsertPdf,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pdfs"] });
-      queryClient.invalidateQueries({ queryKey: ["availableYears"] });
-    },
+    onSuccess: invalidate,
   });
 
   const removePdf = useMutation<PdfRecord, PostgrestError, string>({
     mutationFn: deletePdfAndFile,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pdfs"] });
-      queryClient.invalidateQueries({ queryKey: ["availableYears"] });
-    },
+    onSuccess: invalidate,
   });
 
   const extractPdf = useMutation<PendingUpload, Error, ExtractVariables>({
@@ -361,10 +310,7 @@ export function usePdfs(props: FetchPdfProps) {
 
   const confirmPdf = useMutation<PdfRecord, PostgrestError, ConfirmVariables>({
     mutationFn: confirmPendingUpload,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pdfs"] });
-      queryClient.invalidateQueries({ queryKey: ["availableYears"] });
-    },
+    onSuccess: invalidate,
   });
 
   const declinePdf = useMutation<void, Error, string>({
@@ -373,8 +319,8 @@ export function usePdfs(props: FetchPdfProps) {
 
   return {
     ...query,
-    addPdf,
     uploadPdf,
+    addPdf,
     removePdf,
     extractPdf,
     confirmPdf,

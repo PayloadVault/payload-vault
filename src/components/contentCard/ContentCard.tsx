@@ -85,10 +85,10 @@ export const ContentCard = (props: CombinedContentCardProps) => {
     <div
       className={`w-full bg-color-bg-card border border-color-border-light
         rounded-radius-md p-4 shadow-shadow-medium
-        transition-colors duration-200 ease-in-out
+        transition-all duration-200 ease-in-out
         ${
           variant !== "document"
-            ? "cursor-pointer hover:border-color-primary hover:text-color-primary"
+            ? "cursor-pointer hover:border-color-primary hover:text-color-primary hover:-translate-y-0.5 hover:shadow-shadow-strong active:scale-[0.99]"
             : ""
         }`}
       onClick={handleNavigate}
@@ -115,7 +115,7 @@ export const ContentCard = (props: CombinedContentCardProps) => {
                 type="button"
                 className="cursor-pointer p-2 sm:p-1 items-center justify-center flex
                   hover:text-color-primary rounded-radius-sm hover:bg-color-primary/10
-                  transition-colors duration-200 ease-in-out"
+                  transition-all duration-200 ease-in-out active:scale-90"
                 onClick={handleDownloadClick}
                 aria-label="Herunterladen"
               >
@@ -126,7 +126,7 @@ export const ContentCard = (props: CombinedContentCardProps) => {
                 type="button"
                 className="cursor-pointer p-2 sm:p-1 items-center justify-center flex
                   hover:text-color-primary rounded-radius-sm hover:bg-color-primary/10
-                  transition-colors duration-200 ease-in-out"
+                  transition-all duration-200 ease-in-out active:scale-90"
                 onClick={handleOpenClick}
                 aria-label="Öffnen"
               >
@@ -137,7 +137,7 @@ export const ContentCard = (props: CombinedContentCardProps) => {
                 type="button"
                 className="cursor-pointer p-2 sm:p-1 items-center justify-center flex
                   hover:text-color-error-text rounded-radius-sm hover:bg-color-error/20
-                  transition-colors duration-200 ease-in-out"
+                  transition-all duration-200 ease-in-out active:scale-90"
                 onClick={handleDeleteClick}
                 aria-label="Löschen"
               >

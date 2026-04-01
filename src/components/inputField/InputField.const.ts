@@ -4,10 +4,10 @@ const getInputStyles = (
   position: InputFieldPosition = "full",
   inputType: InputType = "text",
   hasError: boolean = false,
-  isReadOnly: boolean = false
+  isReadOnly: boolean = false,
 ) => {
   const base =
-    "py-3 px-3 sm:px-6 font-medium text-[16px] placeholder-color-text-subtle min-w-0";
+    "py-3 px-3 sm:px-6 font-medium text-[16px] placeholder-color-text-subtle min-w-0 transition-all duration-200 ease-in-out";
 
   const text = isReadOnly ? "text-color-text-subtle" : "text-color-text-main";
 
@@ -15,14 +15,14 @@ const getInputStyles = (
     position === "full"
       ? "rounded-lg"
       : position === "left"
-      ? "rounded-l-lg"
-      : "rounded-r-lg";
+        ? "rounded-l-lg"
+        : "rounded-r-lg";
 
   const colorClasses = isReadOnly
     ? "bg-color-bg-dark border border-color-border-light cursor-not-allowed"
     : hasError
-    ? "bg-color-error/10 border border-color-error"
-    : "bg-color-bg-dark border border-color-border-light";
+      ? "bg-color-error/10 border border-color-error"
+      : "bg-color-bg-dark border border-color-border-light";
 
   const focusClasses = isReadOnly
     ? "focus:outline-none focus:border-color-border-light"

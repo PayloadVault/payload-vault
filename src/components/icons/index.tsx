@@ -20,3 +20,5 @@ export { ArrowBackIcon } from "./ArrowBackIcon";
 export { OpenIcon } from "./OpenIcon";
 export { DownloadIcon } from "./DownloadIcon";
 export { DeleteIcon } from "./DeleteIcon";
+export { LossIcon } from "./LossIcon";
+export { CameraIcon } from "./CameraIcon";
