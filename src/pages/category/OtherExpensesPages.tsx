@@ -207,7 +207,7 @@ export const OtherExpensesPages = ({ title }: CategoryProps) => {
   if (error) return <ErrorBlock />;
 
   return (
-    <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
+    <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-6">
       <TotalIncomeCard
         title={title}
         subtitle={
