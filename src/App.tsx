@@ -19,6 +19,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { YearProvider } from "./context/YearContext";
 import { BannerProvider } from "./context/banner/BannerProvider";
 import { AllExpensesPdfsPage } from "./pages/allPdfs/AllExpensesPdfPage";
+import { ImpressumPage } from "./pages/impressum/ImpressumPage";
+import { DatenschutzPage } from "./pages/datenschutz/DatenschutzPage";
 
 const queryClient = new QueryClient();
 
@@ -145,6 +147,12 @@ export default function App() {
                     }
                   />
                 </Route>
+
+                <Route path="/impressum" element={<ImpressumPage />} />
+                <Route
+                  path="/datenschutz"
+                  element={<DatenschutzPage />}
+                />
 
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

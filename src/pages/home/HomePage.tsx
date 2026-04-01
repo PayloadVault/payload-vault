@@ -9,6 +9,7 @@ import { useYear } from "../../hooks/year/UseYear";
 import { usePdfs } from "../../hooks/usePdf/UsePdfs";
 import { formatExpenses } from "../expenses/utils";
 import { formatData } from "./utils";
+import { MiniFooter } from "../../components/footer/MiniFooter";
 
 export const HomePage = () => {
   const { user } = useAuth();
@@ -43,13 +44,13 @@ export const HomePage = () => {
   if (!user || !year || errorExpenses || errorPdfs) return <ErrorBlock />;
 
   return (
-    <div className="min-h-screen bg-color-bg">
+    <div className="flex flex-col min-h-screen bg-color-bg">
       {isLoadingExpenses || isLoadingPdfs || !expenses || !pdfs ? (
         <PageSkeletonLoader />
       ) : (
         <>
           <HeaderHome />
-          <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
+          <main className="flex-1 flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
             <TotalIncomeCard
               title="Gesamteinnahmen"
               subtitle={contentCardData.totalPdf + " · Abrechnungen"}
@@ -79,6 +80,7 @@ export const HomePage = () => {
               />
             </div>
           </main>
+          <MiniFooter />
         </>
       )}
     </div>

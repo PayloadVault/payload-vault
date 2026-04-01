@@ -6,6 +6,7 @@ import { Banner } from "../../components/banner/Banner";
 import { Button } from "../../components/button/Button";
 import { VaultIcon } from "../../components/icons";
 import { passwordChangeSchema } from "../../validation/ChangePasswordValidation";
+import { MiniFooter } from "../../components/footer/MiniFooter";
 
 export const UpdatePasswordPage = () => {
   const [password, setPassword] = useState("");
@@ -46,7 +47,8 @@ export const UpdatePasswordPage = () => {
 
   if (isUpdated) {
     return (
-      <div className="flex items-center justify-center w-screen h-screen p-4">
+      <div className="flex flex-col min-h-screen">
+      <div className="flex-1 flex items-center justify-center w-full p-4">
         <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card p-8 rounded-xl border border-color-border-light text-center shadow-shadow-strong animate-scale-in">
           <h3 className="font-bold text-color-text-main">
             Passwort aktualisiert
@@ -57,11 +59,14 @@ export const UpdatePasswordPage = () => {
           <Button onClick={() => navigate("/login")} text="Zur Anmeldung" />
         </div>
       </div>
+      <MiniFooter showHome={false} />
+      </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-center w-screen h-screen p-4">
+    <div className="flex flex-col min-h-screen">
+    <div className="flex-1 flex items-center justify-center w-full p-4">
       <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card p-8 rounded-xl border border-color-border-light shadow-shadow-strong animate-scale-in">
         <div className="bg-color-primary/15 p-2 rounded-full mx-auto">
           <VaultIcon className="w-12 h-12 mx-auto text-color-primary" />
@@ -98,6 +103,8 @@ export const UpdatePasswordPage = () => {
           <Link to="/login">Zurück zur Anmeldung</Link>
         </p>
       </div>
+    </div>
+    <MiniFooter showHome={false} />
     </div>
   );
 };
