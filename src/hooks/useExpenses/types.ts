@@ -7,6 +7,12 @@ type ExpenseRecord = Database["public"]["Tables"]["expenses"]["Row"] & {
 type NewExpense = Database["public"]["Tables"]["expenses"]["Insert"];
 type ExpenseCategory = Database["public"]["Enums"]["expense_category"];
 
+type StoredProduct = {
+  product_name: string;
+  amount: number;
+  category: ExpenseCategory;
+};
+
 type ExtractedProduct = {
   id: string;
   product_name: string;
@@ -14,8 +20,10 @@ type ExtractedProduct = {
   category: ExpenseCategory;
 };
 
-type ConfirmProductPayload = {
-  product: ExtractedProduct;
+type ConfirmReceiptPayload = {
+  products: StoredProduct[];
+  amount: number;
+  category: ExpenseCategory;
   expense_date: string;
   vendor_name: string;
   image_url: string;
@@ -59,12 +67,13 @@ type PendingExpenseUpload = {
 };
 
 export type {
-  ConfirmProductPayload,
+  ConfirmReceiptPayload,
   ExpenseCategory,
   ExpenseRecord,
   ExtractedProduct,
   FetchExpensesProps,
   NewExpense,
   PendingExpenseUpload,
+  StoredProduct,
 };
 export { DEFAULT_EXPENSE_CATEGORY, expenseCategories, isExpenseCategory };

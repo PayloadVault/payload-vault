@@ -2,19 +2,17 @@ import { ExpenseConfirmationForm } from "../../components/modal/ExpenseConfirmat
 import { useModal } from "../../context/modal/ModalContext";
 import type {
   PendingExpenseUpload,
-  ConfirmProductPayload,
+  ConfirmReceiptPayload,
 } from "../useExpenses/types";
 
 type UseExpenseConfirmUploadModalProps = {
-  onConfirmProduct: (payload: ConfirmProductPayload) => Promise<void>;
-  onDeclineProduct: () => void;
+  onConfirmReceipt: (payload: ConfirmReceiptPayload) => Promise<void>;
   onDeclineReceipt: (filePath: string) => Promise<void>;
   onComplete: () => void;
 };
 
 export const useExpenseConfirmUploadModal = ({
-  onConfirmProduct,
-  onDeclineProduct,
+  onConfirmReceipt,
   onDeclineReceipt,
   onComplete,
 }: UseExpenseConfirmUploadModalProps) => {
@@ -44,15 +42,14 @@ export const useExpenseConfirmUploadModal = ({
       children: (
         <ExpenseConfirmationForm
           pendingUploads={pendingUploads}
-          onConfirmProduct={async (payload) => {
+          onConfirmReceipt={async (payload) => {
             setDisableClose(true);
             try {
-              await onConfirmProduct(payload);
+              await onConfirmReceipt(payload);
             } finally {
               setDisableClose(false);
             }
           }}
-          onDeclineProduct={onDeclineProduct}
           onDeclineReceipt={onDeclineReceipt}
           onClose={closeModal}
         />

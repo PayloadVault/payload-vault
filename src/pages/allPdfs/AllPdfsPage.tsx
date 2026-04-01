@@ -29,6 +29,9 @@ import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeleton
 import { DocumentSkeletonLoader } from "../../components/skeletonLoader/DocumentSkeletonLoader";
 import { Button } from "../../components/button/Button";
 import { useBanner } from "../../context/banner/BannerContext";
+import { useModal } from "../../context/modal/ModalContext";
+import { PdfEditForm } from "../../components/modal/PdfEditForm";
+import type { PdfCategory } from "../../hooks/usePdf/usePendingUpload";
 
 export const AllPdfsPage = () => {
   const { user } = useAuth();
@@ -80,11 +83,14 @@ export const AllPdfsPage = () => {
 
   const param = window.location.pathname.split("/")[1];
 
+  const { openModal, closeModal } = useModal();
+
   const {
     data: pdfs,
     isLoading,
     error,
     removePdf,
+    updatePdf,
   } = usePdfs({
     userId: user?.id ?? "",
     year,
@@ -112,6 +118,31 @@ export const AllPdfsPage = () => {
       setEndMonthSelected(startMonthSelected);
     }
   }, [startMonthSelected]);
+
+  const handleEditPdf = useCallback(
+    (id: string) => {
+      const pdf = pdfs?.find((p) => p.id === id);
+      if (!pdf) return;
+
+      openModal({
+        title: "Dokument bearbeiten",
+        children: (
+          <PdfEditForm
+            pdfId={pdf.id}
+            fileName={pdf.file_name}
+            category={pdf.category as PdfCategory}
+            profit={pdf.profit}
+            dateCreated={pdf.date_created}
+            onSave={async (payload) => {
+              await updatePdf.mutateAsync(payload);
+            }}
+            onCancel={closeModal}
+          />
+        ),
+      });
+    },
+    [pdfs, openModal, closeModal, updatePdf],
+  );
 
   if (!user) return <ErrorBlock />;
 
@@ -274,6 +305,7 @@ export const AllPdfsPage = () => {
               searchQuery={searchQuery}
               id={pdf.id}
               onDelete={(id) => removePdf.mutate(id)}
+              onEdit={handleEditPdf}
             />
           ))}
         </div>

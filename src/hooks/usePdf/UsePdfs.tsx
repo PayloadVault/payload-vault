@@ -306,6 +306,28 @@ export function usePdfs(props: FetchPdfProps) {
     onSuccess: invalidate,
   });
 
+  const updatePdf = useMutation<
+    PdfRecord,
+    PostgrestError,
+    { id: string; category: PdfCategory; profit: number; date_created: string }
+  >({
+    mutationFn: async (payload) => {
+      const { data, error } = await supabase
+        .from("pdf_records")
+        .update({
+          category: payload.category,
+          profit: payload.profit,
+          date_created: payload.date_created,
+        })
+        .eq("id", payload.id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: invalidate,
+  });
+
   const removePdf = useMutation<PdfRecord, PostgrestError, string>({
     mutationFn: deletePdfAndFile,
     onSuccess: invalidate,
@@ -328,6 +350,7 @@ export function usePdfs(props: FetchPdfProps) {
     ...query,
     uploadPdf,
     addPdf,
+    updatePdf,
     removePdf,
     extractPdf,
     confirmPdf,

@@ -1,5 +1,5 @@
 import type { HomeSort } from "../../hooks/usePdf/types";
-import type { ExpenseRecord } from "../../hooks/useExpenses/types";
+import type { ExpenseRecord, StoredProduct } from "../../hooks/useExpenses/types";
 import type { CategoryData, FullData } from "./types";
 import { type Category } from "../../data/Categories";
 
@@ -26,15 +26,43 @@ const formatExpenses = (expenses: ExpenseRecord[]): FullData => {
     subtitle: 0,
   }));
 
+  const countedExpenses = new Map<string, Set<string>>();
+
   expenses.forEach((expense) => {
     totalAmount += expense.amount;
     totalExpenses++;
 
-    const match = allData.find((d) => d.category.title === expense.category);
-    if (match) {
-      match.profit += expense.amount;
-      match.subtitle++;
+    const products = Array.isArray(expense.products)
+      ? (expense.products as StoredProduct[])
+      : [];
+
+    if (products.length > 0) {
+      products.forEach((product) => {
+        const match = allData.find(
+          (d) => d.category.title === product.category,
+        );
+        if (match) {
+          match.profit += product.amount;
+          const key = match.category.title;
+          if (!countedExpenses.has(key)) countedExpenses.set(key, new Set());
+          countedExpenses.get(key)!.add(expense.id);
+        }
+      });
+    } else {
+      const match = allData.find(
+        (d) => d.category.title === expense.category,
+      );
+      if (match) {
+        match.profit += expense.amount;
+        const key = match.category.title;
+        if (!countedExpenses.has(key)) countedExpenses.set(key, new Set());
+        countedExpenses.get(key)!.add(expense.id);
+      }
     }
+  });
+
+  allData.forEach((d) => {
+    d.subtitle = countedExpenses.get(d.category.title)?.size ?? 0;
   });
 
   return {

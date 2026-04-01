@@ -4,6 +4,7 @@ import { UserIcon, VaultIcon } from "../icons";
 import { MenuDropdown } from "./MenuDropdown";
 import { useAuth } from "../../context/AuthContext";
 import { useYear } from "../../hooks/year/UseYear";
+import { useNavigate } from "react-router-dom";
 
 type HeaderHomeProps = {
   isTwoHeaders?: boolean;
@@ -12,6 +13,8 @@ type HeaderHomeProps = {
 export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
   const { user } = useAuth();
   const { year, setYear, availableYears } = useYear();
+
+  const navigate = useNavigate();
 
   const options = useMemo(
     () =>
@@ -88,7 +91,10 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
           md:flex-row md:items-center md:justify-between
         "
       >
-        <div className="flex items-center gap-4 min-w-0">
+        <div
+          className="flex items-center gap-4 min-w-0"
+          onClick={() => navigate("/")}
+        >
           <div className="w-10 h-10 sm:w-12 sm:h-12 bg-color-primary/20 rounded-full flex items-center justify-center shrink-0">
             <VaultIcon className="w-6 h-6 sm:w-8 sm:h-8 text-color-primary" />
           </div>

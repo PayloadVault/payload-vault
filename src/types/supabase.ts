@@ -43,6 +43,7 @@ export type Database = {
           file_name: string
           id: string
           image_url: string
+          products: Json
           user_id: string
           vendor_name: string | null
         }
@@ -54,6 +55,7 @@ export type Database = {
           file_name: string
           id?: string
           image_url: string
+          products?: Json
           user_id: string
           vendor_name?: string | null
         }
@@ -65,6 +67,7 @@ export type Database = {
           file_name?: string
           id?: string
           image_url?: string
+          products?: Json
           user_id?: string
           vendor_name?: string | null
         }

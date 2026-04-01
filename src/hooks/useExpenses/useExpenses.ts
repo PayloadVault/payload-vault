@@ -2,11 +2,13 @@ import type { PostgrestError } from "@supabase/supabase-js";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../../lib/supabase";
 import type {
+  ConfirmReceiptPayload,
+  ExpenseCategory,
   ExpenseRecord,
   FetchExpensesProps,
-  NewExpense,
   PendingExpenseUpload,
   SortType,
+  StoredProduct,
 } from "./types";
 import { isExpenseCategory, DEFAULT_EXPENSE_CATEGORY } from "./types";
 
@@ -47,7 +49,7 @@ async function checkDuplicateFileName(
     .from("expenses")
     .select("id")
     .eq("user_id", userId)
-    .or(`file_name.eq.${fileName},file_name.like.${fileName}__p%`)
+    .eq("file_name", fileName)
     .limit(1);
 
   if (error) throw error;
@@ -84,19 +86,15 @@ export function useFetchExpenses(props: FetchExpensesProps) {
           2,
           "0",
         )}-01`;
-        const endDay = new Date(props.year, endMonth, 0).getDate(); // last day of endMonth
+        const endDay = new Date(props.year, endMonth, 0).getDate();
         const endDate = `${props.year}-${String(endMonth).padStart(
           2,
           "0",
         )}-${endDay}`;
 
         q = q.gte("expense_date", startDate).lte("expense_date", endDate);
-      } else if (props.startMonth || props.endMonth) {
-        // no year selected but months are — you can decide to ignore or handle
-        // currently ignored; adjust if needed
       }
 
-      // Sorting
       switch (props.sortBy) {
         case "old":
           q = q.order("expense_date", { ascending: true });
@@ -161,7 +159,6 @@ export function useUploadAndExtract(userId: string) {
         );
 
         if (extractError) {
-          // Try to read the error body from a FunctionsHttpError
           let message = "Extraction failed";
           try {
             if (
@@ -239,11 +236,58 @@ export function useDeclineExpenseUpload() {
 export function useConfirmAndUploadToDatabase() {
   const queryClient = useQueryClient();
 
-  return useMutation<ExpenseRecord, PostgrestError, NewExpense>({
-    mutationFn: async (newExpense) => {
+  return useMutation<ExpenseRecord, PostgrestError, ConfirmReceiptPayload & { user_id: string }>({
+    mutationFn: async (payload) => {
       const { data, error } = await supabase
         .from("expenses")
-        .insert(newExpense)
+        .insert({
+          user_id: payload.user_id,
+          category: payload.category,
+          amount: payload.amount,
+          expense_date: payload.expense_date,
+          vendor_name: payload.vendor_name,
+          image_url: payload.image_url,
+          file_name: payload.file_name,
+          products: JSON.parse(JSON.stringify(payload.products)),
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["availableYears"] });
+    },
+  });
+}
+
+export function useUpdateExpense() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ExpenseRecord,
+    PostgrestError,
+    {
+      id: string;
+      category: ExpenseCategory;
+      amount: number;
+      expense_date: string;
+      vendor_name: string;
+      products: StoredProduct[];
+    }
+  >({
+    mutationFn: async (payload) => {
+      const { data, error } = await supabase
+        .from("expenses")
+        .update({
+          category: payload.category,
+          amount: payload.amount,
+          expense_date: payload.expense_date,
+          vendor_name: payload.vendor_name,
+          products: JSON.parse(JSON.stringify(payload.products)),
+        })
+        .eq("id", payload.id)
         .select()
         .single();
       if (error) throw error;
@@ -268,15 +312,7 @@ export function useRemoveExpense() {
       if (dbError) throw dbError;
 
       if (imageUrl) {
-        // Only delete from storage if no other expenses reference the same image
-        const { count } = await supabase
-          .from("expenses")
-          .select("id", { count: "exact", head: true })
-          .eq("image_url", imageUrl);
-
-        if (count === 0) {
-          await deleteImageFromStorage(imageUrl);
-        }
+        await deleteImageFromStorage(imageUrl);
       }
     },
     onSuccess: () => {

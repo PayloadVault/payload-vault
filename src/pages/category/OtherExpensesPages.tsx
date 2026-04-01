@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   type DropdownOptions,
   paycheckFilterOptions,
@@ -10,7 +10,7 @@ import { ContentCard } from "../../components/contentCard/ContentCard";
 import { TotalIncomeCard } from "../../components/totalIncomeCard/TotalIncomeCard";
 import { useAuth } from "../../context/AuthContext";
 import { useYear } from "../../hooks/year/UseYear";
-import type { AllExpensePdfTypes } from "../allPdfs/types";
+
 import { formatAllPdfsExpenses } from "../allPdfs/utils";
 import { ErrorBlock } from "../../components/errorBlock/ErrorBlock";
 import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
@@ -22,7 +22,12 @@ import {
   isSortType,
   useFetchExpenses,
   useRemoveExpense,
+  useUpdateExpense,
 } from "../../hooks/useExpenses/useExpenses";
+import type { StoredProduct } from "../../hooks/useExpenses/types";
+import { useModal } from "../../context/modal/ModalContext";
+import { ExpenseEditForm } from "../../components/modal/ExpenseEditForm";
+import { useCallback } from "react";
 
 type CategoryProps = {
   title: string;
@@ -44,9 +49,6 @@ export const OtherExpensesPages = ({ title }: CategoryProps) => {
     DropdownOptions["month"][number]
   >(monthOptions[monthOptions.length - 1]);
 
-  const [contentCardData, setContentCardData] = useState<
-    AllExpensePdfTypes | undefined
-  >();
 
   const endMonthOptions = useMemo(
     () => monthOptions.slice(monthOptions.indexOf(startMonthSelected)),
@@ -60,8 +62,10 @@ export const OtherExpensesPages = ({ title }: CategoryProps) => {
   };
 
   const { showBanner } = useBanner();
+  const { openModal, closeModal } = useModal();
 
   const removeFile = useRemoveExpense();
+  const updateExpense = useUpdateExpense();
 
   const { data, isLoading, error } = useFetchExpenses({
     userId: user?.id || "",
@@ -69,14 +73,59 @@ export const OtherExpensesPages = ({ title }: CategoryProps) => {
     startMonth: Number(startMonthSelected.id) || undefined,
     endMonth: Number(endMonthSelected.id) || undefined,
     sortBy: isSortType(sortSelected.id) ? sortSelected.id : "new",
-    category: isExpenseCategoryType(title) ? title : "all",
   });
 
-  useEffect(() => {
-    if (data) {
-      setContentCardData(formatAllPdfsExpenses(data));
-    }
-  }, [data]);
+  const filteredData = useMemo(() => {
+    if (!data) return undefined;
+    const categoryTitle = isExpenseCategoryType(title) ? title : null;
+    if (!categoryTitle) return data;
+
+    return data.filter((expense) => {
+      const products = Array.isArray(expense.products)
+        ? (expense.products as StoredProduct[])
+        : [];
+      if (products.length > 0) {
+        return products.some((p) => p.category === categoryTitle);
+      }
+      return expense.category === categoryTitle;
+    });
+  }, [data, title]);
+
+  const contentCardData = useMemo(() => {
+    if (!filteredData) return undefined;
+    const categoryTitle = isExpenseCategoryType(title) ? title : undefined;
+    return formatAllPdfsExpenses(filteredData, categoryTitle);
+  }, [filteredData, title]);
+
+  const handleEditExpense = useCallback(
+    (id: string) => {
+      const expense = data?.find((e) => e.id === id);
+      if (!expense) return;
+
+      const products = Array.isArray(expense.products)
+        ? (expense.products as StoredProduct[])
+        : [];
+
+      openModal({
+        title: "Beleg bearbeiten",
+        size: "large",
+        children: (
+          <ExpenseEditForm
+            expenseId={expense.id}
+            fileName={expense.file_name}
+            expenseDate={expense.expense_date}
+            vendorName={expense.vendor_name || ""}
+            products={products}
+            onSave={async (payload) => {
+              await updateExpense.mutateAsync(payload);
+            }}
+            onCancel={closeModal}
+          />
+        ),
+      });
+    },
+    [data, openModal, closeModal, updateExpense],
+  );
 
   if (!user) return <ErrorBlock />;
 
@@ -223,6 +272,10 @@ export const OtherExpensesPages = ({ title }: CategoryProps) => {
               onDelete={(id) =>
                 removeFile.mutate({ id, imageUrl: pdf.image_url })
               }
+              onEdit={handleEditExpense}
+              products={pdf.products}
+              vendorName={pdf.vendor_name}
+              activeCategory={isExpenseCategoryType(title) ? title : undefined}
             />
           ))}
         </div>

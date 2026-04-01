@@ -17,6 +17,7 @@ import {
 import {
   isSortType,
   useRemoveExpense,
+  useUpdateExpense,
 } from "../../hooks/useExpenses/useExpenses";
 import { Dropdown } from "../../components/dropdown/Dropdown";
 import { ContentCard } from "../../components/contentCard/ContentCard";
@@ -32,6 +33,9 @@ import { DocumentSkeletonLoader } from "../../components/skeletonLoader/Document
 import { Button } from "../../components/button/Button";
 import { useBanner } from "../../context/banner/BannerContext";
 import { useFetchExpenses } from "../../hooks/useExpenses/useExpenses";
+import { useModal } from "../../context/modal/ModalContext";
+import { ExpenseEditForm } from "../../components/modal/ExpenseEditForm";
+import type { StoredProduct } from "../../hooks/useExpenses/types";
 
 export const AllExpensesPdfsPage = () => {
   const { user } = useAuth();
@@ -83,7 +87,9 @@ export const AllExpensesPdfsPage = () => {
 
   const param = window.location.pathname.split("/")[1];
 
+  const { openModal, closeModal } = useModal();
   const removeFile = useRemoveExpense();
+  const updateExpense = useUpdateExpense();
 
   const { data, isLoading, error } = useFetchExpenses({
     userId: user?.id ?? "",
@@ -114,6 +120,36 @@ export const AllExpensesPdfsPage = () => {
       setEndMonthSelected(startMonthSelected);
     }
   }, [startMonthSelected]);
+
+  const handleEditExpense = useCallback(
+    (id: string) => {
+      const expense = data?.find((e) => e.id === id);
+      if (!expense) return;
+
+      const products = Array.isArray(expense.products)
+        ? (expense.products as StoredProduct[])
+        : [];
+
+      openModal({
+        title: "Beleg bearbeiten",
+        size: "large",
+        children: (
+          <ExpenseEditForm
+            expenseId={expense.id}
+            fileName={expense.file_name}
+            expenseDate={expense.expense_date}
+            vendorName={expense.vendor_name || ""}
+            products={products}
+            onSave={async (payload) => {
+              await updateExpense.mutateAsync(payload);
+            }}
+            onCancel={closeModal}
+          />
+        ),
+      });
+    },
+    [data, openModal, closeModal, updateExpense],
+  );
 
   if (!user) return <ErrorBlock />;
 
@@ -279,6 +315,9 @@ export const AllExpensesPdfsPage = () => {
               onDelete={(id) =>
                 removeFile.mutate({ id, imageUrl: pdf.image_url })
               }
+              onEdit={handleEditExpense}
+              products={pdf.products}
+              vendorName={pdf.vendor_name}
             />
           ))}
         </div>
