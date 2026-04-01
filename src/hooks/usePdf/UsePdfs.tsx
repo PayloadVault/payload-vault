@@ -60,7 +60,7 @@ async function fetchPdfs({
 
   const { data: signedUrls, error: signError } = await supabase.storage
     .from("pdf_reports")
-    .createSignedUrls(filePaths, 3600);
+    .createSignedUrls(filePaths, 900);
 
   if (signError) throw signError;
   return data.map((pdf, index) => ({
@@ -151,7 +151,7 @@ function validateCategory(cat: string): PdfCategory {
 function buildStoragePath(userId: string, fileName: string): string {
   const lastDot = fileName.lastIndexOf(".");
   const ext = lastDot > 0 ? fileName.slice(lastDot + 1) : "pdf";
-  const safeName = `${Date.now()}_${fileName.replace(/[^a-zA-Z0-9]/g, "_")}.${ext}`;
+  const safeName = `${crypto.randomUUID()}_${fileName.replace(/[^a-zA-Z0-9]/g, "_")}.${ext}`;
   return `${userId}/${safeName}`;
 }
 

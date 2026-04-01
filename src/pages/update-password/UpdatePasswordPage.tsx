@@ -37,7 +37,9 @@ export const UpdatePasswordPage = () => {
     });
 
     if (error) {
-      setError(error.message);
+      setError(
+        "Passwort konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.",
+      );
     } else {
       setIsUpdated(true);
     }

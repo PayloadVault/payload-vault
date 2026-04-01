@@ -172,9 +172,16 @@ function buildProducts(aiParsed: ExtractedAIData | null): ExtractedProduct[] {
   ];
 }
 
-function getMimeType(filePath: string, blobType: string): string {
-  if (blobType && blobType !== "application/octet-stream") return blobType;
+const ALLOWED_MIME_TYPES = new Set([
+  "application/pdf",
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/heic",
+]);
 
+function getMimeType(filePath: string, blobType: string): string {
+  // Determine MIME from extension first (trusted), then fall back to blob type
   const ext = filePath.split(".").pop()?.toLowerCase();
   const mimeMap: Record<string, string> = {
     pdf: "application/pdf",
@@ -184,7 +191,13 @@ function getMimeType(filePath: string, blobType: string): string {
     webp: "image/webp",
     heic: "image/heic",
   };
-  return mimeMap[ext ?? ""] ?? "application/octet-stream";
+  const extMime = mimeMap[ext ?? ""];
+  if (extMime) return extMime;
+
+  // Only accept known MIME types from blob — never trust arbitrary values
+  if (blobType && ALLOWED_MIME_TYPES.has(blobType)) return blobType;
+
+  return "application/octet-stream";
 }
 
 function toBase64(buffer: ArrayBuffer): string {
@@ -201,11 +214,30 @@ function toBase64(buffer: ArrayBuffer): string {
 
 // ---------- CORS ----------
 
+const allowedOrigin = Deno.env.get("APP_ORIGIN") ?? "";
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": allowedOrigin,
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+
+// Simple in-memory rate limiter (per warm instance)
+const requestCounts = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 10;
+const WINDOW_MS = 60_000;
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const entry = requestCounts.get(userId);
+  if (!entry || now > entry.resetAt) {
+    requestCounts.set(userId, { count: 1, resetAt: now + WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT) return false;
+  entry.count++;
+  return true;
+}
 
 // ---------- Handler ----------
 
@@ -214,10 +246,36 @@ Deno.serve(async (req: Request) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  // Validate JWT — ensure caller is an authenticated user
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  const { data: { user }, error: authError } = await supabase.auth.getUser(
+    authHeader.replace("Bearer ", ""),
+  );
+  if (authError || !user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Rate limiting
+  if (!checkRateLimit(user.id)) {
+    return new Response(JSON.stringify({ error: "Too many requests" }), {
+      status: 429,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const { filePath } = await req.json();
 
-    if (!filePath) {
+    if (!filePath || typeof filePath !== "string") {
       return new Response(
         JSON.stringify({ success: false, error: "No filePath provided" }),
         {
@@ -225,6 +283,28 @@ Deno.serve(async (req: Request) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         },
       );
+    }
+
+    // Prevent path traversal and enforce ownership
+    const normalizedPath = filePath.replace(/\\/g, "/");
+    if (
+      normalizedPath.includes("..") ||
+      normalizedPath.includes("\0") ||
+      normalizedPath.startsWith("/") ||
+      normalizedPath.includes("//") ||
+      /[%]/.test(filePath) ||
+      filePath.length > 512
+    ) {
+      return new Response(JSON.stringify({ error: "Invalid file path" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!normalizedPath.startsWith(`${user.id}/`)) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Download the file (image or PDF) from storage
@@ -254,8 +334,7 @@ Deno.serve(async (req: Request) => {
       const responseText = result.response.text();
       aiParsed = sanitizeAIResponse(responseText);
 
-      console.log("AI raw response:", responseText);
-      console.log("AI parsed response:", JSON.stringify(aiParsed, null, 2));
+      // AI response logging omitted in production for data privacy
     } catch (aiError) {
       const msg = aiError instanceof Error ? aiError.message : String(aiError);
       console.error("Gemini API error (returning mock data):", msg);
@@ -284,7 +363,7 @@ Deno.serve(async (req: Request) => {
             "Dieses Dokument konnte nicht als gültiger Beleg identifiziert werden. Bitte stellen Sie sicher, dass Sie einen Kassenbon oder eine Rechnung hochladen.",
         };
 
-    console.log("Extracted Data:", JSON.stringify(extractedData, null, 2));
+    // Extracted data logging omitted in production for data privacy
 
     return new Response(JSON.stringify(extractedData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -293,9 +372,12 @@ Deno.serve(async (req: Request) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error("Edge function error:", message);
-    return new Response(JSON.stringify({ success: false, error: message }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 400,
-    });
+    return new Response(
+      JSON.stringify({ success: false, error: "Verarbeitung fehlgeschlagen. Bitte erneut versuchen." }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      },
+    );
   }
 });

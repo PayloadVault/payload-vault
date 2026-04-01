@@ -29,10 +29,14 @@ export class ExtractionExpenseError extends Error {
 }
 
 function sanitizeFileName(fileName: string): string {
-  return fileName
+  // Strip path separators to prevent directory traversal
+  const baseName = fileName.split(/[/\\]/).pop() ?? fileName;
+  return baseName
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9._-]/g, "_");
+    .replace(/[^a-zA-Z0-9._-]/g, "_")
+    .replace(/^[._-]+/, "") // Don't start with dot, dash, or underscore
+    .slice(0, 200); // Cap length
 }
 async function deleteImageFromStorage(path: string): Promise<void> {
   const { error } = await supabase.storage
@@ -45,15 +49,32 @@ async function checkDuplicateFileName(
   userId: string,
   fileName: string,
 ): Promise<boolean> {
-  const { data, error } = await supabase
+  // Exact match — safe parameterized query
+  const { data: exactMatch, error: exactError } = await supabase
     .from("expenses")
     .select("id")
     .eq("user_id", userId)
     .eq("file_name", fileName)
     .limit(1);
 
-  if (error) throw error;
-  return (data?.length ?? 0) > 0;
+  if (exactError) throw exactError;
+  if ((exactMatch?.length ?? 0) > 0) return true;
+
+  // Suffix-copy match — escape LIKE wildcards to prevent pattern injection
+  const escapedName = fileName
+    .replace(/\\/g, "\\\\")
+    .replace(/%/g, "\\%")
+    .replace(/_/g, "\\_");
+
+  const { data: suffixMatch, error: suffixError } = await supabase
+    .from("expenses")
+    .select("id")
+    .eq("user_id", userId)
+    .like("file_name", `${escapedName}__p%`)
+    .limit(1);
+
+  if (suffixError) throw suffixError;
+  return (suffixMatch?.length ?? 0) > 0;
 }
 
 export function isSortType(value: string): value is SortType {
@@ -120,7 +141,7 @@ export function useFetchExpenses(props: FetchExpensesProps) {
       const { data: signedUrls, error: signedUrlsError } =
         await supabase.storage
           .from("expense_invoices")
-          .createSignedUrls(filePaths, 3600);
+          .createSignedUrls(filePaths, 900);
 
       if (signedUrlsError) throw signedUrlsError;
 
@@ -143,7 +164,7 @@ export function useUploadAndExtract(userId: string) {
         throw new DuplicateExpenseError(file.name);
       }
 
-      const filePath = `${userId}/${Date.now()}_${sanitizeFileName(file.name)}`;
+      const filePath = `${userId}/${crypto.randomUUID()}_${sanitizeFileName(file.name)}`;
 
       const { error: uploadError } = await supabase.storage
         .from("expense_invoices")
