@@ -154,6 +154,7 @@ export const OtherExpensesPages = ({ title }: CategoryProps) => {
     const csvContent = generateExpenseCsv(contentCardData.pdfs, activeCategory);
     const csvName = buildCsvFileName([
       user.email ? user.email.split("@")[0] : null,
+      "steuerrelevante-ausgaben",
       startMonthSelected.label,
       endMonthSelected.id !== startMonthSelected.id
         ? `to_${endMonthSelected.label}`
@@ -187,6 +188,7 @@ export const OtherExpensesPages = ({ title }: CategoryProps) => {
 
     const zipName = [
       user.email ? user.email.split("@")[0] : null,
+      "steuerrelevante-ausgaben",
       startMonthSelected.label,
       endMonthSelected.id !== startMonthSelected.id
         ? `to_${endMonthSelected.label}`

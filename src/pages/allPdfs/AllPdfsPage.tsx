@@ -188,6 +188,7 @@ export const AllPdfsPage = () => {
     const csvContent = generateIncomeCsv(matchingPdfs);
     const csvName = buildCsvFileName([
       user.email ? user.email.split("@")[0] : null,
+      "einnahmen",
       startMonthSelected.label,
       endMonthSelected.id !== startMonthSelected.id
         ? `to_${endMonthSelected.label}`
@@ -222,6 +223,7 @@ export const AllPdfsPage = () => {
 
     const zipName = [
       user.email ? user.email.split("@")[0] : null,
+      "einnahmen",
       startMonthSelected.label,
       endMonthSelected.id !== startMonthSelected.id
         ? `to_${endMonthSelected.label}`

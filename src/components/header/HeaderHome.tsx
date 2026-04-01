@@ -92,7 +92,7 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
         "
       >
         <div
-          className="flex items-center gap-4 min-w-0"
+          className="flex items-center gap-4 min-w-0 hover:cursor-pointer"
           onClick={() => navigate("/")}
         >
           <div className="w-10 h-10 sm:w-12 sm:h-12 bg-color-primary/20 rounded-full flex items-center justify-center shrink-0">
@@ -100,7 +100,10 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
           </div>
 
           <div className="flex flex-col min-w-0">
-            <h5 className="leading-tight">Payload Vault</h5>
+            <h5 className="leading-tight text-color-primary/90">
+              <span className="text-color-primary font-semibold">Profina</span>{" "}
+              Payload Vault
+            </h5>
 
             <p className="text-[14px] sm:text-[16px] text-color-text-secondary truncate">
               {user?.email}

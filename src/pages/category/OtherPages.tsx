@@ -104,6 +104,7 @@ export const OtherPages = ({ title }: CategoryProps) => {
     const csvContent = generateIncomeCsv(pdfs);
     const csvName = buildCsvFileName([
       user.email ? user.email.split("@")[0] : null,
+      "einnahmen",
       startMonthSelected.label,
       endMonthSelected.id !== startMonthSelected.id
         ? `to_${endMonthSelected.label}`
@@ -137,6 +138,7 @@ export const OtherPages = ({ title }: CategoryProps) => {
 
     const zipName = [
       user.email ? user.email.split("@")[0] : null,
+      "einnahmen",
       startMonthSelected.label,
       endMonthSelected.id !== startMonthSelected.id
         ? `to_${endMonthSelected.label}`

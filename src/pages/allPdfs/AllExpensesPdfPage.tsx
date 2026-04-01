@@ -192,6 +192,7 @@ export const AllExpensesPdfsPage = () => {
     const csvContent = generateExpenseCsv(filteredPdfs);
     const csvName = buildCsvFileName([
       user.email ? user.email.split("@")[0] : null,
+      "steuerrelevante-ausgaben",
       startMonthSelected.label,
       endMonthSelected.id !== startMonthSelected.id
         ? `to_${endMonthSelected.label}`
@@ -226,6 +227,7 @@ export const AllExpensesPdfsPage = () => {
 
     const zipName = [
       user.email ? user.email.split("@")[0] : null,
+      "steuerrelevante-ausgaben",
       startMonthSelected.label,
       endMonthSelected.id !== startMonthSelected.id
         ? `to_${endMonthSelected.label}`
