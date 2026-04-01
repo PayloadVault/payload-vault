@@ -12,4 +12,5 @@ export type ExtractedData = {
   date_created: string;
   profit: number;
   category?: string;
+  general_grant?: number;
 } | null;

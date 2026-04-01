@@ -10,6 +10,7 @@ export type PendingUpload = {
     category: PdfCategory;
     profit: number;
     dateCreated: string;
+     general_grant?: number;
   };
 };
 
