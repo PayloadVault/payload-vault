@@ -6,6 +6,7 @@ import { Banner } from "../../components/banner/Banner";
 import { Button } from "../../components/button/Button";
 import { VaultIcon } from "../../components/icons";
 import { z } from "zod";
+import { MiniFooter } from "../../components/footer/MiniFooter";
 
 const emailSchema = z
   .string()
@@ -45,7 +46,8 @@ export const ResetPasswordPage = () => {
 
   if (isSent) {
     return (
-      <div className="flex items-center justify-center w-screen h-screen p-4">
+      <div className="flex flex-col min-h-screen">
+      <div className="flex-1 flex items-center justify-center w-full p-4">
         <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card p-8 rounded-xl border border-color-border-light text-center shadow-shadow-strong animate-scale-in">
           <h3 className="font-bold text-color-text-main">E-Mail gesendet</h3>
           <p className="text-color-text-subtle">
@@ -61,11 +63,14 @@ export const ResetPasswordPage = () => {
           </Link>
         </div>
       </div>
+      <MiniFooter showHome={false} />
+      </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-center w-screen h-screen p-4">
+    <div className="flex flex-col min-h-screen">
+    <div className="flex-1 flex items-center justify-center w-full p-4">
       <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card p-8 rounded-xl border border-color-border-light shadow-shadow-strong animate-scale-in">
         <div className="bg-color-primary/15 p-2 rounded-full mx-auto">
           <VaultIcon className="w-12 h-12 mx-auto text-color-primary" />
@@ -99,6 +104,8 @@ export const ResetPasswordPage = () => {
           <Link to="/login">Zurück zur Anmeldung</Link>
         </p>
       </div>
+    </div>
+    <MiniFooter showHome={false} />
     </div>
   );
 };

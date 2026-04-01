@@ -5,6 +5,7 @@ import { PdfImportFooter } from "../components/pdfImport/PdfImportFooter";
 import { useYear } from "../hooks/year/UseYear";
 import { HeaderHome } from "../components/header/HeaderHome";
 import { ExpensePdfImportFooter } from "../components/pdfImport/ExpensePdfImportFooter";
+import { MiniFooter } from "../components/footer/MiniFooter";
 
 export const Layout = () => {
   const [title, setTitle] = useState("");
@@ -18,6 +19,9 @@ export const Layout = () => {
 
       <main className="flex-1 overflow-y-auto">
         <Outlet context={{ setTitle }} />
+        <div className="pb-20">
+          <MiniFooter />
+        </div>
       </main>
 
       {isSales ? <PdfImportFooter /> : <ExpensePdfImportFooter />}
