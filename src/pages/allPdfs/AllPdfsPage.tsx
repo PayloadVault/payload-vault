@@ -37,6 +37,9 @@ import {
   buildCsvFileName,
 } from "../../utils/csvExport";
 import { PdfEditForm } from "../../components/modal/PdfEditForm";
+import { BulkDeleteConfirmationForm } from "../../components/modal/BulkDeleteConfirmationForm";
+import { BulkActionBar } from "../../components/bulkActionBar/BulkActionBar";
+import { useBulkSelect } from "../../hooks/useBulkSelect";
 import type { PdfCategory } from "../../hooks/usePdf/usePendingUpload";
 
 export const AllPdfsPage = () => {
@@ -86,6 +89,8 @@ export const AllPdfsPage = () => {
     setCategorySelected(categoryOptions[0]);
     setSearchQuery("");
   }, []);
+
+  const bulk = useBulkSelect();
 
   const param = window.location.pathname.split("/")[1];
 
@@ -168,6 +173,64 @@ export const AllPdfsPage = () => {
     if (searchQuery.trim() !== "") return true;
     return false;
   }, [categorySelected, startMonthSelected, endMonthSelected, searchQuery]);
+
+  const handleBulkDelete = useCallback(() => {
+    if (bulk.count === 0) return;
+    openModal({
+      title: "Dokumente löschen",
+      children: (
+        <BulkDeleteConfirmationForm
+          count={bulk.count}
+          onConfirm={async () => {
+            const ids = Array.from(bulk.selectedIds);
+            await Promise.all(ids.map((id) => removePdf.mutateAsync(id)));
+            bulk.exitSelectionMode();
+            closeModal();
+          }}
+          onCancel={closeModal}
+        />
+      ),
+    });
+  }, [bulk, openModal, closeModal, removePdf]);
+
+  const handleBulkDownload = useCallback(async () => {
+    const selected = filteredPdfs.filter((pdf) => bulk.selectedIds.has(pdf.id));
+    if (selected.length === 0) return;
+
+    const zip = new JSZip();
+    try {
+      await Promise.all(
+        selected.map(async (pdf, index) => {
+          if (!pdf.signedUrl) return;
+          const response = await fetch(pdf.signedUrl);
+          const blob = await response.blob();
+          const fileName =
+            pdf.title?.replace(/[^\w\d]+/g, "_") || `document_${index + 1}.pdf`;
+          zip.file(`${fileName}.pdf`, blob);
+        }),
+      );
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const url = window.URL.createObjectURL(zipBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `auswahl_${selected.length}_dokumente.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      showBanner(
+        "Download gestartet",
+        `${selected.length} Dokument${selected.length > 1 ? "e" : ""} werden als ZIP heruntergeladen.`,
+        "success",
+      );
+    } catch {
+      showBanner(
+        "Download fehlgeschlagen",
+        "Beim Herunterladen ist ein Fehler aufgetreten.",
+        "error",
+      );
+    }
+  }, [bulk.selectedIds, filteredPdfs, showBanner]);
 
   if (!contentCardData) return <PageSkeletonLoader />;
 
@@ -331,7 +394,7 @@ export const AllPdfsPage = () => {
           text="Filter zurücksetzen"
           size="medium"
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Button
             onClick={handleDownloadAll}
             variant="secondary"
@@ -350,6 +413,16 @@ export const AllPdfsPage = () => {
                 ? "Gefilterte Daten als CSV exportieren"
                 : "Alle Daten als CSV exportieren"
             }
+            size="medium"
+          />
+          <Button
+            onClick={
+              bulk.isSelecting
+                ? bulk.exitSelectionMode
+                : bulk.enterSelectionMode
+            }
+            variant="secondary"
+            text={bulk.isSelecting ? "Auswahl beenden" : "Auswählen"}
             size="medium"
           />
         </div>
@@ -377,10 +450,25 @@ export const AllPdfsPage = () => {
                 id={pdf.id}
                 onDelete={(id) => removePdf.mutate(id)}
                 onEdit={handleEditPdf}
+                isSelecting={bulk.isSelecting}
+                isSelected={bulk.isSelected(pdf.id)}
+                onToggleSelect={bulk.toggle}
               />
             ))
           )}
         </div>
+      )}
+
+      {bulk.isSelecting && bulk.count > 0 && (
+        <BulkActionBar
+          count={bulk.count}
+          totalCount={filteredPdfs.length}
+          onSelectAll={() => bulk.selectAll(filteredPdfs.map((p) => p.id))}
+          onDeselectAll={bulk.deselectAll}
+          onDelete={handleBulkDelete}
+          onDownload={handleBulkDownload}
+          onCancel={bulk.exitSelectionMode}
+        />
       )}
     </main>
   );
