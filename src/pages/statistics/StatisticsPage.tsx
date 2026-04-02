@@ -20,6 +20,7 @@ import {
   aggregateExpensesByCategory,
   getExpensesSummary,
 } from "./utils";
+import { TaxReportButton } from "../../components/taxReport/TaxReportButton";
 
 export const StatisticsPage = () => {
   const { user } = useAuth();
@@ -133,6 +134,11 @@ export const StatisticsPage = () => {
                     Einnahmen − Ausgaben
                   </span>
                 </div>
+              </div>
+
+              {/* ── Tax Report Button ─────────────────────────────── */}
+              <div className="flex justify-end animate-slide-up">
+                <TaxReportButton pdfs={pdfs} expenses={expenses} year={year} />
               </div>
 
               {/* ── Earnings Section ───────────────────────────────── */}
