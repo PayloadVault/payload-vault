@@ -17,8 +17,10 @@ export const Layout = () => {
       <HeaderHome isTwoHeaders />
       <Header title={title} subtitle={year.toString()} />
 
-      <main className="flex-1 overflow-y-auto">
-        <Outlet context={{ setTitle }} />
+      <main className="flex-1 overflow-y-auto flex flex-col">
+        <div className="flex-1">
+          <Outlet context={{ setTitle }} />
+        </div>
         <div className="pb-20">
           <MiniFooter />
         </div>

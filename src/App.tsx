@@ -21,6 +21,7 @@ import { BannerProvider } from "./context/banner/BannerProvider";
 import { AllExpensesPdfsPage } from "./pages/allPdfs/AllExpensesPdfPage";
 import { ImpressumPage } from "./pages/impressum/ImpressumPage";
 import { DatenschutzPage } from "./pages/datenschutz/DatenschutzPage";
+import { StatisticsPage } from "./pages/statistics/StatisticsPage";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,15 @@ export default function App() {
                   element={
                     <ProtectedRoute>
                       <HomePage />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/statistiken"
+                  element={
+                    <ProtectedRoute>
+                      <StatisticsPage />
                     </ProtectedRoute>
                   }
                 />
