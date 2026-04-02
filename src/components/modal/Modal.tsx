@@ -31,7 +31,12 @@ export const Modal = ({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget && !disableClose) onClose();
+      }}
+    >
       <div
         className={`flex max-h-[90vh] w-full ${sizeClasses[size]} flex-col gap-4 overflow-y-auto rounded-lg bg-color-bg-card p-4 sm:p-6 shadow-shadow-strong animate-scale-in`}
       >
