@@ -96,11 +96,19 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
           onClick={() => navigate("/")}
         >
           <div className="flex items-center justify-center shrink-0">
-            <img
-              src="/profinaLogo.svg"
-              alt="Profina logo"
-              className="w-30 md:w-40"
-            />
+            {theme === "dark" ? (
+              <img
+                src="/profinaLogo.svg"
+                alt="Profina logo"
+                className="w-30 md:w-40"
+              />
+            ) : (
+              <img
+                src="/profinaLogoLight.svg"
+                alt="Profina logo"
+                className="w-30 md:w-40"
+              />
+            )}
           </div>
 
           <div className="flex flex-col min-w-0">
