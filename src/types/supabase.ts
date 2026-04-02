@@ -34,6 +34,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      budget_targets: {
+        Row: {
+          budget_amount: number
+          category: Database["public"]["Enums"]["expense_category"]
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          budget_amount: number
+          category: Database["public"]["Enums"]["expense_category"]
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          budget_amount?: number
+          category?: Database["public"]["Enums"]["expense_category"]
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
       expenses: {
         Row: {
           amount: number
@@ -73,6 +103,36 @@ export type Database = {
         }
         Relationships: []
       }
+      income_goals: {
+        Row: {
+          created_at: string
+          goal_amount: number
+          id: string
+          month: number | null
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          goal_amount: number
+          id?: string
+          month?: number | null
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          goal_amount?: number
+          id?: string
+          month?: number | null
+          updated_at?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
       pdf_records: {
         Row: {
           category: Database["public"]["Enums"]["document_category"]
@@ -80,7 +140,7 @@ export type Database = {
           date_created: string
           date_uploaded: string
           file_name: string
-           general_grant: number
+          general_grant: number
           id: string
           pdf_url: string
           profit: number
@@ -92,7 +152,7 @@ export type Database = {
           date_created: string
           date_uploaded?: string
           file_name: string
-           general_grant?: number
+          general_grant?: number
           id?: string
           pdf_url: string
           profit?: number
@@ -104,7 +164,7 @@ export type Database = {
           date_created?: string
           date_uploaded?: string
           file_name?: string
-           general_grant?: number
+          general_grant?: number
           id?: string
           pdf_url?: string
           profit?: number
