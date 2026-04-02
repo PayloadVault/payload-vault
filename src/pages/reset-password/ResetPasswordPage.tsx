@@ -48,7 +48,7 @@ export const ResetPasswordPage = () => {
 
   if (isSent) {
     return (
-      <div className="flex flex-col min-h-screen">
+      <div className="auth-bg flex flex-col min-h-screen">
       <div className="flex-1 flex items-center justify-center w-full p-4">
         <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card p-8 rounded-xl border border-color-border-light text-center shadow-shadow-strong animate-scale-in">
           <h3 className="font-bold text-color-text-main">E-Mail gesendet</h3>
@@ -71,7 +71,7 @@ export const ResetPasswordPage = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="auth-bg flex flex-col min-h-screen">
     <div className="flex-1 flex items-center justify-center w-full p-4">
       <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card p-8 rounded-xl border border-color-border-light shadow-shadow-strong animate-scale-in">
         <div className="bg-color-primary/15 p-2 rounded-full mx-auto">

@@ -73,7 +73,7 @@ button {
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
-  --bg-overlay: linear-gradient(rgba(13, 13, 13, 0.88), rgba(13, 13, 13, 0.88));
+  --bg-overlay: linear-gradient(rgba(13, 13, 13, 0.95), rgba(13, 13, 13, 0.95));
   --color-bg-accent-subtle: #0f2b28;
   --color-bg-error-subtle: #2e1618;
 }
@@ -168,12 +168,17 @@ button {
 
 @layer base {
   body {
-    @apply text-color-text-main
+    @apply bg-color-bg-main
+      text-color-text-main
       font-sans
       text-base
       leading-relaxed;
-    background: var(--bg-overlay), url("/Desktop-Hintergrund.jpg") center / cover
-      fixed no-repeat;
+  }
+
+  .auth-bg {
+    background:
+      var(--bg-overlay),
+      url("/Desktop-Hintergrund.jpg") center / cover fixed no-repeat;
   }
 
   h1 {
