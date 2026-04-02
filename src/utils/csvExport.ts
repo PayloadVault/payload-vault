@@ -2,7 +2,7 @@ import type { StoredProduct } from "../hooks/useExpenses/types";
 import type { PdfRecord } from "../hooks/usePdf/types";
 import type { SingleExpensePdf } from "../pages/allPdfs/types";
 
-const GERMAN_MONTHS = [
+export const GERMAN_MONTHS = [
   "Januar",
   "Februar",
   "März",
@@ -17,7 +17,7 @@ const GERMAN_MONTHS = [
   "Dezember",
 ];
 
-const EXPENSE_KONTO: Record<string, number> = {
+export const EXPENSE_KONTO: Record<string, number> = {
   Mobilität: 4530,
   Geschäftsessen: 4650,
   Reisen: 4660,
@@ -30,7 +30,7 @@ const EXPENSE_KONTO: Record<string, number> = {
   Sonstiges: 4900,
 };
 
-const INCOME_KONTO: Record<string, number> = {
+export const INCOME_KONTO: Record<string, number> = {
   "Adcuri Abschlussprovision": 8300,
   "Adcuri Bestandsprovision": 8300,
   "Barmenia Abrechnung": 8300,
@@ -38,7 +38,7 @@ const INCOME_KONTO: Record<string, number> = {
   "IKK Abrechnung": 8400,
 };
 
-function formatAmount(value: number): string {
+export function formatAmount(value: number): string {
   return value.toFixed(2).replace(".", ",");
 }
 
@@ -47,7 +47,7 @@ function getGermanMonth(dateStr: string): string {
   return GERMAN_MONTHS[month];
 }
 
-function formatDate(dateStr: string): string {
+export function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
   const day = String(d.getDate()).padStart(2, "0");
   const month = String(d.getMonth() + 1).padStart(2, "0");
