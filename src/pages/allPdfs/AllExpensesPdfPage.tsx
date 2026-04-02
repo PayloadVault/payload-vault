@@ -41,6 +41,9 @@ import {
   buildCsvFileName,
 } from "../../utils/csvExport";
 import { ExpenseEditForm } from "../../components/modal/ExpenseEditForm";
+import { BulkDeleteConfirmationForm } from "../../components/modal/BulkDeleteConfirmationForm";
+import { BulkActionBar } from "../../components/bulkActionBar/BulkActionBar";
+import { useBulkSelect } from "../../hooks/useBulkSelect";
 import type { StoredProduct } from "../../hooks/useExpenses/types";
 
 export const AllExpensesPdfsPage = () => {
@@ -90,6 +93,8 @@ export const AllExpensesPdfsPage = () => {
     setCategorySelected(categoryExpenseOptions[0]);
     setSearchQuery("");
   }, []);
+
+  const bulk = useBulkSelect();
 
   const param = window.location.pathname.split("/")[1];
 
@@ -175,6 +180,70 @@ export const AllExpensesPdfsPage = () => {
     if (searchQuery.trim() !== "") return true;
     return false;
   }, [categorySelected, startMonthSelected, endMonthSelected, searchQuery]);
+
+  const handleBulkDelete = useCallback(() => {
+    if (bulk.count === 0) return;
+    openModal({
+      title: "Dokumente löschen",
+      children: (
+        <BulkDeleteConfirmationForm
+          count={bulk.count}
+          onConfirm={async () => {
+            const ids = Array.from(bulk.selectedIds);
+            const toDelete = filteredPdfs.filter((pdf) => ids.includes(pdf.id));
+            await Promise.all(
+              toDelete.map((pdf) =>
+                removeFile.mutateAsync({ id: pdf.id, imageUrl: pdf.image_url }),
+              ),
+            );
+            bulk.exitSelectionMode();
+            closeModal();
+          }}
+          onCancel={closeModal}
+        />
+      ),
+    });
+  }, [bulk, filteredPdfs, openModal, closeModal, removeFile]);
+
+  const handleBulkDownload = useCallback(async () => {
+    const selected = filteredPdfs.filter((pdf) => bulk.selectedIds.has(pdf.id));
+    if (selected.length === 0) return;
+
+    const zip = new JSZip();
+    try {
+      await Promise.all(
+        selected.map(async (pdf, index) => {
+          if (!pdf.signed_url) return;
+          const response = await fetch(pdf.signed_url);
+          const blob = await response.blob();
+          const fileName =
+            pdf.file_name?.replace(/[^\w\d]+/g, "_") ||
+            `document_${index + 1}.pdf`;
+          zip.file(`${fileName}.pdf`, blob);
+        }),
+      );
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const url = window.URL.createObjectURL(zipBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `auswahl_${selected.length}_dokumente.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      showBanner(
+        "Download gestartet",
+        `${selected.length} Dokument${selected.length > 1 ? "e" : ""} werden als ZIP heruntergeladen.`,
+        "success",
+      );
+    } catch {
+      showBanner(
+        "Download fehlgeschlagen",
+        "Beim Herunterladen ist ein Fehler aufgetreten.",
+        "error",
+      );
+    }
+  }, [bulk.selectedIds, filteredPdfs, showBanner]);
 
   if (!contentCardData) return <PageSkeletonLoader />;
 
@@ -336,7 +405,7 @@ export const AllExpensesPdfsPage = () => {
           text="Filter zurücksetzen"
           size="medium"
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Button
             onClick={handleDownloadAll}
             variant="secondary"
@@ -355,6 +424,16 @@ export const AllExpensesPdfsPage = () => {
                 ? "Gefilterte Daten als CSV exportieren"
                 : "Alle Daten als CSV exportieren"
             }
+            size="medium"
+          />
+          <Button
+            onClick={
+              bulk.isSelecting
+                ? bulk.exitSelectionMode
+                : bulk.enterSelectionMode
+            }
+            variant="secondary"
+            text={bulk.isSelecting ? "Auswahl beenden" : "Auswählen"}
             size="medium"
           />
         </div>
@@ -386,10 +465,25 @@ export const AllExpensesPdfsPage = () => {
                 onEdit={handleEditExpense}
                 products={pdf.products}
                 vendorName={pdf.vendor_name}
+                isSelecting={bulk.isSelecting}
+                isSelected={bulk.isSelected(pdf.id)}
+                onToggleSelect={bulk.toggle}
               />
             ))
           )}
         </div>
+      )}
+
+      {bulk.isSelecting && bulk.count > 0 && (
+        <BulkActionBar
+          count={bulk.count}
+          totalCount={filteredPdfs.length}
+          onSelectAll={() => bulk.selectAll(filteredPdfs.map((p) => p.id))}
+          onDeselectAll={bulk.deselectAll}
+          onDelete={handleBulkDelete}
+          onDownload={handleBulkDownload}
+          onCancel={bulk.exitSelectionMode}
+        />
       )}
     </main>
   );
