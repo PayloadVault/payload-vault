@@ -22,6 +22,7 @@ import { AllExpensesPdfsPage } from "./pages/allPdfs/AllExpensesPdfPage";
 import { ImpressumPage } from "./pages/impressum/ImpressumPage";
 import { DatenschutzPage } from "./pages/datenschutz/DatenschutzPage";
 import { StatisticsPage } from "./pages/statistics/StatisticsPage";
+import { AnalyticsPage } from "./pages/analytics/AnalyticsPage";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,15 @@ export default function App() {
                   element={
                     <ProtectedRoute>
                       <StatisticsPage />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/analysen"
+                  element={
+                    <ProtectedRoute>
+                      <AnalyticsPage />
                     </ProtectedRoute>
                   }
                 />
@@ -159,10 +169,7 @@ export default function App() {
                 </Route>
 
                 <Route path="/impressum" element={<ImpressumPage />} />
-                <Route
-                  path="/datenschutz"
-                  element={<DatenschutzPage />}
-                />
+                <Route path="/datenschutz" element={<DatenschutzPage />} />
 
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
