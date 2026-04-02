@@ -44,6 +44,7 @@ import { ExpenseEditForm } from "../../components/modal/ExpenseEditForm";
 import { BulkDeleteConfirmationForm } from "../../components/modal/BulkDeleteConfirmationForm";
 import { BulkActionBar } from "../../components/bulkActionBar/BulkActionBar";
 import { useBulkSelect } from "../../hooks/useBulkSelect";
+import { useBulkSelectContext } from "../../context/BulkSelectContext";
 import type { StoredProduct } from "../../hooks/useExpenses/types";
 
 export const AllExpensesPdfsPage = () => {
@@ -86,15 +87,22 @@ export const AllExpensesPdfsPage = () => {
     DropdownOptions["expenseCategory"][number]
   >(categoryExpenseOptions[0]);
 
+  const bulk = useBulkSelect();
+
+  const { registerExit, unregisterExit } = useBulkSelectContext();
+  useEffect(() => {
+    registerExit(bulk.exitSelectionMode);
+    return () => unregisterExit();
+  }, [bulk.exitSelectionMode, registerExit, unregisterExit]);
+
   const handleResetFilters = useCallback(() => {
     setSortSelected(paycheckFilterOptions[0]);
     setStartMonthSelected(monthOptions[0]);
     setEndMonthSelected(monthOptions[monthOptions.length - 1]);
     setCategorySelected(categoryExpenseOptions[0]);
     setSearchQuery("");
-  }, []);
-
-  const bulk = useBulkSelect();
+    bulk.exitSelectionMode();
+  }, [bulk]);
 
   const param = window.location.pathname.split("/")[1];
 
@@ -367,32 +375,47 @@ export const AllExpensesPdfsPage = () => {
           <Dropdown
             label="Sortieren nach"
             options={paycheckFilterOptions}
-            onSelect={setSortSelected}
+            onSelect={(v) => {
+              bulk.exitSelectionMode();
+              setSortSelected(v);
+            }}
             value={sortSelected}
           />
           <Dropdown
             label="Kategorie auswählen"
             options={categoryExpenseOptions}
-            onSelect={setCategorySelected}
+            onSelect={(v) => {
+              bulk.exitSelectionMode();
+              setCategorySelected(v);
+            }}
             value={categorySelected}
           />
           <Dropdown
             label="Startmonat auswählen"
             options={monthOptions}
-            onSelect={setStartMonthSelected}
+            onSelect={(v) => {
+              bulk.exitSelectionMode();
+              setStartMonthSelected(v);
+            }}
             value={startMonthSelected}
           />
           <Dropdown
             label="Endmonat auswählen"
             options={endMonthOptions}
-            onSelect={setEndMonthSelected}
+            onSelect={(v) => {
+              bulk.exitSelectionMode();
+              setEndMonthSelected(v);
+            }}
             value={endMonthSelected}
           />
         </div>
         <div className="grid grid-cols-1">
           <SearchBar
             placeholder="Dokumente suchen..."
-            onChange={setSearchQuery}
+            onChange={(v) => {
+              bulk.exitSelectionMode();
+              setSearchQuery(v);
+            }}
             value={searchQuery}
             debounceMs={200}
             title="Dokumente suchen"
@@ -407,7 +430,10 @@ export const AllExpensesPdfsPage = () => {
         />
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Button
-            onClick={handleDownloadAll}
+            onClick={() => {
+              bulk.exitSelectionMode();
+              handleDownloadAll();
+            }}
             variant="secondary"
             text={
               isFiltered
@@ -417,7 +443,10 @@ export const AllExpensesPdfsPage = () => {
             size="medium"
           />
           <Button
-            onClick={handleExportCsv}
+            onClick={() => {
+              bulk.exitSelectionMode();
+              handleExportCsv();
+            }}
             variant="secondary"
             text={
               isFiltered
