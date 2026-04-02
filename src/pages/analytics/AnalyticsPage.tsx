@@ -24,6 +24,12 @@ export const AnalyticsPage = () => {
     error: errorPdfs,
   } = usePdfs({ userId: user?.id || "", year });
 
+  // Fetch previous year data for improved forecast accuracy
+  const { data: previousYearPdfs, isLoading: isLoadingPrevPdfs } = usePdfs({
+    userId: user?.id || "",
+    year: year - 1,
+  });
+
   const {
     data: expenses,
     isLoading: isLoadingExpenses,
@@ -76,6 +82,7 @@ export const AnalyticsPage = () => {
 
   const isLoading =
     isLoadingPdfs ||
+    isLoadingPrevPdfs ||
     isLoadingExpenses ||
     isLoadingBudgets ||
     isLoadingGoals ||
@@ -101,7 +108,11 @@ export const AnalyticsPage = () => {
                     Einnahmenprognose
                   </h3>
                 </div>
-                <IncomeForecast pdfs={pdfs} year={year} />
+                <IncomeForecast
+                  pdfs={pdfs}
+                  previousYearPdfs={previousYearPdfs ?? []}
+                  year={year}
+                />
               </section>
 
               {/* Section: Category Budget Targets */}
