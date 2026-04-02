@@ -12,6 +12,7 @@ import { useBanner } from "../../context/banner/BannerContext";
 import type { UploadProgress } from "../modal/ImportPdfForm";
 import type { PendingUpload } from "../../hooks/usePdf/usePendingUpload";
 import { useRef } from "react";
+import { useBulkSelectContext } from "../../context/BulkSelectContext";
 
 export const PdfImportFooter = () => {
   const { user } = useAuth();
@@ -19,6 +20,7 @@ export const PdfImportFooter = () => {
     userId: user?.id || "",
   });
   const { showBanner } = useBanner();
+  const { exitSelectionMode } = useBulkSelectContext();
 
   const classifyImportError = (
     error: unknown,
@@ -234,7 +236,10 @@ export const PdfImportFooter = () => {
     "
     >
       <Button
-        onClick={openImportPdfModal}
+        onClick={() => {
+          exitSelectionMode();
+          openImportPdfModal();
+        }}
         icon={UploadIcon}
         text="Dokument hochladen"
       />

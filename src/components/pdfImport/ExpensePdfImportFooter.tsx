@@ -17,6 +17,7 @@ import { useBanner } from "../../context/banner/BannerContext";
 import type { UploadProgress } from "../modal/ExpenseImportPdfForm";
 import { useRef } from "react";
 import { useExpenseImportPdfModal } from "../../hooks/modal/UseExpenseImportPdfModal";
+import { useBulkSelectContext } from "../../context/BulkSelectContext";
 
 export const ExpensePdfImportFooter = () => {
   const { user } = useAuth();
@@ -24,6 +25,7 @@ export const ExpensePdfImportFooter = () => {
   const confirmExpense = useConfirmAndUploadToDatabase();
   const declineExpense = useDeclineExpenseUpload();
   const { showBanner } = useBanner();
+  const { exitSelectionMode } = useBulkSelectContext();
 
   const classifyImportError = (
     error: unknown,
@@ -233,7 +235,10 @@ export const ExpensePdfImportFooter = () => {
     "
     >
       <Button
-        onClick={openExpenseImportPdfModal}
+        onClick={() => {
+          exitSelectionMode();
+          openExpenseImportPdfModal();
+        }}
         icon={UploadIcon}
         text="Dokument hochladen"
       />
