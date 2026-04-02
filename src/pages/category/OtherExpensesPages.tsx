@@ -16,6 +16,7 @@ import { ErrorBlock } from "../../components/errorBlock/ErrorBlock";
 import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
 import { DocumentSkeletonLoader } from "../../components/skeletonLoader/DocumentSkeletonLoader";
 import { Button } from "../../components/button/Button";
+import { EmptyState } from "../../components/emptyState/EmptyState";
 import JSZip from "jszip";
 import { useBanner } from "../../context/banner/BannerContext";
 import {
@@ -259,25 +260,32 @@ export const OtherExpensesPages = ({ title }: CategoryProps) => {
         <DocumentSkeletonLoader />
       ) : (
         <div className="flex flex-col gap-6">
-          {contentCardData.pdfs.map((pdf, index) => (
-            <ContentCard
-              key={pdf.id || index}
-              variant="document"
-              title={pdf.file_name}
-              date={pdf.expense_date}
-              profit={pdf.amount}
-              downloadLink={pdf.signed_url}
-              openLink={pdf.signed_url}
-              id={pdf.id}
-              onDelete={(id) =>
-                removeFile.mutate({ id, imageUrl: pdf.image_url })
-              }
-              onEdit={handleEditExpense}
-              products={pdf.products}
-              vendorName={pdf.vendor_name}
-              activeCategory={isExpenseCategoryType(title) ? title : undefined}
+          {contentCardData.pdfs.length === 0 ? (
+            <EmptyState
+              message="Keine Dokumente gefunden"
+              hint="Versuche andere Filter oder lade ein neues Dokument hoch."
             />
-          ))}
+          ) : (
+            contentCardData.pdfs.map((pdf, index) => (
+              <ContentCard
+                key={pdf.id || index}
+                variant="document"
+                title={pdf.file_name}
+                date={pdf.expense_date}
+                profit={pdf.amount}
+                downloadLink={pdf.signed_url}
+                openLink={pdf.signed_url}
+                id={pdf.id}
+                onDelete={(id) =>
+                  removeFile.mutate({ id, imageUrl: pdf.image_url })
+                }
+                onEdit={handleEditExpense}
+                products={pdf.products}
+                vendorName={pdf.vendor_name}
+                activeCategory={isExpenseCategoryType(title) ? title : undefined}
+              />
+            ))
+          )}
         </div>
       )}
     </main>
