@@ -3,6 +3,7 @@ import type { PdfRecord } from "../../hooks/usePdf/types";
 import type { IncomeGoal } from "../../hooks/useAnalytics/types";
 import { getMonthlyIncomeTotals } from "../../hooks/useAnalytics/forecastUtils";
 import { normalizeProfit } from "../../components/contentCard/ContentCard.utils";
+import { ConfirmDeleteModal } from "../../components/modal/ConfirmDeleteModal";
 
 const MONTH_FULL_NAMES = [
   "Januar",
@@ -42,6 +43,8 @@ export const IncomeGoalTracking = ({
   const [goalAmount, setGoalAmount] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editAmount, setEditAmount] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteName, setDeleteName] = useState("");
 
   const monthlyTotals = useMemo(() => getMonthlyIncomeTotals(pdfs), [pdfs]);
   const totalIncome = useMemo(
@@ -268,6 +271,18 @@ export const IncomeGoalTracking = ({
           </p>
         </div>
       )}
+
+      {deleteId && (
+        <ConfirmDeleteModal
+          title="Ziel löschen"
+          message={`Möchtest du das Ziel „${deleteName}" wirklich löschen?`}
+          onCancel={() => setDeleteId(null)}
+          onConfirm={() => {
+            onRemove(deleteId);
+            setDeleteId(null);
+          }}
+        />
+      )}
     </div>
   );
 
@@ -342,7 +357,7 @@ export const IncomeGoalTracking = ({
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="hidden sm:flex items-center gap-1.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                 <button
                   type="button"
                   onClick={() => {
@@ -355,7 +370,10 @@ export const IncomeGoalTracking = ({
                 </button>
                 <button
                   type="button"
-                  onClick={() => onRemove(goalId)}
+                  onClick={() => {
+                    setDeleteId(goalId);
+                    setDeleteName(label);
+                  }}
                   className="text-xs text-color-text-subtle hover:text-color-error-text transition-colors"
                 >
                   Löschen
@@ -376,7 +394,8 @@ export const IncomeGoalTracking = ({
           />
         </div>
 
-        <div className="flex justify-between mt-1">
+        {/* Status + mobile actions */}
+        <div className="flex justify-between items-center mt-1">
           <span
             className={`text-xs ${remaining > 0 ? "text-color-text-subtle" : "text-color-primary font-medium"}`}
           >
@@ -384,6 +403,30 @@ export const IncomeGoalTracking = ({
               ? `${normalizeProfit(remaining)} € bis zum Ziel`
               : `Ziel erreicht! 🎉`}
           </span>
+          {!isEditing && (
+            <div className="flex sm:hidden items-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingId(goalId);
+                  setEditAmount(goal.toString());
+                }}
+                className="text-xs text-color-text-subtle hover:text-color-primary transition-colors"
+              >
+                Bearbeiten
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteId(goalId);
+                  setDeleteName(label);
+                }}
+                className="text-xs text-color-text-subtle hover:text-color-error-text transition-colors"
+              >
+                Löschen
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
