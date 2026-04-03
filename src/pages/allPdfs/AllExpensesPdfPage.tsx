@@ -35,6 +35,11 @@ import { EmptyState } from "../../components/emptyState/EmptyState";
 import { useBanner } from "../../context/banner/BannerContext";
 import { useFetchExpenses } from "../../hooks/useExpenses/useExpenses";
 import { useModal } from "../../context/modal/ModalContext";
+import {
+  generateExpenseCsv,
+  downloadCsv,
+  buildCsvFileName,
+} from "../../utils/csvExport";
 import { ExpenseEditForm } from "../../components/modal/ExpenseEditForm";
 import type { StoredProduct } from "../../hooks/useExpenses/types";
 
@@ -163,9 +168,48 @@ export const AllExpensesPdfsPage = () => {
     });
   }, [contentCardData, searchQuery]);
 
+  const isFiltered = useMemo(() => {
+    if (categorySelected.id !== "all") return true;
+    if (startMonthSelected.id !== "1") return true;
+    if (endMonthSelected.id !== "12") return true;
+    if (searchQuery.trim() !== "") return true;
+    return false;
+  }, [categorySelected, startMonthSelected, endMonthSelected, searchQuery]);
+
   if (!contentCardData) return <PageSkeletonLoader />;
 
   if (error) return <ErrorBlock />;
+
+  const handleExportCsv = () => {
+    if (filteredPdfs.length === 0) {
+      showBanner(
+        "Keine Daten zum Exportieren",
+        "Es sind keine Daten zum CSV-Export verfügbar.",
+        "error",
+      );
+      return;
+    }
+
+    const csvContent = generateExpenseCsv(filteredPdfs);
+    const csvName = buildCsvFileName([
+      user.email ? user.email.split("@")[0] : null,
+      "steuerrelevante-ausgaben",
+      startMonthSelected.label,
+      endMonthSelected.id !== startMonthSelected.id
+        ? `to_${endMonthSelected.label}`
+        : null,
+      `${year}`,
+      categorySelected.id,
+      searchQuery ? `search_${searchQuery}` : null,
+    ]);
+
+    downloadCsv(csvContent, csvName);
+    showBanner(
+      "CSV-Export gestartet",
+      "Deine Daten werden als CSV-Datei heruntergeladen.",
+      "success",
+    );
+  };
 
   const handleDownloadAll = async () => {
     const zip = new JSZip();
@@ -184,6 +228,7 @@ export const AllExpensesPdfsPage = () => {
 
     const zipName = [
       user.email ? user.email.split("@")[0] : null,
+      "steuerrelevante-ausgaben",
       startMonthSelected.label,
       endMonthSelected.id !== startMonthSelected.id
         ? `to_${endMonthSelected.label}`
@@ -285,18 +330,34 @@ export const AllExpensesPdfsPage = () => {
           />
         </div>
       </div>
-      <div className="grid grid-cols-1 items-center gap-5">
+      <div className="grid grid-cols-1 items-center gap-3">
         <Button
           onClick={handleResetFilters}
           text="Filter zurücksetzen"
           size="medium"
         />
-        <Button
-          onClick={handleDownloadAll}
-          variant="secondary"
-          text="Alle gefilterten Dokumente herunterladen"
-          size="medium"
-        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Button
+            onClick={handleDownloadAll}
+            variant="secondary"
+            text={
+              isFiltered
+                ? "Gefilterte Dokumente herunterladen"
+                : "Alle Dokumente herunterladen"
+            }
+            size="medium"
+          />
+          <Button
+            onClick={handleExportCsv}
+            variant="secondary"
+            text={
+              isFiltered
+                ? "Gefilterte Daten als CSV exportieren"
+                : "Alle Daten als CSV exportieren"
+            }
+            size="medium"
+          />
+        </div>
       </div>
       {isLoading ? (
         <DocumentSkeletonLoader />
