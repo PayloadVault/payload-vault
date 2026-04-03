@@ -44,12 +44,10 @@ export function addHeaderSection(
 
   const totalEarnings = pdfs.reduce((sum, p) => sum + p.profit, 0);
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
-  const net = totalEarnings - totalExpenses;
 
   const summaryData = [
     ["Gesamteinnahmen", formatCurrency(totalEarnings)],
     ["Gesamtausgaben", formatCurrency(totalExpenses)],
-    ["Nettoergebnis", formatCurrency(net)],
     ["Anzahl Einnahmen", String(pdfs.length)],
     ["Anzahl Ausgaben", String(expenses.length)],
   ];
