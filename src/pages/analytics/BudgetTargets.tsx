@@ -7,6 +7,7 @@ import { expenseCategories } from "../../hooks/useExpenses/types";
 import type { BudgetTarget } from "../../hooks/useAnalytics/types";
 import { getCategoryExpenseTotals } from "../../hooks/useAnalytics/forecastUtils";
 import { normalizeProfit } from "../../components/contentCard/ContentCard.utils";
+import { ConfirmDeleteModal } from "../../components/modal/ConfirmDeleteModal";
 
 type BudgetTargetsProps = {
   expenses: ExpenseRecord[];
@@ -31,6 +32,8 @@ export const BudgetTargets = ({
     expenseCategories[0],
   );
   const [newAmount, setNewAmount] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteName, setDeleteName] = useState("");
 
   const categoryTotals = useMemo(
     () => getCategoryExpenseTotals(expenses),
@@ -239,7 +242,7 @@ export const BudgetTargets = ({
                         </button>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="hidden sm:flex items-center gap-1.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         <button
                           type="button"
                           onClick={() => {
@@ -252,7 +255,10 @@ export const BudgetTargets = ({
                         </button>
                         <button
                           type="button"
-                          onClick={() => onRemove(item.id)}
+                          onClick={() => {
+                            setDeleteId(item.id);
+                            setDeleteName(item.category);
+                          }}
                           className="text-xs text-color-text-subtle hover:text-color-error-text transition-colors"
                         >
                           Löschen
@@ -274,8 +280,8 @@ export const BudgetTargets = ({
                   />
                 </div>
 
-                {/* Status */}
-                <div className="flex justify-between mt-1">
+                {/* Status + mobile actions */}
+                <div className="flex justify-between items-center mt-1">
                   <span
                     className={`text-xs ${remaining >= 0 ? "text-color-text-subtle" : "text-color-error-text font-medium"}`}
                   >
@@ -283,11 +289,46 @@ export const BudgetTargets = ({
                       ? `${normalizeProfit(remaining)} € übrig`
                       : `${normalizeProfit(Math.abs(remaining))} € über Budget!`}
                   </span>
+                  {!isEditing && (
+                    <div className="flex sm:hidden items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingCategory(item.category);
+                          setEditAmount(item.budget.toString());
+                        }}
+                        className="text-xs text-color-text-subtle hover:text-color-primary transition-colors"
+                      >
+                        Bearbeiten
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDeleteId(item.id);
+                          setDeleteName(item.category);
+                        }}
+                        className="text-xs text-color-text-subtle hover:text-color-error-text transition-colors"
+                      >
+                        Löschen
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             );
           })}
         </div>
+      )}
+      {deleteId && (
+        <ConfirmDeleteModal
+          title="Budget löschen"
+          message={`Möchtest du das Budget für „${deleteName}" wirklich löschen?`}
+          onCancel={() => setDeleteId(null)}
+          onConfirm={() => {
+            onRemove(deleteId);
+            setDeleteId(null);
+          }}
+        />
       )}
     </div>
   );
