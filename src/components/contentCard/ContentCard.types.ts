@@ -43,6 +43,9 @@ type CombinedContentCardProps = {
   products?: StoredProduct[];
   vendorName?: string;
   activeCategory?: string;
+  isSelecting?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (id: string) => void;
 };
 
 type SvgIcon = ComponentType<IconProps>;

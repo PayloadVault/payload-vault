@@ -6,6 +6,7 @@ import { useYear } from "../hooks/year/UseYear";
 import { HeaderHome } from "../components/header/HeaderHome";
 import { ExpensePdfImportFooter } from "../components/pdfImport/ExpensePdfImportFooter";
 import { MiniFooter } from "../components/footer/MiniFooter";
+import { BulkSelectProvider } from "../context/BulkSelectContext";
 
 export const Layout = () => {
   const [title, setTitle] = useState("");
@@ -13,20 +14,22 @@ export const Layout = () => {
   const isSales = window.location.pathname.includes("/einnahmen");
 
   return (
-    <div className="flex flex-col min-h-screen overflow-hidden">
-      <HeaderHome isTwoHeaders />
-      <Header title={title} subtitle={year.toString()} />
+    <BulkSelectProvider>
+      <div className="flex flex-col min-h-screen overflow-hidden">
+        <HeaderHome isTwoHeaders />
+        <Header title={title} subtitle={year.toString()} />
 
-      <main className="flex-1 overflow-y-auto flex flex-col">
-        <div className="flex-1">
-          <Outlet context={{ setTitle }} />
-        </div>
-        <div className="pb-20">
-          <MiniFooter />
-        </div>
-      </main>
+        <main className="flex-1 overflow-y-auto flex flex-col">
+          <div className="flex-1">
+            <Outlet context={{ setTitle }} />
+          </div>
+          <div className="pb-20">
+            <MiniFooter />
+          </div>
+        </main>
 
-      {isSales ? <PdfImportFooter /> : <ExpensePdfImportFooter />}
-    </div>
+        {isSales ? <PdfImportFooter /> : <ExpensePdfImportFooter />}
+      </div>
+    </BulkSelectProvider>
   );
 };

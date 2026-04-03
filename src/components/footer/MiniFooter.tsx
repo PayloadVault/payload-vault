@@ -22,6 +22,13 @@ export const MiniFooter = ({ showHome = true }: { showHome?: boolean }) => {
             </Link>
             <span className="hidden sm:inline text-color-border-light">·</span>
             <Link
+              to="/analysen"
+              className="hover:text-color-primary transition-colors duration-200 hover:underline py-1 text-xs text-color-text-subtle"
+            >
+              Analysen
+            </Link>
+            <span className="hidden sm:inline text-color-border-light">·</span>
+            <Link
               to="/einnahmen"
               className="hover:text-color-primary transition-colors duration-200 hover:underline py-1 text-xs text-color-text-subtle"
             >

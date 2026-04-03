@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Link } from "react-router-dom";
 import { HeaderHome } from "../../components/header/HeaderHome";
 import { Header } from "../../components/header/Header";
 import { MiniFooter } from "../../components/footer/MiniFooter";
@@ -20,6 +21,7 @@ import {
   aggregateExpensesByCategory,
   getExpensesSummary,
 } from "./utils";
+import { TaxReportButton } from "../../components/taxReport/TaxReportButton";
 
 export const StatisticsPage = () => {
   const { user } = useAuth();
@@ -47,7 +49,15 @@ export const StatisticsPage = () => {
     [pdfs],
   );
   const earningsSummary = useMemo(
-    () => (pdfs ? getEarningsSummary(pdfs) : { bestMonth: null, worstMonth: null, bestCategory: null, worstCategory: null }),
+    () =>
+      pdfs
+        ? getEarningsSummary(pdfs)
+        : {
+            bestMonth: null,
+            worstMonth: null,
+            bestCategory: null,
+            worstCategory: null,
+          },
     [pdfs],
   );
   const totalEarnings = useMemo(
@@ -65,7 +75,15 @@ export const StatisticsPage = () => {
     [expenses],
   );
   const expensesSummary = useMemo(
-    () => (expenses ? getExpensesSummary(expenses) : { bestMonth: null, worstMonth: null, bestCategory: null, worstCategory: null }),
+    () =>
+      expenses
+        ? getExpensesSummary(expenses)
+        : {
+            bestMonth: null,
+            worstMonth: null,
+            bestCategory: null,
+            worstCategory: null,
+          },
     [expenses],
   );
   const totalExpenses = useMemo(
@@ -88,7 +106,6 @@ export const StatisticsPage = () => {
 
           <main className="flex-1 overflow-y-auto">
             <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8 space-y-10 pb-10">
-
               {/* ── Overview Cards ──────────────────────────────────── */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-slide-up">
                 <div className="bg-color-bg-card border border-color-border-light rounded-radius-lg p-5 flex flex-col gap-1 transition-all duration-200 hover:shadow-shadow-medium">
@@ -133,6 +150,11 @@ export const StatisticsPage = () => {
                     Einnahmen − Ausgaben
                   </span>
                 </div>
+              </div>
+
+              {/* ── Tax Report Button ─────────────────────────────── */}
+              <div className="flex justify-end animate-slide-up">
+                <TaxReportButton pdfs={pdfs} expenses={expenses} year={year} />
               </div>
 
               {/* ── Earnings Section ───────────────────────────────── */}
@@ -182,6 +204,28 @@ export const StatisticsPage = () => {
 
                 <SummaryTable stats={expensesSummary} variant="expense" />
               </section>
+
+              {/* Link to Advanced Analytics */}
+              <Link
+                to="/analysen"
+                className="block bg-color-bg-card border border-color-border-light rounded-radius-lg p-5
+                  hover:shadow-shadow-medium hover:border-color-primary/40 transition-all duration-200
+                  group animate-fade-in"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-base font-semibold text-color-text-main group-hover:text-color-primary transition-colors">
+                      Erweiterte Analysen
+                    </h4>
+                    <p className="text-xs text-color-text-subtle mt-0.5">
+                      Ausgabenprognosen, Kategorie-Budgets & Einnahmen-Ziele
+                    </p>
+                  </div>
+                  <span className="text-color-text-subtle group-hover:text-color-primary transition-colors text-lg">
+                    →
+                  </span>
+                </div>
+              </Link>
             </div>
 
             <MiniFooter />
