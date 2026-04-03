@@ -356,30 +356,7 @@ export const IncomeGoalTracking = ({
                   ✕
                 </button>
               </div>
-            ) : (
-              <div className="hidden sm:flex items-center gap-1.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingId(goalId);
-                    setEditAmount(goal.toString());
-                  }}
-                  className="text-xs text-color-text-subtle hover:text-color-primary transition-colors"
-                >
-                  Bearbeiten
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDeleteId(goalId);
-                    setDeleteName(label);
-                  }}
-                  className="text-xs text-color-text-subtle hover:text-color-error-text transition-colors"
-                >
-                  Löschen
-                </button>
-              </div>
-            )}
+            ) : null}
             <span className="text-xs text-color-text-subtle whitespace-nowrap">
               {normalizeProfit(current)} / {normalizeProfit(goal)} €
             </span>
@@ -404,14 +381,14 @@ export const IncomeGoalTracking = ({
               : `Ziel erreicht! 🎉`}
           </span>
           {!isEditing && (
-            <div className="flex sm:hidden items-center gap-3">
+            <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => {
                   setEditingId(goalId);
                   setEditAmount(goal.toString());
                 }}
-                className="text-xs text-color-text-subtle hover:text-color-primary transition-colors"
+                className="text-xs py-1 text-color-text-subtle hover:text-color-primary transition-colors"
               >
                 Bearbeiten
               </button>
@@ -421,7 +398,7 @@ export const IncomeGoalTracking = ({
                   setDeleteId(goalId);
                   setDeleteName(label);
                 }}
-                className="text-xs text-color-text-subtle hover:text-color-error-text transition-colors"
+                className="text-xs py-1 text-color-text-subtle hover:text-color-error-text transition-colors"
               >
                 Löschen
               </button>

@@ -241,30 +241,7 @@ export const BudgetTargets = ({
                           ✕
                         </button>
                       </div>
-                    ) : (
-                      <div className="hidden sm:flex items-center gap-1.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingCategory(item.category);
-                            setEditAmount(item.budget.toString());
-                          }}
-                          className="text-xs text-color-text-subtle hover:text-color-primary transition-colors"
-                        >
-                          Bearbeiten
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDeleteId(item.id);
-                            setDeleteName(item.category);
-                          }}
-                          className="text-xs text-color-text-subtle hover:text-color-error-text transition-colors"
-                        >
-                          Löschen
-                        </button>
-                      </div>
-                    )}
+                    ) : null}
                     <span className="text-xs text-color-text-subtle whitespace-nowrap">
                       {normalizeProfit(item.spent)} /{" "}
                       {normalizeProfit(item.budget)} €
@@ -290,14 +267,14 @@ export const BudgetTargets = ({
                       : `${normalizeProfit(Math.abs(remaining))} € über Budget!`}
                   </span>
                   {!isEditing && (
-                    <div className="flex sm:hidden items-center gap-3">
+                    <div className="flex items-center gap-3">
                       <button
                         type="button"
                         onClick={() => {
                           setEditingCategory(item.category);
                           setEditAmount(item.budget.toString());
                         }}
-                        className="text-xs text-color-text-subtle hover:text-color-primary transition-colors"
+                        className="text-xs py-1 text-color-text-subtle hover:text-color-primary transition-colors"
                       >
                         Bearbeiten
                       </button>
@@ -307,7 +284,7 @@ export const BudgetTargets = ({
                           setDeleteId(item.id);
                           setDeleteName(item.category);
                         }}
-                        className="text-xs text-color-text-subtle hover:text-color-error-text transition-colors"
+                        className="text-xs py-1 text-color-text-subtle hover:text-color-error-text transition-colors"
                       >
                         Löschen
                       </button>
