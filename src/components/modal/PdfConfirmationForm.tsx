@@ -61,6 +61,9 @@ export const PdfConfirmationForm = ({
   const pendingUploadsRef = useRef<PendingUpload[]>(pendingUploads);
   pendingUploadsRef.current = pendingUploads;
 
+  // Guard against StrictMode double-mount: only allow cleanup after user interaction
+  const userInteractedRef = useRef(false);
+
   const isSingleUpload = pendingUploads.length === 1;
   const hasUploads = pendingUploads.length > 0;
 
@@ -89,10 +92,13 @@ export const PdfConfirmationForm = ({
   };
 
   const handleConfirm = async (upload: PendingUpload) => {
+    userInteractedRef.current = true;
     setProcessingIds((prev) => new Set(prev).add(upload.id));
     try {
       await onConfirm(getUploadWithEditedData(upload));
-      setPendingUploads((prev) => prev.filter((u) => u.id !== upload.id));
+      const remaining = pendingUploads.filter((u) => u.id !== upload.id);
+      pendingUploadsRef.current = remaining;
+      setPendingUploads(remaining);
     } finally {
       setProcessingIds((prev) => {
         const next = new Set(prev);
@@ -103,6 +109,7 @@ export const PdfConfirmationForm = ({
   };
 
   const handleDecline = async (upload: PendingUpload) => {
+    userInteractedRef.current = true;
     setProcessingIds((prev) => new Set(prev).add(upload.id));
     try {
       await onDecline(upload);
@@ -117,10 +124,12 @@ export const PdfConfirmationForm = ({
   };
 
   const handleConfirmAll = async () => {
+    userInteractedRef.current = true;
     setIsProcessingAll(true);
     try {
       const uploadsWithEdits = pendingUploads.map(getUploadWithEditedData);
       await onConfirmAll(uploadsWithEdits);
+      pendingUploadsRef.current = [];
       setPendingUploads([]);
     } finally {
       setIsProcessingAll(false);
@@ -128,6 +137,7 @@ export const PdfConfirmationForm = ({
   };
 
   const handleDeclineAll = async () => {
+    userInteractedRef.current = true;
     setIsProcessingAll(true);
     try {
       await onDeclineAll(pendingUploads);
@@ -143,9 +153,12 @@ export const PdfConfirmationForm = ({
     }
   }, [hasUploads, onClose]);
 
-  // Cleanup: decline any remaining uploads when modal is closed
+  // Cleanup: decline any remaining uploads when modal is closed by the user.
+  // The userInteractedRef guard prevents React StrictMode's synthetic
+  // unmount-remount cycle from deleting freshly uploaded files.
   useEffect(() => {
     return () => {
+      if (!userInteractedRef.current) return;
       const remaining = pendingUploadsRef.current;
       if (remaining.length > 0) {
         onDeclineAll(remaining).catch(console.error);
