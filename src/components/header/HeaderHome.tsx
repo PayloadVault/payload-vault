@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Dropdown } from "../dropdown/Dropdown";
-import { UserIcon, VaultIcon } from "../icons";
+import { UserIcon } from "../icons";
 import { MenuDropdown } from "./MenuDropdown";
 import { useAuth } from "../../context/AuthContext";
 import { useYear } from "../../hooks/year/UseYear";
@@ -95,8 +95,20 @@ export const HeaderHome = ({ isTwoHeaders = false }: HeaderHomeProps) => {
           className="flex items-center gap-4 min-w-0"
           onClick={() => navigate("/")}
         >
-          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-color-primary/20 rounded-full flex items-center justify-center shrink-0">
-            <VaultIcon className="w-6 h-6 sm:w-8 sm:h-8 text-color-primary" />
+          <div className="flex items-center justify-center shrink-0">
+            {theme === "dark" ? (
+              <img
+                src="/profinaLogo.svg"
+                alt="Profina logo"
+                className="w-30 md:w-40"
+              />
+            ) : (
+              <img
+                src="/profinaLogoLight.svg"
+                alt="Profina logo"
+                className="w-30 md:w-40"
+              />
+            )}
           </div>
 
           <div className="flex flex-col min-w-0">

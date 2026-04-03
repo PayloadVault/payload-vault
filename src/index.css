@@ -73,6 +73,9 @@ button {
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
+  --bg-overlay: linear-gradient(rgba(13, 13, 13, 0.95), rgba(13, 13, 13, 0.95));
+  --color-bg-accent-subtle: #0f2b28;
+  --color-bg-error-subtle: #2e1618;
 }
 
 :root[data-theme="light"] {
@@ -92,6 +95,12 @@ button {
   --color-bg-dark: #e2e8f0;
   --color-bg-card: #ffffff;
   --color-bg-accent: var(--color-primary);
+  --bg-overlay: linear-gradient(
+    rgba(248, 250, 252, 0.9),
+    rgba(248, 250, 252, 0.9)
+  );
+  --color-bg-accent-subtle: #dff5f3;
+  --color-bg-error-subtle: #fde8e8;
   --color-border-light: #cbd5e1;
   --color-border-dark: #94a3b8;
   --color-success: #16a34a;
@@ -135,6 +144,8 @@ button {
   --color-color-bg-dark: var(--color-bg-dark);
   --color-color-bg-card: var(--color-bg-card);
   --color-color-bg-accent: var(--color-bg-accent);
+  --color-color-bg-accent-subtle: var(--color-bg-accent-subtle);
+  --color-color-bg-error-subtle: var(--color-bg-error-subtle);
 
   --color-color-border-light: var(--color-border-light);
   --color-color-border-dark: var(--color-border-dark);
@@ -162,6 +173,12 @@ button {
       font-sans
       text-base
       leading-relaxed;
+  }
+
+  .auth-bg {
+    background:
+      var(--bg-overlay),
+      url("/Desktop-Hintergrund.jpg") center / cover fixed no-repeat;
   }
 
   h1 {
