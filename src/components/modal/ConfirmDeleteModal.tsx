@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { Modal } from "./Modal";
 import { Button } from "../button/Button";
 
@@ -14,7 +15,7 @@ export const ConfirmDeleteModal = ({
   onCancel,
   onConfirm,
 }: ConfirmDeleteModalProps) => {
-  return (
+  return createPortal(
     <Modal title={title} onClose={onCancel}>
       <div className="flex flex-col gap-6 pt-2">
         <p className="text-color-text-secondary">{message}</p>
@@ -23,6 +24,7 @@ export const ConfirmDeleteModal = ({
           <Button text="Löschen" variant="decline" onClick={onConfirm} />
         </div>
       </div>
-    </Modal>
+    </Modal>,
+    document.body,
   );
 };
