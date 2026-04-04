@@ -8,13 +8,13 @@ type NavigationDropdownProps = {
 
 const navigationLinks = [
   { label: "Home", to: "/" },
-  { label: "Statistiken", to: "/statistiken" },
-  { label: "Analysen", to: "/analysen" },
   { label: "Einnahmen", to: "/einnahmen" },
   {
     label: "Steuerrelevante Ausgaben",
     to: "/steuerrelevante-ausgaben",
   },
+  { label: "Statistiken", to: "/statistiken" },
+  { label: "Analysen", to: "/analysen" },
 ];
 
 const isActivePath = (pathname: string, to: string) => {
