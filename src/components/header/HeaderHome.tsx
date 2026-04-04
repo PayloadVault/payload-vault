@@ -108,7 +108,7 @@ export const HeaderHome = ({
   }, []);
 
   useEffect(() => {
-    if (!hasPageHeader || typeof window === "undefined") return;
+    if (typeof window === "undefined") return;
 
     const scrollElement = scrollContainerRef?.current;
 
@@ -138,7 +138,7 @@ export const HeaderHome = ({
       scrollTarget.removeEventListener("scroll", updateCollapsedState);
       window.removeEventListener("resize", updateCollapsedState);
     };
-  }, [hasPageHeader, scrollContainerRef]);
+  }, [scrollContainerRef]);
 
   const brandBlock = (
     <div
@@ -267,47 +267,50 @@ export const HeaderHome = ({
     <header
       className={`${isSticky ? "sticky top-0 z-40" : ""} bg-color-bg-main border-b-color-border-light border-b-2`}
     >
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out md:hidden ${
+          isBrandCollapsed
+            ? "max-h-0 opacity-0 -translate-y-3 pointer-events-none"
+            : "max-h-28 opacity-100 translate-y-0"
+        }`}
+      >
+        <div className="px-4 pt-3 pb-2 sm:px-6">{brandBlock}</div>
+      </div>
+
+      <div className="border-t border-color-border-light/40 px-4 py-3 sm:px-6 md:hidden">
+        <div className="flex items-center justify-end gap-1.5">
+          {controlsBlock}
+        </div>
+      </div>
+
+      {hasPageHeader && (
+        <div className="px-4 pb-3 sm:px-6 md:hidden">
+          <div className="flex items-center justify-start min-w-0">
+            {pageTitleBlock}
+          </div>
+        </div>
+      )}
+
       {hasPageHeader ? (
-        <>
-          <div
-            className={`overflow-hidden transition-all duration-300 ease-in-out md:hidden ${
-              isBrandCollapsed
-                ? "max-h-0 opacity-0 -translate-y-3 pointer-events-none"
-                : "max-h-28 opacity-100 translate-y-0"
-            }`}
-          >
-            <div className="px-4 pt-3 pb-2 sm:px-6">{brandBlock}</div>
+        <div className="hidden md:flex items-center justify-between gap-6 px-6 py-3 lg:px-10">
+          <div className="flex items-center gap-6 min-w-0 flex-1">
+            <div className="shrink-0">{brandBlock}</div>
+            <div className="h-12 w-px bg-color-border-light/70 shrink-0" />
+            <div className="min-w-0">{pageTitleBlock}</div>
           </div>
 
-          <div className="px-4 py-3 sm:px-6 md:hidden">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0 flex-1">{pageTitleBlock}</div>
-              <div className="flex items-center gap-1.5 shrink-0">
-                {controlsBlock}
-              </div>
-            </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {controlsBlock}
           </div>
-
-          <div className="hidden md:flex items-center justify-between gap-6 px-6 py-3 lg:px-10">
-            <div className="flex items-center gap-6 min-w-0 flex-1">
-              <div className="shrink-0">{brandBlock}</div>
-              <div className="h-12 w-px bg-color-border-light/70 shrink-0" />
-              <div className="min-w-0">{pageTitleBlock}</div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              {controlsBlock}
-            </div>
-          </div>
-        </>
+        </div>
       ) : (
         <div
           className="
-            flex flex-col gap-3
+            hidden md:flex
+            items-center justify-between gap-3
             px-4 py-3
             sm:px-6
             md:px-10 md:py-3
-            md:flex-row md:items-center md:justify-between
           "
         >
           {brandBlock}
