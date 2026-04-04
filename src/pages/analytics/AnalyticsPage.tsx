@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { HeaderHome } from "../../components/header/HeaderHome";
 import { MiniFooter } from "../../components/footer/MiniFooter";
 import { useAuth } from "../../context/AuthContext";
@@ -17,7 +16,6 @@ import type { ExpenseCategory } from "../../hooks/useExpenses/types";
 export const AnalyticsPage = () => {
   const { user } = useAuth();
   const { year } = useYear();
-  const mainRef = useRef<HTMLElement | null>(null);
 
   const {
     data: pdfs,
@@ -102,11 +100,10 @@ export const AnalyticsPage = () => {
               isSticky={false}
               pageTitle="Erweiterte Analysen"
               pageSubtitle={year.toString()}
-              scrollContainerRef={mainRef}
             />
           </div>
 
-          <main ref={mainRef} className="flex-1 overflow-y-auto">
+          <main className="flex-1">
             <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8 space-y-8 pb-10">
               {/* Section: Income Forecasting */}
               <section className="space-y-4">

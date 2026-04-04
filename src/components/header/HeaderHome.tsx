@@ -263,28 +263,32 @@ export const HeaderHome = ({
     </div>
   ) : null;
 
+  const mobileBrandWrapperClass = `overflow-hidden transition-all duration-300 ease-in-out md:hidden ${
+    isBrandCollapsed
+      ? "max-h-0 opacity-0 -translate-y-3 pointer-events-none"
+      : "max-h-28 opacity-100 translate-y-0"
+  }`;
+
+  const mobileControlsRowClass = `border-color-border-light/40 px-4 py-3 sm:px-6 md:hidden ${
+    hasPageHeader ? "border-t" : "border-t border-b"
+  }`;
+
   return (
     <header
       className={`${isSticky ? "sticky top-0 z-40" : ""} bg-color-bg-main border-b-color-border-light border-b-2`}
     >
-      <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out md:hidden ${
-          isBrandCollapsed
-            ? "max-h-0 opacity-0 -translate-y-3 pointer-events-none"
-            : "max-h-28 opacity-100 translate-y-0"
-        }`}
-      >
-        <div className="px-4 pt-3 pb-2 sm:px-6">{brandBlock}</div>
+      <div className={mobileBrandWrapperClass}>
+        <div className="px-4 pt-3 pb-3 sm:px-6">{brandBlock}</div>
       </div>
 
-      <div className="border-t border-color-border-light/40 px-4 py-3 sm:px-6 md:hidden">
+      <div className={mobileControlsRowClass}>
         <div className="flex items-center justify-end gap-1.5">
           {controlsBlock}
         </div>
       </div>
 
       {hasPageHeader && (
-        <div className="px-4 pb-3 sm:px-6 md:hidden">
+        <div className="px-4 pt-1 pb-3 sm:px-6 md:hidden">
           <div className="flex items-center justify-start min-w-0">
             {pageTitleBlock}
           </div>
