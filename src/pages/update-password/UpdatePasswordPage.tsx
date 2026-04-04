@@ -50,63 +50,63 @@ export const UpdatePasswordPage = () => {
   if (isUpdated) {
     return (
       <div className="auth-bg flex flex-col min-h-screen">
-      <div className="flex-1 flex items-center justify-center w-full p-4">
-        <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card p-8 rounded-xl border border-color-border-light text-center shadow-shadow-strong animate-scale-in">
-          <h3 className="font-bold text-color-text-main">
-            Passwort aktualisiert
-          </h3>
-          <p className="text-color-text-subtle">
-            Ihr Passwort wurde erfolgreich geändert.
-          </p>
-          <Button onClick={() => navigate("/login")} text="Zur Anmeldung" />
+        <div className="flex-1 flex items-center justify-center w-full p-4">
+          <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card p-8 rounded-xl border border-color-border-light text-center shadow-shadow-strong animate-scale-in">
+            <h3 className="font-bold text-color-text-main">
+              Passwort aktualisiert
+            </h3>
+            <p className="text-color-text-subtle">
+              Ihr Passwort wurde erfolgreich geändert.
+            </p>
+            <Button onClick={() => navigate("/login")} text="Zur Anmeldung" />
+          </div>
         </div>
-      </div>
-      <MiniFooter showHome={false} />
+        <MiniFooter />
       </div>
     );
   }
 
   return (
     <div className="auth-bg flex flex-col min-h-screen">
-    <div className="flex-1 flex items-center justify-center w-full p-4">
-      <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card p-8 rounded-xl border border-color-border-light shadow-shadow-strong animate-scale-in">
-        <div className="bg-color-primary/15 p-2 rounded-full mx-auto">
-          <VaultIcon className="w-12 h-12 mx-auto text-color-primary" />
-        </div>
-        <h3 className="font-bold text-color-text-main">Neues Passwort</h3>
-        <p className="text-color-text-subtle text-sm">
-          Geben Sie Ihr neues Passwort ein.
-        </p>
+      <div className="flex-1 flex items-center justify-center w-full p-4">
+        <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card p-8 rounded-xl border border-color-border-light shadow-shadow-strong animate-scale-in">
+          <div className="bg-color-primary/15 p-2 rounded-full mx-auto">
+            <VaultIcon className="w-12 h-12 mx-auto text-color-primary" />
+          </div>
+          <h3 className="font-bold text-color-text-main">Neues Passwort</h3>
+          <p className="text-color-text-subtle text-sm">
+            Geben Sie Ihr neues Passwort ein.
+          </p>
 
-        {error && <Banner bannerType="error" title={error} description="" />}
+          {error && <Banner bannerType="error" title={error} description="" />}
 
-        <PasswordInput
-          label="Neues Passwort"
-          value={password}
-          onChange={(val) => setPassword(val)}
-        />
-
-        <PasswordInput
-          label="Passwort wiederholen"
-          value={repeatPassword}
-          onChange={(val) => setRepeatPassword(val)}
-          isRepeated
-        />
-
-        <div className="flex flex-col gap-3 mt-4">
-          <Button
-            onClick={handleUpdatePassword}
-            text="Passwort speichern"
-            isLoading={loading}
+          <PasswordInput
+            label="Neues Passwort"
+            value={password}
+            onChange={(val) => setPassword(val)}
           />
-        </div>
 
-        <p className="text-color-text-subtle text-center text-sm mt-2">
-          <Link to="/login">Zurück zur Anmeldung</Link>
-        </p>
+          <PasswordInput
+            label="Passwort wiederholen"
+            value={repeatPassword}
+            onChange={(val) => setRepeatPassword(val)}
+            isRepeated
+          />
+
+          <div className="flex flex-col gap-3 mt-4">
+            <Button
+              onClick={handleUpdatePassword}
+              text="Passwort speichern"
+              isLoading={loading}
+            />
+          </div>
+
+          <p className="text-color-text-subtle text-center text-sm mt-2">
+            <Link to="/login">Zurück zur Anmeldung</Link>
+          </p>
+        </div>
       </div>
-    </div>
-    <MiniFooter showHome={false} />
+      <MiniFooter />
     </div>
   );
 };

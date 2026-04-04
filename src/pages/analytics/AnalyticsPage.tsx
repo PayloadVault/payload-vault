@@ -95,8 +95,10 @@ export const AnalyticsPage = () => {
         <PageSkeletonLoader />
       ) : (
         <>
-          <HeaderHome isTwoHeaders />
-          <Header title="Erweiterte Analysen" subtitle={year.toString()} />
+          <div className="sticky top-0 z-40">
+            <HeaderHome isTwoHeaders isSticky={false} />
+            <Header title="Erweiterte Analysen" subtitle={year.toString()} />
+          </div>
 
           <main className="flex-1 overflow-y-auto">
             <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8 space-y-8 pb-10">
