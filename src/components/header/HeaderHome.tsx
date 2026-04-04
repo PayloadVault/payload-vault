@@ -242,11 +242,22 @@ export const HeaderHome = ({
     </>
   );
 
+  const handleBackNavigation = () => {
+    navigate(-1);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        scrollContainerRef?.current?.scrollTo({ top: 0, left: 0 });
+        window.scrollTo({ top: 0, left: 0 });
+      });
+    });
+  };
+
   const pageTitleBlock = hasPageHeader ? (
     <div className="flex items-center gap-3 min-w-0">
       <button
         className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center shrink-0 cursor-pointer hover:text-color-primary hover:bg-color-primary/20 rounded-full transition-all duration-200 ease-in-out active:scale-90"
-        onClick={() => navigate(-1)}
+        onClick={handleBackNavigation}
       >
         <ArrowBackIcon className="w-5 h-5 sm:w-6 sm:h-6" />
       </button>
