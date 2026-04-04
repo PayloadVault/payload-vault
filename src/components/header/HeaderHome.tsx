@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Dropdown } from "../dropdown/Dropdown";
-import { CloseIcon, UserIcon } from "../icons";
+import { UserIcon } from "../icons";
 import { MenuDropdown } from "./MenuDropdown";
 import { NavigationDropdown } from "./NavigationDropdown";
 import { useAuth } from "../../context/AuthContext";
@@ -175,15 +175,23 @@ export const HeaderHome = ({
               type="button"
               onClick={handleNavigationOpen}
             >
-              {isNavigationOpen ? (
-                <CloseIcon className="w-6 h-6 text-color-text-secondary" />
-              ) : (
-                <span className="flex h-6 w-6 flex-col items-center justify-center gap-1">
-                  <span className="block h-0.5 w-5 rounded-full bg-current" />
-                  <span className="block h-0.5 w-5 rounded-full bg-current" />
-                  <span className="block h-0.5 w-5 rounded-full bg-current" />
-                </span>
-              )}
+              <span className="relative flex h-6 w-6 items-center justify-center text-color-text-secondary">
+                <span
+                  className={`absolute block h-0.5 w-5 rounded-full bg-current transition-all duration-300 ease-in-out ${
+                    isNavigationOpen ? "rotate-45" : "-translate-y-1.5"
+                  }`}
+                />
+                <span
+                  className={`absolute block h-0.5 w-5 rounded-full bg-current transition-all duration-200 ease-in-out ${
+                    isNavigationOpen ? "opacity-0 scale-x-0" : "opacity-100"
+                  }`}
+                />
+                <span
+                  className={`absolute block h-0.5 w-5 rounded-full bg-current transition-all duration-300 ease-in-out ${
+                    isNavigationOpen ? "-rotate-45" : "translate-y-1.5"
+                  }`}
+                />
+              </span>
             </button>
 
             <NavigationDropdown

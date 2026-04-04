@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 type NavigationDropdownProps = {
@@ -26,18 +27,36 @@ export const NavigationDropdown = ({
   setIsOpen,
 }: NavigationDropdownProps) => {
   const { pathname } = useLocation();
+  const [isVisible, setIsVisible] = useState(false);
+  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true);
+      setIsAnimatingOut(false);
+      return;
+    }
+
+    if (isVisible) {
+      setIsAnimatingOut(true);
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+        setIsAnimatingOut(false);
+      }, 150);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, isVisible]);
+
+  if (!isVisible) return null;
 
   return (
     <div
       role="menu"
-      className="absolute right-0 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-radius-md border border-color-border-light bg-color-bg-dark shadow-shadow-medium z-50 overflow-hidden"
+      className={`absolute right-0 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-radius-md border border-color-border-light bg-color-bg-dark shadow-shadow-medium z-50 overflow-hidden ${
+        isAnimatingOut ? "animate-slide-up-out" : "animate-slide-down"
+      }`}
     >
-      <div className="border-b border-color-border-light px-4 py-3">
-        <p className="text-sm text-color-text-secondary">Navigation</p>
-      </div>
-
       <nav className="flex flex-col py-2">
         {navigationLinks.map((link) => {
           const isActive = isActivePath(pathname, link.to);
