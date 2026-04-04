@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { PdfImportFooter } from "../components/pdfImport/PdfImportFooter";
 import { useYear } from "../hooks/year/UseYear";
 import { HeaderHome } from "../components/header/HeaderHome";
@@ -11,22 +11,20 @@ export const Layout = () => {
   const [title, setTitle] = useState("");
   const { year } = useYear();
   const isSales = window.location.pathname.includes("/einnahmen");
-  const mainRef = useRef<HTMLElement | null>(null);
 
   return (
     <BulkSelectProvider>
-      <div className="flex flex-col min-h-screen overflow-hidden">
+      <div className="flex flex-col min-h-screen">
         <div className="sticky top-0 z-40">
           <HeaderHome
             isTwoHeaders
             isSticky={false}
             pageTitle={title}
             pageSubtitle={year.toString()}
-            scrollContainerRef={mainRef}
           />
         </div>
 
-        <main ref={mainRef} className="flex-1 overflow-y-auto flex flex-col">
+        <main className="flex-1 flex flex-col">
           <div className="flex-1">
             <Outlet context={{ setTitle }} />
           </div>
