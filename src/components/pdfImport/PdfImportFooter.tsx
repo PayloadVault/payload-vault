@@ -14,6 +14,9 @@ import type { PendingUpload } from "../../hooks/usePdf/usePendingUpload";
 import { useRef } from "react";
 import { useBulkSelectContext } from "../../context/BulkSelectContext";
 
+const truncateName = (name: string, max = 30) =>
+  name.length > max ? name.slice(0, max) + "..." : name;
+
 export const PdfImportFooter = () => {
   const { user } = useAuth();
   const { extractPdf, confirmPdf, declinePdf } = usePdfs({
@@ -114,7 +117,7 @@ export const PdfImportFooter = () => {
       console.error("Error confirming upload:", error);
       showBanner(
         "Fehler",
-        `Bestätigung fehlgeschlagen: ${upload.fileName}`,
+        `Bestätigung fehlgeschlagen: ${truncateName(upload.fileName)}`,
         "error",
       );
     }
@@ -188,29 +191,35 @@ export const PdfImportFooter = () => {
 
         await Promise.all(extractionPromises);
 
-        // Show errors for failed extractions
-        failedFiles.forEach(({ name, reason, errorType }) => {
-          if (reason) {
-            const title =
-              errorType === "duplicate"
-                ? "Duplikat erkannt"
-                : "Extraktion fehlgeschlagen";
-            showBanner(title, `${name}: ${reason}`, "error");
-          }
-        });
-
         closeImportModal();
 
         if (pendingUploads.length > 0) {
           setTimeout(() => {
             openConfirmUploadModal(pendingUploads);
           }, 100);
-        } else if (failedFiles.length > 0) {
-          showBanner(
-            "Extraktion fehlgeschlagen",
-            `${failedFiles.length} Datei${failedFiles.length > 1 ? "en" : ""} konnten nicht verarbeitet werden.`,
-            "error",
+        }
+
+        if (failedFiles.length > 0) {
+          const allDuplicates = failedFiles.every(
+            (f) => f.errorType === "duplicate",
           );
+          const allExtraction = failedFiles.every(
+            (f) => f.errorType === "extraction",
+          );
+
+          const title = allDuplicates
+            ? "Duplikat erkannt"
+            : allExtraction
+              ? "Extraktion fehlgeschlagen"
+              : "Import fehlgeschlagen";
+
+          const description = allDuplicates
+            ? failedFiles.length === 1
+              ? `${truncateName(failedFiles[0].name)}: ${failedFiles[0].reason}`
+              : `${failedFiles.length} Dateien existieren bereits.`
+            : `${failedFiles.length} Datei${failedFiles.length > 1 ? "en" : ""} konnten nicht verarbeitet werden.`;
+
+          showBanner(title, description, "error");
         }
       },
     });
