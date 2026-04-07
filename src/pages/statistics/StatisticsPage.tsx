@@ -107,7 +107,7 @@ export const StatisticsPage = () => {
           <main className="flex-1 overflow-y-auto">
             <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8 space-y-10 pb-10">
               {/* ── Overview Cards ──────────────────────────────────── */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-slide-up">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-slide-up">
                 <div className="bg-color-bg-card border border-color-border-light rounded-radius-lg p-5 flex flex-col gap-1 transition-all duration-200 hover:shadow-shadow-medium">
                   <span className="text-xs text-color-text-subtle uppercase tracking-wide">
                     Gesamteinnahmen
@@ -129,25 +129,6 @@ export const StatisticsPage = () => {
                   </span>
                   <span className="text-xs text-color-text-subtle">
                     {expenses.length} Rechnungen
-                  </span>
-                </div>
-
-                <div className="bg-color-bg-card border border-color-border-light rounded-radius-lg p-5 flex flex-col gap-1 sm:col-span-2 lg:col-span-1 transition-all duration-200 hover:shadow-shadow-medium">
-                  <span className="text-xs text-color-text-subtle uppercase tracking-wide">
-                    Netto
-                  </span>
-                  <span
-                    className={`text-xl sm:text-2xl font-bold ${
-                      totalEarnings - totalExpenses >= 0
-                        ? "text-color-primary"
-                        : "text-color-error-text"
-                    }`}
-                  >
-                    {totalEarnings - totalExpenses >= 0 ? "+" : ""}
-                    {normalizeProfit(totalEarnings - totalExpenses)} €
-                  </span>
-                  <span className="text-xs text-color-text-subtle">
-                    Einnahmen − Ausgaben
                   </span>
                 </div>
               </div>
