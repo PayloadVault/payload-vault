@@ -49,7 +49,9 @@ export const HomePage = () => {
         <PageSkeletonLoader />
       ) : (
         <>
-          <HeaderHome />
+          <div className="sticky top-0 z-40">
+            <HeaderHome isSticky={false} />
+          </div>
           <main className="flex-1 flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
             <TotalIncomeCard
               title="Gesamteinnahmen"

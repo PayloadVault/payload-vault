@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { HeaderHome } from "../../components/header/HeaderHome";
-import { Header } from "../../components/header/Header";
 import { MiniFooter } from "../../components/footer/MiniFooter";
 import { useAuth } from "../../context/AuthContext";
 import { useYear } from "../../hooks/year/UseYear";
@@ -101,10 +100,16 @@ export const StatisticsPage = () => {
         <PageSkeletonLoader />
       ) : (
         <>
-          <HeaderHome isTwoHeaders />
-          <Header title="Statistiken" subtitle={year.toString()} />
+          <div className="sticky top-0 z-40">
+            <HeaderHome
+              isTwoHeaders
+              isSticky={false}
+              pageTitle="Statistiken"
+              pageSubtitle={year.toString()}
+            />
+          </div>
 
-          <main className="flex-1 overflow-y-auto">
+          <main className="flex-1">
             <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8 space-y-10 pb-10">
               {/* ── Overview Cards ──────────────────────────────────── */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-slide-up">

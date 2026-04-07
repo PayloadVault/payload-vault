@@ -1,48 +1,10 @@
 import { Link } from "react-router-dom";
 import * as CookieConsent from "vanilla-cookieconsent";
 
-export const MiniFooter = ({ showHome = true }: { showHome?: boolean }) => {
+export const MiniFooter = () => {
   return (
     <footer className="w-full py-3 px-4 text-center border-t border-color-border-light/50 bg-color-bg-main/80 backdrop-blur-sm">
       <div className="flex flex-col items-start md:items-center gap-1 text-xs text-color-text-subtle">
-        {showHome && (
-          <div className="flex flex-col sm:flex-row items-start md:items-center gap-x-4 gap-y-1">
-            <Link
-              to="/"
-              className="hover:text-color-primary transition-colors duration-200 hover:underline py-1 text-xs text-color-text-subtle"
-            >
-              Home
-            </Link>
-            <span className="hidden sm:inline text-color-border-light">·</span>
-            <Link
-              to="/statistiken"
-              className="hover:text-color-primary transition-colors duration-200 hover:underline py-1 text-xs text-color-text-subtle"
-            >
-              Statistiken
-            </Link>
-            <span className="hidden sm:inline text-color-border-light">·</span>
-            <Link
-              to="/analysen"
-              className="hover:text-color-primary transition-colors duration-200 hover:underline py-1 text-xs text-color-text-subtle"
-            >
-              Analysen
-            </Link>
-            <span className="hidden sm:inline text-color-border-light">·</span>
-            <Link
-              to="/einnahmen"
-              className="hover:text-color-primary transition-colors duration-200 hover:underline py-1 text-xs text-color-text-subtle"
-            >
-              Einnahmen
-            </Link>
-            <span className="hidden sm:inline text-color-border-light">·</span>
-            <Link
-              to="/steuerrelevante-ausgaben"
-              className="hover:text-color-primary transition-colors duration-200 hover:underline py-1 text-xs text-color-text-subtle"
-            >
-              Steuerrelevante Ausgaben
-            </Link>
-          </div>
-        )}
         <div className="flex flex-col sm:flex-row items-start md:items-center gap-x-4 gap-y-1">
           <Link
             to="/impressum"

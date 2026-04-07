@@ -1,5 +1,4 @@
 import { Outlet } from "react-router-dom";
-import { Header } from "../components/header/Header";
 import { useState } from "react";
 import { PdfImportFooter } from "../components/pdfImport/PdfImportFooter";
 import { useYear } from "../hooks/year/UseYear";
@@ -15,11 +14,17 @@ export const Layout = () => {
 
   return (
     <BulkSelectProvider>
-      <div className="flex flex-col min-h-screen overflow-hidden">
-        <HeaderHome isTwoHeaders />
-        <Header title={title} subtitle={year.toString()} />
+      <div className="flex flex-col min-h-screen">
+        <div className="sticky top-0 z-40">
+          <HeaderHome
+            isTwoHeaders
+            isSticky={false}
+            pageTitle={title}
+            pageSubtitle={year.toString()}
+          />
+        </div>
 
-        <main className="flex-1 overflow-y-auto flex flex-col">
+        <main className="flex-1 flex flex-col">
           <div className="flex-1">
             <Outlet context={{ setTitle }} />
           </div>

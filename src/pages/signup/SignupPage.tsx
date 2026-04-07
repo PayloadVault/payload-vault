@@ -75,49 +75,49 @@ export const SignUpPage = () => {
 
   return (
     <div className="auth-bg flex flex-col min-h-screen">
-    <div className="flex-1 flex justify-center items-center w-full p-4">
-      <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card border border-color-border-light p-8 rounded-xl shadow-shadow-strong animate-scale-in">
-        <div className="bg-color-primary/15 p-2 rounded-full mx-auto">
-          <VaultIcon className="w-12 h-12 mx-auto text-color-primary" />
-        </div>
-        <h3 className="font-bold text-color-text-main">Konto erstellen</h3>
+      <div className="flex-1 flex justify-center items-center w-full p-4">
+        <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card border border-color-border-light p-8 rounded-xl shadow-shadow-strong animate-scale-in">
+          <div className="bg-color-primary/15 p-2 rounded-full mx-auto">
+            <VaultIcon className="w-12 h-12 mx-auto text-color-primary" />
+          </div>
+          <h3 className="font-bold text-color-text-main">Konto erstellen</h3>
 
-        {error && <Banner bannerType="error" title={error} description="" />}
+          {error && <Banner bannerType="error" title={error} description="" />}
 
-        <InputField
-          label="Email"
-          placeholder="nachname@pro-fina.de"
-          value={email}
-          onChange={(val) => setEmail(val)}
-        />
-
-        <PasswordInput
-          label="Passwort"
-          value={password}
-          onChange={(val) => setPassword(val)}
-        />
-
-        <PasswordInput
-          label="Passwort wiederholen"
-          value={repeatedPassword}
-          onChange={(val) => setRepeatedPassword(val)}
-          isRepeated
-        />
-
-        <div className="flex flex-col gap-3 mt-4">
-          <Button
-            onClick={handleSignUp}
-            text="Registrieren"
-            isLoading={loading}
+          <InputField
+            label="Email"
+            placeholder="nachname@pro-fina.de"
+            value={email}
+            onChange={(val) => setEmail(val)}
           />
 
-          <p className="text-color-text-subtle text-center text-sm mt-2">
-            Schon ein Konto? <Link to="/login">Anmelden</Link>
-          </p>
+          <PasswordInput
+            label="Passwort"
+            value={password}
+            onChange={(val) => setPassword(val)}
+          />
+
+          <PasswordInput
+            label="Passwort wiederholen"
+            value={repeatedPassword}
+            onChange={(val) => setRepeatedPassword(val)}
+            isRepeated
+          />
+
+          <div className="flex flex-col gap-3 mt-4">
+            <Button
+              onClick={handleSignUp}
+              text="Registrieren"
+              isLoading={loading}
+            />
+
+            <p className="text-color-text-subtle text-center text-sm mt-2">
+              Schon ein Konto? <Link to="/login">Anmelden</Link>
+            </p>
+          </div>
         </div>
       </div>
-    </div>
-    <MiniFooter showHome={false} />
+      <MiniFooter />
     </div>
   );
 };
