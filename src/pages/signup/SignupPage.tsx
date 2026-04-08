@@ -9,6 +9,7 @@ import { Banner } from "../../components/banner/Banner";
 import { Button } from "../../components/button/Button";
 import { VaultIcon } from "../../components/icons";
 import { signUpSchema } from "../../validation/SignUpValidation";
+import { MiniFooter } from "../../components/footer/MiniFooter";
 
 export const SignUpPage = () => {
   const [email, setEmail] = useState("");
@@ -56,10 +57,11 @@ export const SignUpPage = () => {
     });
 
     if (signUpError) {
-      const errorMessage = signUpError.message.includes("User already registered")
-        ? "Benutzer ist bereits registriert"
-        : signUpError.message;
-      setError(errorMessage);
+      setError(
+        signUpError.message.includes("User already registered")
+          ? "Benutzer ist bereits registriert"
+          : "Registrierung fehlgeschlagen. Bitte versuchen Sie es später erneut.",
+      );
     } else if (data.user && data.session === null) {
       setIsSent(true);
     }
@@ -72,47 +74,50 @@ export const SignUpPage = () => {
   }
 
   return (
-    <div className="flex justify-center items-center w-screen h-screen p-4">
-      <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card border border-color-border-light p-8 rounded-xl">
-        <div className="bg-color-primary/15 p-2 rounded-full mx-auto">
-          <VaultIcon className="w-12 h-12 mx-auto text-color-primary" />
-        </div>
-        <h3 className="font-bold text-color-text-main">Konto erstellen</h3>
+    <div className="auth-bg flex flex-col min-h-screen">
+      <div className="flex-1 flex justify-center items-center w-full p-4">
+        <div className="flex flex-col gap-6 w-full max-w-md bg-color-bg-card border border-color-border-light p-8 rounded-xl shadow-shadow-strong animate-scale-in">
+          <div className="bg-color-primary/15 p-2 rounded-full mx-auto">
+            <VaultIcon className="w-12 h-12 mx-auto text-color-primary" />
+          </div>
+          <h3 className="font-bold text-color-text-main">Konto erstellen</h3>
 
-        {error && <Banner bannerType="error" title={error} description="" />}
+          {error && <Banner bannerType="error" title={error} description="" />}
 
-        <InputField
-          label="Email"
-          placeholder="nachname@pro-fina.de"
-          value={email}
-          onChange={(val) => setEmail(val)}
-        />
-
-        <PasswordInput
-          label="Passwort"
-          value={password}
-          onChange={(val) => setPassword(val)}
-        />
-
-        <PasswordInput
-          label="Passwort wiederholen"
-          value={repeatedPassword}
-          onChange={(val) => setRepeatedPassword(val)}
-          isRepeated
-        />
-
-        <div className="flex flex-col gap-3 mt-4">
-          <Button
-            onClick={handleSignUp}
-            text="Registrieren"
-            isLoading={loading}
+          <InputField
+            label="Email"
+            placeholder="nachname@pro-fina.de"
+            value={email}
+            onChange={(val) => setEmail(val)}
           />
 
-          <p className="text-color-text-subtle text-center text-sm mt-2">
-            Schon ein Konto? <Link to="/login">Anmelden</Link>
-          </p>
+          <PasswordInput
+            label="Passwort"
+            value={password}
+            onChange={(val) => setPassword(val)}
+          />
+
+          <PasswordInput
+            label="Passwort wiederholen"
+            value={repeatedPassword}
+            onChange={(val) => setRepeatedPassword(val)}
+            isRepeated
+          />
+
+          <div className="flex flex-col gap-3 mt-4">
+            <Button
+              onClick={handleSignUp}
+              text="Registrieren"
+              isLoading={loading}
+            />
+
+            <p className="text-color-text-subtle text-center text-sm mt-2">
+              Schon ein Konto? <Link to="/login">Anmelden</Link>
+            </p>
+          </div>
         </div>
       </div>
+      <MiniFooter />
     </div>
   );
 };

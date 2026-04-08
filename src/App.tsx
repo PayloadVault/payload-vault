@@ -5,22 +5,33 @@ import { LoginPage } from "./pages/login/LoginPage";
 import { AllPdfsPage } from "./pages/allPdfs/AllPdfsPage";
 import { CategoryPage } from "./pages/category/CategoryPage";
 import { CategoryPdfsPage } from "./pages/categoryPdfs/CategoryPdfsPage";
+import { SalesPage } from "./pages/sales/SalesPage";
+import { ExpensesPage } from "./pages/expenses/ExpensesPage";
 import { useEffect } from "react";
 import { Layout } from "./pages/layout";
 import { ModalProvider } from "./context/modal/ModalProvider";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./context/ProtectedRoutes";
 import { SignUpPage } from "./pages/signup/SignupPage";
+import { ResetPasswordPage } from "./pages/reset-password/ResetPasswordPage";
+import { UpdatePasswordPage } from "./pages/update-password/UpdatePasswordPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { YearProvider } from "./context/YearContext";
 import { BannerProvider } from "./context/banner/BannerProvider";
+import { AllExpensesPdfsPage } from "./pages/allPdfs/AllExpensesPdfPage";
+import { ImpressumPage } from "./pages/impressum/ImpressumPage";
+import { DatenschutzPage } from "./pages/datenschutz/DatenschutzPage";
+import { StatisticsPage } from "./pages/statistics/StatisticsPage";
+import { AnalyticsPage } from "./pages/analytics/AnalyticsPage";
+
+const queryClient = new QueryClient();
 
 export default function App() {
   useEffect(() => {
     const saved = localStorage.getItem("theme") as "light" | "dark" | null;
 
     const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
+      "(prefers-color-scheme: dark)",
     ).matches;
     const theme = saved ?? (prefersDark ? "dark" : "light");
 
@@ -29,13 +40,21 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <QueryClientProvider client={new QueryClient()}>
+      <QueryClientProvider client={queryClient}>
         <YearProvider>
           <BannerProvider>
             <ModalProvider>
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignUpPage />} />
+                <Route
+                  path="/passwort-zurucksetzen"
+                  element={<ResetPasswordPage />}
+                />
+                <Route
+                  path="/update-passwort"
+                  element={<UpdatePasswordPage />}
+                />
 
                 <Route
                   path="/"
@@ -46,9 +65,44 @@ export default function App() {
                   }
                 />
 
+                <Route
+                  path="/statistiken"
+                  element={
+                    <ProtectedRoute>
+                      <StatisticsPage />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/analysen"
+                  element={
+                    <ProtectedRoute>
+                      <AnalyticsPage />
+                    </ProtectedRoute>
+                  }
+                />
+
                 <Route element={<Layout />}>
                   <Route
-                    path="/all-pdfs"
+                    path="/einnahmen"
+                    element={
+                      <ProtectedRoute>
+                        <SalesPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/steuerrelevante-ausgaben"
+                    element={
+                      <ProtectedRoute>
+                        <ExpensesPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/einnahmen/alle-dokumente"
                     element={
                       <ProtectedRoute>
                         <AllPdfsPage />
@@ -56,7 +110,16 @@ export default function App() {
                     }
                   />
                   <Route
-                    path="/category/:slug"
+                    path="/steuerrelevante-ausgaben/alle-dokumente"
+                    element={
+                      <ProtectedRoute>
+                        <AllExpensesPdfsPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/einnahmen/kategorie/:slug"
                     element={
                       <ProtectedRoute>
                         <CategoryPage />
@@ -64,7 +127,15 @@ export default function App() {
                     }
                   />
                   <Route
-                    path="/category/:slug/pdfs"
+                    path="/steuerrelevante-ausgaben/kategorie/:slug"
+                    element={
+                      <ProtectedRoute>
+                        <CategoryPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/einnahmen/kategorie/:slug/pdfs"
                     element={
                       <ProtectedRoute>
                         <CategoryPdfsPage />
@@ -72,7 +143,15 @@ export default function App() {
                     }
                   />
                   <Route
-                    path="/category/:slug/:subSlug"
+                    path="/steuerrelevante-ausgaben/kategorie/:slug/pdfs"
+                    element={
+                      <ProtectedRoute>
+                        <CategoryPdfsPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/einnahmen/kategorie/:slug/:subSlug"
                     element={
                       <ProtectedRoute>
                         <CategoryPage />
@@ -80,7 +159,7 @@ export default function App() {
                     }
                   />
                   <Route
-                    path="/category/:slug/:subSlug/pdfs"
+                    path="/einnahmen/kategorie/:slug/:subSlug/pdfs"
                     element={
                       <ProtectedRoute>
                         <CategoryPdfsPage />
@@ -88,6 +167,9 @@ export default function App() {
                     }
                   />
                 </Route>
+
+                <Route path="/impressum" element={<ImpressumPage />} />
+                <Route path="/datenschutz" element={<DatenschutzPage />} />
 
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

@@ -25,7 +25,7 @@ export const Banner = ({
       {onCloseBanner && (
         <button
           onClick={onCloseBanner}
-          className="absolute top-1 right-1 flex cursor-pointer items-center justify-center"
+          className="absolute top-1 right-1 flex cursor-pointer items-center justify-center rounded-md p-1 transition-all duration-200 hover:bg-white/20 active:scale-90"
         >
           <CloseIcon className="h-6 w-6 shrink-0 text-white" />
         </button>

@@ -9,6 +9,16 @@ type HeaderProps = {
 export const Header = ({ title, subtitle }: HeaderProps) => {
   const navigate = useNavigate();
 
+  const handleBackNavigation = () => {
+    navigate(-1);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, left: 0 });
+      });
+    });
+  };
+
   return (
     <header className="bg-color-bg-main border-b-color-border-light border-b-2">
       <div
@@ -23,8 +33,8 @@ export const Header = ({ title, subtitle }: HeaderProps) => {
         <div className="flex items-center gap-4 min-w-0">
           <button
             className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shrink-0 cursor-pointer hover:text-color-primary hover:bg-color-primary/20 rounded-full
-        transition-colors duration-200 ease-in-out"
-            onClick={() => navigate(-1)}
+        transition-all duration-200 ease-in-out active:scale-90"
+            onClick={handleBackNavigation}
           >
             <ArrowBackIcon className="w-5 h-5 sm:w-7 sm:h-7" />
           </button>

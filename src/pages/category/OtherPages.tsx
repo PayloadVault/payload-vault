@@ -18,8 +18,14 @@ import { ErrorBlock } from "../../components/errorBlock/ErrorBlock";
 import { PageSkeletonLoader } from "../../components/skeletonLoader/PageSkeletonLoader";
 import { DocumentSkeletonLoader } from "../../components/skeletonLoader/DocumentSkeletonLoader";
 import { Button } from "../../components/button/Button";
+import { EmptyState } from "../../components/emptyState/EmptyState";
 import JSZip from "jszip";
 import { useBanner } from "../../context/banner/BannerContext";
+import {
+  generateIncomeCsv,
+  downloadCsv,
+  buildCsvFileName,
+} from "../../utils/csvExport";
 
 type CategoryProps = {
   title: string;
@@ -28,6 +34,7 @@ type CategoryProps = {
 export const OtherPages = ({ title }: CategoryProps) => {
   const { user } = useAuth();
   const { year } = useYear();
+  const params = window.location.pathname.split("/")[1];
 
   const [sortSelected, setSortSelected] = useState<
     DropdownOptions["paycheckFilter"][number]
@@ -57,15 +64,13 @@ export const OtherPages = ({ title }: CategoryProps) => {
 
   const { showBanner } = useBanner();
 
-  if (!user) return <ErrorBlock />;
-
   const {
     data: pdfs,
     isLoading,
     error,
     removePdf,
   } = usePdfs({
-    userId: user.id,
+    userId: user?.id || "",
     year,
     startMonth: Number(startMonthSelected.id) || undefined,
     endMonth: Number(endMonthSelected.id) || undefined,
@@ -78,6 +83,44 @@ export const OtherPages = ({ title }: CategoryProps) => {
       setContentCardData(formatAllPdfs(pdfs));
     }
   }, [pdfs]);
+
+  const isFiltered = useMemo(() => {
+    if (startMonthSelected.id !== "1") return true;
+    if (endMonthSelected.id !== "12") return true;
+    return false;
+  }, [startMonthSelected, endMonthSelected]);
+
+  if (!user) return <ErrorBlock />;
+
+  const handleExportCsv = () => {
+    if (!pdfs || pdfs.length === 0) {
+      showBanner(
+        "Keine Daten zum Exportieren",
+        "Es sind keine Daten zum CSV-Export verfügbar.",
+        "error",
+      );
+      return;
+    }
+
+    const csvContent = generateIncomeCsv(pdfs);
+    const csvName = buildCsvFileName([
+      user.email ? user.email.split("@")[0] : null,
+      "einnahmen",
+      startMonthSelected.label,
+      endMonthSelected.id !== startMonthSelected.id
+        ? `to_${endMonthSelected.label}`
+        : null,
+      `${year}`,
+      title,
+    ]);
+
+    downloadCsv(csvContent, csvName);
+    showBanner(
+      "CSV-Export gestartet",
+      "Deine Daten werden als CSV-Datei heruntergeladen.",
+      "success",
+    );
+  };
 
   const handleDownloadAll = async () => {
     if (!contentCardData || contentCardData.pdfs.length === 0) {
@@ -96,6 +139,7 @@ export const OtherPages = ({ title }: CategoryProps) => {
 
     const zipName = [
       user.email ? user.email.split("@")[0] : null,
+      "einnahmen",
       startMonthSelected.label,
       endMonthSelected.id !== startMonthSelected.id
         ? `to_${endMonthSelected.label}`
@@ -147,6 +191,7 @@ export const OtherPages = ({ title }: CategoryProps) => {
         "Beim Herunterladen der PDFs ist ein Fehler aufgetreten. Bitte versuche es erneut.",
         "error",
       );
+      console.error(error);
     }
   };
 
@@ -155,11 +200,16 @@ export const OtherPages = ({ title }: CategoryProps) => {
   if (error) return <ErrorBlock />;
 
   return (
-    <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-25">
+    <main className="flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 gap-10 pb-6">
       <TotalIncomeCard
         title={title}
-        subtitle={contentCardData.totalPdf.toString() + " · Gehaltsabrechnung"}
+        subtitle={
+          contentCardData.totalPdf.toString() +
+          " · " +
+          (params === "einnahmen" ? "Abrechnungen" : "Rechnungen")
+        }
         totalIncome={contentCardData.totalIncome}
+        variant={params === "einnahmen" ? "income" : "expense"}
       />
       <div className="flex flex-col gap-2">
         <div className="grid grid-cols-1">
@@ -185,36 +235,59 @@ export const OtherPages = ({ title }: CategoryProps) => {
           />
         </div>
       </div>
-      <div className="grid grid-cols-1 items-center gap-5">
+      <div className="grid grid-cols-1 items-center gap-3">
         <Button
           onClick={handleResetFilters}
           text="Filter zurücksetzen"
           size="medium"
         />
-        <Button
-          onClick={handleDownloadAll}
-          variant="secondary"
-          text="Alle gefilterten Dokumente herunterladen"
-          size="medium"
-        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Button
+            onClick={handleDownloadAll}
+            variant="secondary"
+            text={
+              isFiltered
+                ? "Gefilterte Dokumente herunterladen"
+                : "Alle Dokumente herunterladen"
+            }
+            size="medium"
+          />
+          <Button
+            onClick={handleExportCsv}
+            variant="secondary"
+            text={
+              isFiltered
+                ? "Gefilterte Daten als CSV exportieren"
+                : "Alle Daten als CSV exportieren"
+            }
+            size="medium"
+          />
+        </div>
       </div>
       {isLoading ? (
         <DocumentSkeletonLoader />
       ) : (
         <div className="flex flex-col gap-6">
-          {contentCardData.pdfs.map((pdf, index) => (
-            <ContentCard
-              key={pdf.id || index}
-              variant="document"
-              title={pdf.title}
-              date={pdf.date}
-              profit={pdf.income}
-              downloadLink={pdf.signedUrl}
-              openLink={pdf.openLink}
-              id={pdf.id}
-              onDelete={(id) => removePdf.mutate(id)}
+          {contentCardData.pdfs.length === 0 ? (
+            <EmptyState
+              message="Keine Dokumente gefunden"
+              hint="Versuche andere Filter oder lade ein neues Dokument hoch."
             />
-          ))}
+          ) : (
+            contentCardData.pdfs.map((pdf, index) => (
+              <ContentCard
+                key={pdf.id || index}
+                variant="document"
+                title={pdf.title}
+                date={pdf.date}
+                profit={pdf.income}
+                downloadLink={pdf.signedUrl}
+                openLink={pdf.openLink}
+                id={pdf.id}
+                onDelete={(id) => removePdf.mutate(id)}
+              />
+            ))
+          )}
         </div>
       )}
     </main>

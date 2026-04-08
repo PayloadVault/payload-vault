@@ -73,6 +73,9 @@ button {
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
+  --bg-overlay: linear-gradient(rgba(13, 13, 13, 0.95), rgba(13, 13, 13, 0.95));
+  --color-bg-accent-subtle: #0f2b28;
+  --color-bg-error-subtle: #2e1618;
 }
 
 :root[data-theme="light"] {
@@ -83,27 +86,33 @@ button {
   --color-black: #000000;
   --color-white: #ffffff;
   --color-text-main: #1a1a2e;
-  --color-text-secondary: #4a5568;
+  --color-text-secondary: #475569;
   --color-text-subtle: #64748b;
   --color-text-inverse: var(--color-white);
-  --color-text-accent: #008578;
-  --color-bg-main: #ffffff;
-  --color-bg-alt: #f8fafc;
-  --color-bg-dark: #edf2f7;
+  --color-text-accent: #007a6f;
+  --color-bg-main: #f8fafc;
+  --color-bg-alt: #f1f5f9;
+  --color-bg-dark: #e2e8f0;
   --color-bg-card: #ffffff;
   --color-bg-accent: var(--color-primary);
-  --color-border-light: #e2e8f0;
-  --color-border-dark: #cbd5e1;
-  --color-success: #4da479;
-  --color-success-border: #27ac68;
-  --color-success-text: #4a9070;
-  --color-error: #e17883;
-  --color-error-border: #e74050;
-  --color-error-text: #c45b64;
-  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --bg-overlay: linear-gradient(
+    rgba(248, 250, 252, 0.9),
+    rgba(248, 250, 252, 0.9)
+  );
+  --color-bg-accent-subtle: #dff5f3;
+  --color-bg-error-subtle: #fde8e8;
+  --color-border-light: #cbd5e1;
+  --color-border-dark: #94a3b8;
+  --color-success: #16a34a;
+  --color-success-border: #15803d;
+  --color-success-text: #166534;
+  --color-error: #dc2626;
+  --color-error-border: #b91c1c;
+  --color-error-text: #991b1b;
+  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
   --shadow-strong:
-    0 10px 15px rgba(0, 0, 0, 0.06), 0 4px 6px rgba(0, 0, 0, 0.04);
+    0 10px 15px rgba(0, 0, 0, 0.08), 0 4px 6px rgba(0, 0, 0, 0.05);
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
@@ -135,6 +144,8 @@ button {
   --color-color-bg-dark: var(--color-bg-dark);
   --color-color-bg-card: var(--color-bg-card);
   --color-color-bg-accent: var(--color-bg-accent);
+  --color-color-bg-accent-subtle: var(--color-bg-accent-subtle);
+  --color-color-bg-error-subtle: var(--color-bg-error-subtle);
 
   --color-color-border-light: var(--color-border-light);
   --color-color-border-dark: var(--color-border-dark);
@@ -162,6 +173,12 @@ button {
       font-sans
       text-base
       leading-relaxed;
+  }
+
+  .auth-bg {
+    background:
+      var(--bg-overlay),
+      url("/Desktop-Hintergrund.jpg") center / cover fixed no-repeat;
   }
 
   h1 {
@@ -249,4 +266,141 @@ button {
       uppercase
       tracking-wide;
   }
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out both;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.2s ease-out both;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.2s ease-out both;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out both;
+}
+
+@keyframes slideUpOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+@keyframes scaleOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.animate-slide-up-out {
+  animation: slideUpOut 0.15s ease-in both;
+}
+
+.animate-slide-out-right {
+  animation: slideOutRight 0.25s ease-in both;
+}
+
+.animate-scale-out {
+  animation: scaleOut 0.15s ease-in both;
+}
+
+.animate-fade-out {
+  animation: fadeOut 0.15s ease-in both;
+}
+
+/* ===== Smooth transitions ===== */
+.transition-smooth {
+  transition: all 0.2s ease-in-out;
 }
