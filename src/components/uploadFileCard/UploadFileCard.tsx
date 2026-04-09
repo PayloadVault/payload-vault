@@ -1,12 +1,11 @@
 import {
-  useEffect,
   useMemo,
   useRef,
   useState,
   type DragEventHandler,
   type ChangeEventHandler,
 } from "react";
-import { CameraIcon, ExcelPaper } from "../icons";
+import { ExcelPaper } from "../icons";
 import type { UploadCardProps } from "./UploadfileCard.types";
 import { Button } from "../button/Button";
 import { useBanner } from "../../context/banner/BannerContext";
@@ -48,79 +47,18 @@ export const FileUploadCard = ({
   maxFiles = 10,
 }: UploadCardProps) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const mediaStreamRef = useRef<MediaStream | null>(null);
   const { showBanner } = useBanner();
 
   const [isDragOver, setIsDragOver] = useState(false);
-  const [isCameraOpen, setIsCameraOpen] = useState(false);
-  const [isOpeningCamera, setIsOpeningCamera] = useState(false);
 
   const acceptedExtensions = useMemo(
     () => buildAcceptedExtensions(accept),
-    [accept],
-  );
-  const canUseCamera = useMemo(
-    () => accept.toLowerCase().includes("image/"),
     [accept],
   );
 
   const openPicker = () => {
     if (disabled) return;
     inputRef.current?.click();
-  };
-
-  const stopCameraStream = () => {
-    mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
-    mediaStreamRef.current = null;
-  };
-
-  const closeCameraCapture = () => {
-    stopCameraStream();
-    setIsCameraOpen(false);
-  };
-
-  const openCameraCapture = async () => {
-    if (disabled || !canUseCamera) return;
-
-    if (!navigator?.mediaDevices?.getUserMedia) {
-      showBanner(
-        "Kamera nicht verfügbar",
-        "Ihr Browser unterstützt keinen direkten Kamerazugriff.",
-        "error",
-      );
-      return;
-    }
-
-    try {
-      setIsOpeningCamera(true);
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: "environment" },
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-        },
-        audio: false,
-      });
-
-      mediaStreamRef.current = stream;
-      setIsCameraOpen(true);
-
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      }, 0);
-    } catch {
-      showBanner(
-        "Kamera konnte nicht gestartet werden",
-        "Bitte erlauben Sie den Kamerazugriff in Ihrem Browser.",
-        "error",
-      );
-      stopCameraStream();
-    } finally {
-      setIsOpeningCamera(false);
-    }
   };
 
   const isAcceptedFile = (f: File) => {
@@ -195,63 +133,6 @@ export const FileUploadCard = ({
     e.currentTarget.value = "";
   };
 
-  const captureFromCamera = async () => {
-    if (!videoRef.current) return;
-
-    const remainingSlots = Math.max(0, maxFiles - files.length);
-    if (remainingSlots === 0) {
-      showBanner(
-        "Limit erreicht",
-        `Maximal ${maxFiles} Dateien sind erlaubt.`,
-        "error",
-      );
-      return;
-    }
-
-    const video = videoRef.current;
-    const width = video.videoWidth;
-    const height = video.videoHeight;
-
-    if (!width || !height) {
-      showBanner(
-        "Aufnahme fehlgeschlagen",
-        "Kamerabild ist noch nicht bereit. Bitte erneut versuchen.",
-        "error",
-      );
-      return;
-    }
-
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-
-    const context = canvas.getContext("2d");
-    if (!context) return;
-
-    context.drawImage(video, 0, 0, width, height);
-
-    const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, "image/jpeg", 0.92),
-    );
-
-    if (!blob) {
-      showBanner(
-        "Aufnahme fehlgeschlagen",
-        "Bild konnte nicht erzeugt werden.",
-        "error",
-      );
-      return;
-    }
-
-    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const cameraFile = new File([blob], `kamera-beleg-${timestamp}.jpg`, {
-      type: "image/jpeg",
-      lastModified: Date.now(),
-    });
-
-    addFiles([cameraFile]);
-  };
-
   const onDrop: DragEventHandler<HTMLDivElement> = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -284,12 +165,6 @@ export const FileUploadCard = ({
     }
     return `${base} border-color-border-light bg-transparent text-inherit`;
   }, [isDragOver]);
-
-  useEffect(() => {
-    return () => {
-      stopCameraStream();
-    };
-  }, []);
 
   return (
     <div
@@ -374,71 +249,12 @@ export const FileUploadCard = ({
       )}
 
       {!isDragOver && (
-        <div className="flex flex-col items-center gap-2">
-          <Button
-            variant="secondary"
-            text="Dateien auswählen"
-            onClick={openPicker}
-            isDisabled={disabled}
-          />
-
-          {canUseCamera && (
-            <button
-              type="button"
-              onClick={openCameraCapture}
-              disabled={disabled}
-              className={`inline-flex items-center gap-2 text-sm transition-colors ${
-                disabled
-                  ? "cursor-not-allowed text-color-text-subtle/50"
-                  : "text-color-text-subtle hover:text-color-text-secondary"
-              }`}
-            >
-              <CameraIcon size={16} />
-              {isOpeningCamera
-                ? "Kamera wird geöffnet..."
-                : "Beleg mit Kamera erfassen"}
-            </button>
-          )}
-        </div>
-      )}
-
-      {isCameraOpen && (
-        <div
-          className="fixed inset-0 z-120 flex items-center justify-center bg-black/80 p-4 animate-fade-in"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Kameraaufnahme"
-        >
-          <div className="w-full max-w-xl rounded-xl border border-color-border-light bg-color-bg-main p-4 animate-scale-in">
-            <p className="mb-3 text-base font-semibold text-color-text-secondary">
-              Kameraaufnahme
-            </p>
-
-            <div className="overflow-hidden rounded-lg bg-black">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="h-80 w-full object-cover"
-              />
-            </div>
-
-            <div className="mt-4 flex flex-wrap gap-3">
-              <Button
-                text="Foto aufnehmen"
-                onClick={captureFromCamera}
-                isDisabled={disabled || files.length >= maxFiles}
-              />
-              <Button
-                variant="secondary"
-                text="Fertig"
-                onClick={closeCameraCapture}
-                isDisabled={disabled}
-              />
-            </div>
-          </div>
-        </div>
+        <Button
+          variant="secondary"
+          text="Dateien auswählen"
+          onClick={openPicker}
+          isDisabled={disabled}
+        />
       )}
     </div>
   );
