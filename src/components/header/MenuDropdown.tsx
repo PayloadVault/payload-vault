@@ -92,7 +92,7 @@ export const MenuDropdown = ({
       role="menu"
       className={`
               absolute right-0 top-full mt-2
-              min-w-55
+              w-48 md:min-w-55
               rounded-radius-md
               border border-color-border-light
               bg-color-bg-dark
@@ -104,7 +104,7 @@ export const MenuDropdown = ({
     >
       <button
         role="menuitem"
-        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2
+        className="w-full px-3 py-2.5 md:px-4 md:py-3 text-xs md:text-sm text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2
         hover:text-color-text-main text-color-text-subtle transition-all duration-200 ease-in-out active:bg-color-primary/30"
         onClick={() => {
           openChangePasswordModal();
@@ -117,7 +117,7 @@ export const MenuDropdown = ({
 
       <button
         role="menuitem"
-        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2
+        className="w-full px-3 py-2.5 md:px-4 md:py-3 text-xs md:text-sm text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2
         hover:text-color-text-main text-color-text-subtle transition-all duration-200 ease-in-out active:bg-color-primary/30"
         onClick={() => {
           toggleTheme();
@@ -134,7 +134,7 @@ export const MenuDropdown = ({
 
       <button
         role="menuitem"
-        className="w-full px-4 py-3 text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2 text-color-error-text/75
+        className="w-full px-3 py-2.5 md:px-4 md:py-3 text-xs md:text-sm text-left hover:bg-color-primary/20 cursor-pointer flex items-center gap-2 text-color-error-text/75
         hover:text-color-error-text transition-all duration-200 ease-in-out active:bg-color-error/20"
         onClick={() => {
           setIsOpen(false);

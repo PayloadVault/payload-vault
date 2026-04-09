@@ -383,6 +383,6 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 
 [functions.extract-data-from-expense-image]
 enabled = true
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/extract-data-from-expense-image/deno.json"
 entrypoint = "./functions/extract-data-from-expense-image/index.ts"

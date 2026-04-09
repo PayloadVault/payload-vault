@@ -29,7 +29,32 @@ function useIncomeGoals(userId: string, year: number) {
 
   const upsertGoal = useMutation<IncomeGoal, Error, NewIncomeGoal>({
     mutationFn: async (goal) => {
-      // For annual goals (month=null), we use raw SQL via upsert
+      // NULL != NULL in PostgreSQL, so onConflict can't match annual goals (month IS NULL).
+      // Use explicit update for annual goals when one already exists.
+      if (goal.month === null) {
+        const { data: existing } = await supabase
+          .from("income_goals")
+          .select("id")
+          .eq("user_id", goal.user_id)
+          .eq("year", goal.year)
+          .is("month", null)
+          .maybeSingle();
+
+        if (existing) {
+          const { data, error } = await supabase
+            .from("income_goals")
+            .update({
+              goal_amount: goal.goal_amount,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", existing.id)
+            .select()
+            .single();
+          if (error) throw error;
+          return data as IncomeGoal;
+        }
+      }
+
       const { data, error } = await supabase
         .from("income_goals")
         .upsert(

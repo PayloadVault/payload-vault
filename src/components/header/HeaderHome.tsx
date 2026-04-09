@@ -81,13 +81,13 @@ export const HeaderHome = ({
 
   useEffect(() => {
     const onMouseDown = (e: MouseEvent) => {
-      const target = e.target as Node;
+      const target = e.target as Element;
 
-      if (menuRef.current && !menuRef.current.contains(target)) {
+      if (!(target.closest?.("[data-menu-wrapper]"))) {
         setIsUserMenuOpen(false);
       }
 
-      if (navigationRef.current && !navigationRef.current.contains(target)) {
+      if (!(target.closest?.("[data-nav-wrapper]"))) {
         setIsNavigationOpen(false);
       }
     };
@@ -184,7 +184,7 @@ export const HeaderHome = ({
         />
       </div>
 
-      <div className="relative shrink-0" ref={navigationRef}>
+      <div className="relative shrink-0" data-nav-wrapper ref={navigationRef}>
         <button
           className="cursor-pointer p-2 rounded-radius-md hover:bg-color-primary/20 hover:text-color-primary transition-all duration-200 ease-in-out active:scale-95"
           aria-label={
@@ -220,7 +220,7 @@ export const HeaderHome = ({
         />
       </div>
 
-      <div className="relative shrink-0" ref={menuRef}>
+      <div className="relative shrink-0" data-menu-wrapper ref={menuRef}>
         <button
           className="cursor-pointer p-2 rounded-radius-md hover:bg-color-primary/20 hover:text-color-primary transition-all duration-200 ease-in-out active:scale-95"
           aria-label="Benutzermenü"
