@@ -53,11 +53,11 @@ export const NavigationDropdown = ({
   return (
     <div
       role="menu"
-      className={`absolute right-0 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-radius-md border border-color-border-light bg-color-bg-dark shadow-shadow-medium z-50 overflow-hidden ${
+      className={`absolute right-0 top-full mt-2 w-56 md:w-72 max-w-[calc(100vw-2rem)] rounded-radius-md border border-color-border-light bg-color-bg-dark shadow-shadow-medium z-50 overflow-hidden ${
         isAnimatingOut ? "animate-slide-up-out" : "animate-slide-down"
       }`}
     >
-      <nav className="flex flex-col py-2">
+      <nav className="flex flex-col py-1.5 md:py-2">
         {navigationLinks.map((link) => {
           const isActive = isActivePath(pathname, link.to);
 
@@ -67,7 +67,7 @@ export const NavigationDropdown = ({
               to={link.to}
               role="menuitem"
               onClick={() => setIsOpen(false)}
-              className={`px-4 py-3 text-sm no-underline transition-all duration-200 ease-in-out ${
+              className={`px-3 py-2.5 md:px-4 md:py-3 text-xs md:text-sm no-underline transition-all duration-200 ease-in-out ${
                 isActive
                   ? "bg-color-primary/15 text-color-primary"
                   : "text-color-text-subtle hover:bg-color-primary/20 hover:text-color-text-main"
