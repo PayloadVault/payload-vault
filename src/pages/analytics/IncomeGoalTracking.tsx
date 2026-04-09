@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import type { PdfRecord } from "../../hooks/usePdf/types";
 import type { IncomeGoal } from "../../hooks/useAnalytics/types";
 import { getMonthlyIncomeTotals } from "../../hooks/useAnalytics/forecastUtils";
@@ -45,6 +45,12 @@ export const IncomeGoalTracking = ({
   const [editAmount, setEditAmount] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteName, setDeleteName] = useState("");
+  const [validationHintAt, setValidationHintAt] = useState<string | null>(null);
+
+  const showValidationHint = useCallback((at: string) => {
+    setValidationHintAt(at);
+    setTimeout(() => setValidationHintAt(null), 3000);
+  }, []);
 
   const monthlyTotals = useMemo(() => getMonthlyIncomeTotals(pdfs), [pdfs]);
   const totalIncome = useMemo(
@@ -71,7 +77,10 @@ export const IncomeGoalTracking = ({
 
   const handleAdd = () => {
     const amount = parseFloat(goalAmount);
-    if (isNaN(amount) || amount <= 0) return;
+    if (isNaN(amount) || amount <= 0) {
+      showValidationHint("add");
+      return;
+    }
     const month = goalType === "annual" ? null : selectedMonth;
     onUpsert(month, amount);
     setShowAddForm(false);
@@ -80,7 +89,10 @@ export const IncomeGoalTracking = ({
 
   const handleEditSave = (_goalId: string, month: number | null) => {
     const amount = parseFloat(editAmount);
-    if (isNaN(amount) || amount <= 0) return;
+    if (isNaN(amount) || amount <= 0) {
+      showValidationHint(_goalId);
+      return;
+    }
     onUpsert(month, amount);
     setEditingId(null);
     setEditAmount("");
@@ -181,37 +193,48 @@ export const IncomeGoalTracking = ({
                   ))}
                 </select>
               )}
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  min="1"
-                  step="0.01"
-                  placeholder="Ziel (€)"
-                  value={goalAmount}
-                  onChange={(e) => setGoalAmount(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-                  className="w-32 bg-color-bg-card border border-color-border-light rounded-radius-md px-3 py-2 text-sm
-                    text-color-text-main focus:outline-none focus:border-color-primary"
-                />
-                <button
-                  type="button"
-                  onClick={handleAdd}
-                  className="px-3 py-2 text-xs font-medium rounded-radius-md bg-color-primary text-color-black
-                    hover:bg-color-primary/90 transition-all duration-200 active:scale-95"
-                >
-                  Speichern
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowAddForm(false);
-                    setGoalAmount("");
-                  }}
-                  className="px-3 py-2 text-xs font-medium rounded-radius-md bg-color-bg-card border border-color-border-light
-                    text-color-text-subtle hover:text-color-text-main transition-all duration-200"
-                >
-                  Abbrechen
-                </button>
+              <div className="flex flex-col gap-1">
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    min="1"
+                    step="0.01"
+                    placeholder="Ziel (€)"
+                    value={goalAmount}
+                    onChange={(e) => {
+                      setGoalAmount(e.target.value);
+                      if (validationHintAt === "add") setValidationHintAt(null);
+                    }}
+                    onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+                    className={`w-32 bg-color-bg-card border rounded-radius-md px-3 py-2 text-sm
+                      text-color-text-main focus:outline-none ${validationHintAt === "add" ? "border-amber-500" : "border-color-border-light focus:border-color-primary"}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAdd}
+                    className="px-3 py-2 text-xs font-medium rounded-radius-md bg-color-primary text-color-black
+                      hover:bg-color-primary/90 transition-all duration-200 active:scale-95"
+                  >
+                    Speichern
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddForm(false);
+                      setGoalAmount("");
+                      setValidationHintAt(null);
+                    }}
+                    className="px-3 py-2 text-xs font-medium rounded-radius-md bg-color-bg-card border border-color-border-light
+                      text-color-text-subtle hover:text-color-text-main transition-all duration-200"
+                  >
+                    Abbrechen
+                  </button>
+                </div>
+                {validationHintAt === "add" && (
+                  <span className="text-xs text-amber-500 animate-fade-in">
+                    Bitte einen Betrag größer als 0 eingeben.
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -320,41 +343,53 @@ export const IncomeGoalTracking = ({
           </div>
           <div className="flex items-center gap-2">
             {isEditing ? (
-              <div className="flex items-center gap-1.5">
-                <input
-                  type="number"
-                  min="1"
-                  step="0.01"
-                  value={editAmount}
-                  onChange={(e) => setEditAmount(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleEditSave(goalId, month);
-                    if (e.key === "Escape") {
+              <div className="flex flex-col items-end gap-0.5">
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="number"
+                    min="1"
+                    step="0.01"
+                    value={editAmount}
+                    onChange={(e) => {
+                      setEditAmount(e.target.value);
+                      if (validationHintAt === goalId) setValidationHintAt(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleEditSave(goalId, month);
+                      if (e.key === "Escape") {
+                        setEditingId(null);
+                        setEditAmount("");
+                        setValidationHintAt(null);
+                      }
+                    }}
+                    className={`w-24 bg-color-bg-card border rounded-radius-sm px-2 py-1 text-xs
+                      text-color-text-main focus:outline-none ${validationHintAt === goalId ? "border-amber-500" : "border-color-border-light focus:border-color-primary"}`}
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleEditSave(goalId, month)}
+                    className="text-xs text-color-primary hover:text-color-primary/80 font-medium"
+                  >
+                    ✓
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
                       setEditingId(null);
                       setEditAmount("");
-                    }
-                  }}
-                  className="w-24 bg-color-bg-card border border-color-border-light rounded-radius-sm px-2 py-1 text-xs
-                    text-color-text-main focus:outline-none focus:border-color-primary"
-                  autoFocus
-                />
-                <button
-                  type="button"
-                  onClick={() => handleEditSave(goalId, month)}
-                  className="text-xs text-color-primary hover:text-color-primary/80 font-medium"
-                >
-                  ✓
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingId(null);
-                    setEditAmount("");
-                  }}
-                  className="text-xs text-color-text-subtle hover:text-color-text-main"
-                >
-                  ✕
-                </button>
+                      setValidationHintAt(null);
+                    }}
+                    className="text-xs text-color-text-subtle hover:text-color-text-main"
+                  >
+                    ✕
+                  </button>
+                </div>
+                {validationHintAt === goalId && (
+                  <span className="text-xs text-amber-500 animate-fade-in">
+                    Betrag muss größer als 0 sein.
+                  </span>
+                )}
               </div>
             ) : null}
             <span className="text-xs text-color-text-subtle whitespace-nowrap">
@@ -387,6 +422,7 @@ export const IncomeGoalTracking = ({
                 onClick={() => {
                   setEditingId(goalId);
                   setEditAmount(goal.toString());
+                  setValidationHintAt(null);
                 }}
                 className="text-xs py-1 text-color-text-subtle hover:text-color-primary transition-colors"
               >
