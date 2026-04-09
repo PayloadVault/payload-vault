@@ -59,9 +59,17 @@ export const SignUpPage = () => {
     if (signUpError) {
       setError(
         signUpError.message.includes("User already registered")
-          ? "Benutzer ist bereits registriert"
+          ? "Ein Konto mit dieser E-Mail-Adresse existiert bereits."
           : "Registrierung fehlgeschlagen. Bitte versuchen Sie es später erneut.",
       );
+    } else if (
+      data.user?.identities?.length === 0 ||
+      (data.user &&
+        data.session === null &&
+        data.user.confirmed_at !== null &&
+        data.user.confirmed_at !== undefined)
+    ) {
+      setError("Ein Konto mit dieser E-Mail-Adresse existiert bereits.");
     } else if (data.user && data.session === null) {
       setIsSent(true);
     }
