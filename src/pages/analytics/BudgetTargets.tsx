@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import type {
   ExpenseRecord,
   ExpenseCategory,
@@ -34,6 +34,12 @@ export const BudgetTargets = ({
   const [newAmount, setNewAmount] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteName, setDeleteName] = useState("");
+  const [validationHintAt, setValidationHintAt] = useState<string | null>(null);
+
+  const showValidationHint = useCallback((at: string) => {
+    setValidationHintAt(at);
+    setTimeout(() => setValidationHintAt(null), 3000);
+  }, []);
 
   const categoryTotals = useMemo(
     () => getCategoryExpenseTotals(expenses),
@@ -67,20 +73,24 @@ export const BudgetTargets = ({
 
   const handleSave = (category: ExpenseCategory) => {
     const amount = parseFloat(editAmount);
-    if (!isNaN(amount) && amount > 0) {
-      onUpsert(category, amount);
-      setEditingCategory(null);
-      setEditAmount("");
+    if (isNaN(amount) || amount <= 0) {
+      showValidationHint(category);
+      return;
     }
+    onUpsert(category, amount);
+    setEditingCategory(null);
+    setEditAmount("");
   };
 
   const handleAdd = () => {
     const amount = parseFloat(newAmount);
-    if (!isNaN(amount) && amount > 0) {
-      onUpsert(newCategory, amount);
-      setShowAddForm(false);
-      setNewAmount("");
+    if (isNaN(amount) || amount <= 0) {
+      showValidationHint("add");
+      return;
     }
+    onUpsert(newCategory, amount);
+    setShowAddForm(false);
+    setNewAmount("");
   };
 
   const getProgressColor = (pct: number) => {
@@ -139,34 +149,47 @@ export const BudgetTargets = ({
                 </option>
               ))}
             </select>
-            <div className="flex gap-2">
-              <input
-                type="number"
-                min="1"
-                step="0.01"
-                placeholder="Budget (€)"
-                value={newAmount}
-                onChange={(e) => setNewAmount(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-                className="w-32 bg-color-bg-card border border-color-border-light rounded-radius-md px-3 py-2 text-sm
-                  text-color-text-main focus:outline-none focus:border-color-primary"
-              />
-              <button
-                type="button"
-                onClick={handleAdd}
-                className="px-3 py-2 text-xs font-medium rounded-radius-md bg-color-primary text-color-black
-                  hover:bg-color-primary/90 transition-all duration-200 active:scale-95"
-              >
-                Speichern
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowAddForm(false)}
-                className="px-3 py-2 text-xs font-medium rounded-radius-md bg-color-bg-card border border-color-border-light
-                  text-color-text-subtle hover:text-color-text-main transition-all duration-200"
-              >
-                Abbrechen
-              </button>
+            <div className="flex flex-col gap-1">
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  min="1"
+                  step="0.01"
+                  placeholder="Budget (€)"
+                  value={newAmount}
+                  onChange={(e) => {
+                    setNewAmount(e.target.value);
+                    if (validationHintAt === "add") setValidationHintAt(null);
+                  }}
+                  onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+                  className={`w-32 bg-color-bg-card border rounded-radius-md px-3 py-2 text-sm
+                    text-color-text-main focus:outline-none ${validationHintAt === "add" ? "border-amber-500" : "border-color-border-light focus:border-color-primary"}`}
+                />
+                <button
+                  type="button"
+                  onClick={handleAdd}
+                  className="px-3 py-2 text-xs font-medium rounded-radius-md bg-color-primary text-color-black
+                    hover:bg-color-primary/90 transition-all duration-200 active:scale-95"
+                >
+                  Speichern
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setValidationHintAt(null);
+                  }}
+                  className="px-3 py-2 text-xs font-medium rounded-radius-md bg-color-bg-card border border-color-border-light
+                    text-color-text-subtle hover:text-color-text-main transition-all duration-200"
+                >
+                  Abbrechen
+                </button>
+              </div>
+              {validationHintAt === "add" && (
+                <span className="text-xs text-amber-500 animate-fade-in">
+                  Bitte einen Betrag größer als 0 eingeben.
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -205,41 +228,53 @@ export const BudgetTargets = ({
                   </div>
                   <div className="flex items-center gap-2">
                     {isEditing ? (
-                      <div className="flex items-center gap-1.5">
-                        <input
-                          type="number"
-                          min="1"
-                          step="0.01"
-                          value={editAmount}
-                          onChange={(e) => setEditAmount(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") handleSave(item.category);
-                            if (e.key === "Escape") {
+                      <div className="flex flex-col items-end gap-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="number"
+                            min="1"
+                            step="0.01"
+                            value={editAmount}
+                            onChange={(e) => {
+                              setEditAmount(e.target.value);
+                              if (validationHintAt === item.category) setValidationHintAt(null);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") handleSave(item.category);
+                              if (e.key === "Escape") {
+                                setEditingCategory(null);
+                                setEditAmount("");
+                                setValidationHintAt(null);
+                              }
+                            }}
+                            className={`w-24 bg-color-bg-card border rounded-radius-sm px-2 py-1 text-xs
+                              text-color-text-main focus:outline-none ${validationHintAt === item.category ? "border-amber-500" : "border-color-border-light focus:border-color-primary"}`}
+                            autoFocus
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleSave(item.category)}
+                            className="text-xs text-color-primary hover:text-color-primary/80 font-medium"
+                          >
+                            ✓
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
                               setEditingCategory(null);
                               setEditAmount("");
-                            }
-                          }}
-                          className="w-24 bg-color-bg-card border border-color-border-light rounded-radius-sm px-2 py-1 text-xs
-                            text-color-text-main focus:outline-none focus:border-color-primary"
-                          autoFocus
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleSave(item.category)}
-                          className="text-xs text-color-primary hover:text-color-primary/80 font-medium"
-                        >
-                          ✓
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingCategory(null);
-                            setEditAmount("");
-                          }}
-                          className="text-xs text-color-text-subtle hover:text-color-text-main"
-                        >
-                          ✕
-                        </button>
+                              setValidationHintAt(null);
+                            }}
+                            className="text-xs text-color-text-subtle hover:text-color-text-main"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        {validationHintAt === item.category && (
+                          <span className="text-xs text-amber-500 animate-fade-in">
+                            Betrag muss größer als 0 sein.
+                          </span>
+                        )}
                       </div>
                     ) : null}
                     <span className="text-xs text-color-text-subtle whitespace-nowrap">
@@ -273,6 +308,7 @@ export const BudgetTargets = ({
                         onClick={() => {
                           setEditingCategory(item.category);
                           setEditAmount(item.budget.toString());
+                          setValidationHintAt(null);
                         }}
                         className="text-xs py-1 text-color-text-subtle hover:text-color-primary transition-colors"
                       >
