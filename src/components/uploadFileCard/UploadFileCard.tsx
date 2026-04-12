@@ -67,22 +67,10 @@ export const FileUploadCard = ({
   };
   const isValidSize = (f: File) => f.size <= MAX_FILE_SIZE_BYTES;
 
-  const makeUniqueName = (file: File): File => {
-    const dot = file.name.lastIndexOf(".");
-    const base = dot > 0 ? file.name.slice(0, dot) : file.name;
-    const ext = dot > 0 ? file.name.slice(dot) : "";
-    const uniqueName = `${base}_${crypto.randomUUID().slice(0, 8)}${ext}`;
-    return new File([file], uniqueName, {
-      type: file.type,
-      lastModified: file.lastModified,
-    });
-  };
-
   const addFiles = (incoming: File[]) => {
     const validFiles: File[] = [];
     const invalidFormatFiles: string[] = [];
     const oversizedFiles: string[] = [];
-    const seenNames = new Set(files.map((f) => f.name));
 
     incoming.forEach((file) => {
       if (!isAcceptedFile(file)) {
@@ -93,9 +81,7 @@ export const FileUploadCard = ({
         oversizedFiles.push(file.name);
         return;
       }
-      const resolved = seenNames.has(file.name) ? makeUniqueName(file) : file;
-      seenNames.add(resolved.name);
-      validFiles.push(resolved);
+      validFiles.push(file);
     });
 
     if (invalidFormatFiles.length) {

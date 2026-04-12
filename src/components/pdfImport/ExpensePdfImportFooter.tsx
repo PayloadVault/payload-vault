@@ -4,7 +4,6 @@ import {
   useUploadAndExtract,
   useConfirmAndUploadToDatabase,
   useDeclineExpenseUpload,
-  DuplicateExpenseError,
   ExtractionExpenseError,
 } from "../../hooks/useExpenses/useExpenses";
 import type {
@@ -34,41 +33,14 @@ export const ExpensePdfImportFooter = () => {
     error: unknown,
   ): {
     reason: string;
-    errorType: "duplicate" | "extraction" | "unknown";
+    errorType: "extraction" | "unknown";
   } => {
-    if (error instanceof DuplicateExpenseError) {
-      return {
-        reason: "Eine Datei mit diesem Namen existiert bereits.",
-        errorType: "duplicate",
-      };
-    }
-
     if (error instanceof ExtractionExpenseError) {
       return {
         reason:
           error.rejectionReason ||
           "Dieses Dokument konnte nicht verarbeitet werden.",
         errorType: "extraction",
-      };
-    }
-
-    const message =
-      error instanceof Error
-        ? error.message.toLowerCase()
-        : typeof error === "string"
-          ? error.toLowerCase()
-          : "";
-
-    if (
-      message.includes("duplicate") ||
-      message.includes("already exists") ||
-      message.includes("existiert bereits") ||
-      message.includes("bereits vorhanden") ||
-      message.includes("23505")
-    ) {
-      return {
-        reason: "Eine Datei mit diesem Namen existiert bereits.",
-        errorType: "duplicate",
       };
     }
 
@@ -158,7 +130,7 @@ export const ExpensePdfImportFooter = () => {
         const failedFiles: {
           name: string;
           reason?: string;
-          errorType: "duplicate" | "extraction" | "unknown";
+          errorType: "extraction" | "unknown";
         }[] = [];
 
         onProgress({
@@ -200,24 +172,15 @@ export const ExpensePdfImportFooter = () => {
         }
 
         if (failedFiles.length > 0) {
-          const allDuplicates = failedFiles.every(
-            (f) => f.errorType === "duplicate",
-          );
           const allExtraction = failedFiles.every(
             (f) => f.errorType === "extraction",
           );
 
-          const title = allDuplicates
-            ? "Duplikat erkannt"
-            : allExtraction
-              ? "Extraktion fehlgeschlagen"
-              : "Import fehlgeschlagen";
+          const title = allExtraction
+            ? "Extraktion fehlgeschlagen"
+            : "Import fehlgeschlagen";
 
-          const description = allDuplicates
-            ? failedFiles.length === 1
-              ? `${truncateName(failedFiles[0].name)}: ${failedFiles[0].reason}`
-              : `${failedFiles.length} Dateien existieren bereits.`
-            : `${failedFiles.length} Datei${failedFiles.length > 1 ? "en" : ""} konnten nicht verarbeitet werden.`;
+          const description = `${failedFiles.length} Datei${failedFiles.length > 1 ? "en" : ""} konnten nicht verarbeitet werden.`;
 
           showBanner(title, description, "error");
         }

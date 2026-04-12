@@ -12,13 +12,6 @@ import type {
 } from "./types";
 import { isExpenseCategory, DEFAULT_EXPENSE_CATEGORY } from "./types";
 
-export class DuplicateExpenseError extends Error {
-  constructor(fileName: string) {
-    super(`File "${fileName}" already exists.`);
-    this.name = "DuplicateExpenseError";
-  }
-}
-
 export class ExtractionExpenseError extends Error {
   rejectionReason: string;
   constructor(reason: string) {
@@ -43,38 +36,6 @@ async function deleteImageFromStorage(path: string): Promise<void> {
     .from("expense_invoices")
     .remove([path]);
   if (error) console.error("Error removing storage file:", error.message);
-}
-
-async function checkDuplicateFileName(
-  userId: string,
-  fileName: string,
-): Promise<boolean> {
-  // Exact match — safe parameterized query
-  const { data: exactMatch, error: exactError } = await supabase
-    .from("expenses")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("file_name", fileName)
-    .limit(1);
-
-  if (exactError) throw exactError;
-  if ((exactMatch?.length ?? 0) > 0) return true;
-
-  // Suffix-copy match — escape LIKE wildcards to prevent pattern injection
-  const escapedName = fileName
-    .replace(/\\/g, "\\\\")
-    .replace(/%/g, "\\%")
-    .replace(/_/g, "\\_");
-
-  const { data: suffixMatch, error: suffixError } = await supabase
-    .from("expenses")
-    .select("id")
-    .eq("user_id", userId)
-    .like("file_name", `${escapedName}__p%`)
-    .limit(1);
-
-  if (suffixError) throw suffixError;
-  return (suffixMatch?.length ?? 0) > 0;
 }
 
 export function isSortType(value: string): value is SortType {
@@ -159,12 +120,12 @@ export function useFetchExpenses(props: FetchExpensesProps) {
 export function useUploadAndExtract(userId: string) {
   return useMutation<PendingExpenseUpload, Error, File>({
     mutationFn: async (file) => {
-      const isDuplicate = await checkDuplicateFileName(userId, file.name);
-      if (isDuplicate) {
-        throw new DuplicateExpenseError(file.name);
-      }
+      const dot = file.name.lastIndexOf(".");
+      const base = dot > 0 ? file.name.slice(0, dot) : file.name;
+      const ext = dot > 0 ? file.name.slice(dot) : "";
+      const uniqueFileName = `${base}_${crypto.randomUUID().slice(0, 8)}${ext}`;
 
-      const filePath = `${userId}/${crypto.randomUUID()}_${sanitizeFileName(file.name)}`;
+      const filePath = `${userId}/${crypto.randomUUID()}_${sanitizeFileName(uniqueFileName)}`;
 
       const { error: uploadError } = await supabase.storage
         .from("expense_invoices")
@@ -216,13 +177,13 @@ export function useUploadAndExtract(userId: string) {
 
         return {
           id: crypto.randomUUID(),
-          fileName: file.name,
+          fileName: uniqueFileName,
           filePath,
           expense_date:
             data.expense_date || new Date().toISOString().split("T")[0],
           vendor_name: data.vendor_name || "Unbekannt",
           image_url: filePath,
-          file_name: file.name,
+          file_name: uniqueFileName,
           products: (data.products || []).map(
             (p: {
               product_name: string;
