@@ -73,7 +73,7 @@ button {
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
-  --bg-overlay: linear-gradient(rgba(13, 13, 13, 0.95), rgba(13, 13, 13, 0.95));
+  --bg-overlay: linear-gradient(rgba(13, 13, 13, 0.75), rgba(13, 13, 13, 0.95));
   --color-bg-accent-subtle: #0f2b28;
   --color-bg-error-subtle: #2e1618;
 }
@@ -96,8 +96,8 @@ button {
   --color-bg-card: #ffffff;
   --color-bg-accent: var(--color-primary);
   --bg-overlay: linear-gradient(
-    rgba(248, 250, 252, 0.9),
-    rgba(248, 250, 252, 0.9)
+    rgba(248, 250, 252, 0.45),
+    rgba(248, 250, 252, 0.65)
   );
   --color-bg-accent-subtle: #dff5f3;
   --color-bg-error-subtle: #fde8e8;
