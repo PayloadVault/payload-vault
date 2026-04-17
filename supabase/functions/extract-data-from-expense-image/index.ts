@@ -265,11 +265,11 @@ async function callGeminiWithFallback(parts: GeminiPart[]): Promise<GeminiResult
   let lastError: unknown;
 
   for (const modelName of MODEL_CHAIN) {
-    const model = genAI.getGenerativeModel({ model: modelName });
-
     for (let attempt = 1; attempt <= MAX_ATTEMPTS_PER_MODEL; attempt++) {
+      const model = genAI.getGenerativeModel({ model: modelName });
       try {
         const result = await model.generateContent(parts);
+        console.log(`Gemini success: ${modelName} (attempt ${attempt}/${MAX_ATTEMPTS_PER_MODEL})`);
         return { ok: true, text: result.response.text() };
       } catch (err) {
         lastError = err;
@@ -316,6 +316,7 @@ Deno.serve(async (req: Request) => {
 
   // Rate limiting
   if (!checkRateLimit(user.id)) {
+    console.warn(`Rate limit exceeded for user ${user.id}`);
     return new Response(JSON.stringify({ error: "Too many requests" }), {
       status: 429,
       headers: { ...corsHeaders(req), "Content-Type": "application/json" },
@@ -362,11 +363,15 @@ Deno.serve(async (req: Request) => {
       .from("expense_invoices")
       .download(filePath);
 
-    if (downloadError) throw downloadError;
+    if (downloadError) {
+      console.error(`Storage download failed: ${downloadError.message}`);
+      throw downloadError;
+    }
 
     const arrayBuffer = await fileBlob.arrayBuffer();
     const base64Data = toBase64(arrayBuffer);
     const mimeType = getMimeType(filePath, fileBlob.type);
+    console.log(`File downloaded: ${arrayBuffer.byteLength} bytes, mime=${mimeType}`);
 
     const geminiResult = await callGeminiWithFallback([
       { text: EXPENSE_RECEIPT_EXTRACTION_PROMPT },
@@ -374,6 +379,7 @@ Deno.serve(async (req: Request) => {
     ]);
 
     if (!geminiResult.ok && geminiResult.kind === "unavailable") {
+      console.error("Gemini unavailable after all retries — returning 503 to client");
       return new Response(
         JSON.stringify({
           success: false,
@@ -390,6 +396,10 @@ Deno.serve(async (req: Request) => {
     const aiParsed: ExtractedAIData | null = geminiResult.ok
       ? sanitizeAIResponse(geminiResult.text)
       : null;
+
+    if (geminiResult.ok && !aiParsed) {
+      console.warn("Gemini response did not parse as JSON");
+    }
 
     const normalizedProducts = buildProducts(aiParsed);
     const hasProducts = normalizedProducts.length > 0;
@@ -413,7 +423,7 @@ Deno.serve(async (req: Request) => {
           "Dieses Dokument konnte nicht als gültiger Beleg identifiziert werden. Bitte stellen Sie sicher, dass Sie einen Kassenbon oder eine Rechnung hochladen.",
       };
 
-    // Extracted data logging omitted in production for data privacy
+    console.log(`Extraction done: success=${hasProducts}, products=${normalizedProducts.length}`);
 
     return new Response(JSON.stringify(extractedData), {
       headers: { ...corsHeaders(req), "Content-Type": "application/json" },
