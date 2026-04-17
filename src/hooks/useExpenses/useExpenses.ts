@@ -19,6 +19,8 @@ export class DuplicateExpenseError extends Error {
   }
 }
 
+export { checkDuplicateExpenseContent };
+
 export class ExtractionExpenseError extends Error {
   rejectionReason: string;
   constructor(reason: string) {
@@ -45,36 +47,37 @@ async function deleteImageFromStorage(path: string): Promise<void> {
   if (error) console.error("Error removing storage file:", error.message);
 }
 
-async function checkDuplicateFileName(
+async function checkDuplicateExpenseContent(
   userId: string,
-  fileName: string,
-): Promise<boolean> {
-  // Exact match — safe parameterized query
-  const { data: exactMatch, error: exactError } = await supabase
+  expense: {
+    expense_date: string;
+    vendor_name: string;
+    amount: number;
+  },
+): Promise<{ file_name: string; image_url: string } | null> {
+  const { data, error } = await supabase
     .from("expenses")
-    .select("id")
+    .select("id, amount, vendor_name, file_name, image_url")
     .eq("user_id", userId)
-    .eq("file_name", fileName)
-    .limit(1);
+    .eq("expense_date", expense.expense_date)
+    .limit(100);
 
-  if (exactError) throw exactError;
-  if ((exactMatch?.length ?? 0) > 0) return true;
+  if (error) throw error;
+  if (!data || data.length === 0) return null;
 
-  // Suffix-copy match — escape LIKE wildcards to prevent pattern injection
-  const escapedName = fileName
-    .replace(/\\/g, "\\\\")
-    .replace(/%/g, "\\%")
-    .replace(/_/g, "\\_");
+  const normalizedVendor = expense.vendor_name.trim().toLowerCase();
 
-  const { data: suffixMatch, error: suffixError } = await supabase
-    .from("expenses")
-    .select("id")
-    .eq("user_id", userId)
-    .like("file_name", `${escapedName}__p%`)
-    .limit(1);
+  const match = data.find((existing) => {
+    const existingVendor = (existing.vendor_name ?? "").trim().toLowerCase();
+    const amountMatch =
+      Math.abs(existing.amount - expense.amount) < 0.01;
+    const vendorMatch = existingVendor === normalizedVendor;
+    return amountMatch && vendorMatch;
+  });
 
-  if (suffixError) throw suffixError;
-  return (suffixMatch?.length ?? 0) > 0;
+  if (!match) return null;
+
+  return { file_name: match.file_name, image_url: match.image_url };
 }
 
 export function isSortType(value: string): value is SortType {
@@ -159,11 +162,6 @@ export function useFetchExpenses(props: FetchExpensesProps) {
 export function useUploadAndExtract(userId: string) {
   return useMutation<PendingExpenseUpload, Error, File>({
     mutationFn: async (file) => {
-      const isDuplicate = await checkDuplicateFileName(userId, file.name);
-      if (isDuplicate) {
-        throw new DuplicateExpenseError(file.name);
-      }
-
       const filePath = `${userId}/${crypto.randomUUID()}_${sanitizeFileName(file.name)}`;
 
       const { error: uploadError } = await supabase.storage
@@ -259,20 +257,43 @@ export function useConfirmAndUploadToDatabase() {
 
   return useMutation<ExpenseRecord, PostgrestError, ConfirmReceiptPayload & { user_id: string }>({
     mutationFn: async (payload) => {
-      const { data, error } = await supabase
-        .from("expenses")
-        .insert({
-          user_id: payload.user_id,
-          category: payload.category,
-          amount: payload.amount,
-          expense_date: payload.expense_date,
-          vendor_name: payload.vendor_name,
-          image_url: payload.image_url,
-          file_name: payload.file_name,
-          products: JSON.parse(JSON.stringify(payload.products)),
-        })
-        .select()
-        .single();
+      const insertRow = (fileName: string) =>
+        supabase
+          .from("expenses")
+          .insert({
+            user_id: payload.user_id,
+            category: payload.category,
+            amount: payload.amount,
+            expense_date: payload.expense_date,
+            vendor_name: payload.vendor_name,
+            image_url: payload.image_url,
+            file_name: fileName,
+            products: JSON.parse(JSON.stringify(payload.products)),
+          })
+          .select()
+          .single();
+
+      const isUniqueViolation = (e: PostgrestError) =>
+        e.code === "23505" || e.message?.includes("unique");
+
+      const { data, error } = await insertRow(payload.file_name);
+
+      if (error && isUniqueViolation(error)) {
+        const baseName = payload.file_name;
+        const dotIdx = baseName.lastIndexOf(".");
+        for (let i = 1; i <= 50; i++) {
+          const uniqueName =
+            dotIdx > 0
+              ? `${baseName.slice(0, dotIdx)}_${i}${baseName.slice(dotIdx)}`
+              : `${baseName}_${i}`;
+          const { data: retryData, error: retryError } =
+            await insertRow(uniqueName);
+          if (!retryError) return retryData;
+          if (!isUniqueViolation(retryError)) throw retryError;
+        }
+        throw error;
+      }
+
       if (error) throw error;
       return data;
     },
