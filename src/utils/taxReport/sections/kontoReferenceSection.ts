@@ -1,14 +1,15 @@
 import type { jsPDF } from "jspdf";
 import {
-  PAGE_MARGIN,
+  CONTENT_TOP,
   CONTENT_WIDTH,
   COLORS,
+  TABLE_MARGIN,
   addSectionTitle,
 } from "../helpers";
 import { INCOME_KONTO, EXPENSE_KONTO } from "../../csvExport";
 
 export function addKontoReferenceSection(doc: jsPDF): number {
-  let y = PAGE_MARGIN;
+  let y = CONTENT_TOP;
 
   y = addSectionTitle(doc, "Kontenplan-Referenz", y);
 
@@ -33,7 +34,7 @@ export function addKontoReferenceSection(doc: jsPDF): number {
     head: [["Kategorie", "Konto", "Typ"]],
     body: allRows,
     theme: "grid",
-    margin: { left: PAGE_MARGIN, right: PAGE_MARGIN },
+    margin: TABLE_MARGIN,
     tableWidth: CONTENT_WIDTH,
     headStyles: {
       fillColor: COLORS.tableHeader,

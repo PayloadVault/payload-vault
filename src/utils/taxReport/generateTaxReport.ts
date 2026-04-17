@@ -1,6 +1,10 @@
 import type { PdfRecord } from "../../hooks/usePdf/types";
 import type { ExpenseRecord } from "../../hooks/useExpenses/types";
-import { addPageFooters } from "./helpers";
+import {
+  addPageDecorations,
+  loadLogoAsset,
+  sanitizeEmailForFilename,
+} from "./helpers";
 import { addHeaderSection } from "./sections/headerSection";
 import { addCategorySummarySection } from "./sections/categorySummarySection";
 import { addMonthlyBreakdownSection } from "./sections/monthlyBreakdownSection";
@@ -12,16 +16,19 @@ export async function generateTaxReport(
   pdfs: PdfRecord[],
   expenses: ExpenseRecord[],
   year: number,
+  userEmail: string,
 ): Promise<void> {
   const { jsPDF } = await import("jspdf");
   const { applyPlugin } = await import("jspdf-autotable");
   applyPlugin(jsPDF);
 
+  const logo = await loadLogoAsset();
+
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
   // Page 1: Header + Summary + Category breakdowns
-  let y = addHeaderSection(doc, year, pdfs, expenses);
-  y = addCategorySummarySection(doc, pdfs, expenses, y);
+  const headerY = addHeaderSection(doc, year, pdfs, expenses, userEmail);
+  addCategorySummarySection(doc, pdfs, expenses, headerY);
 
   // Page 2: Monthly breakdowns
   doc.addPage();
@@ -39,8 +46,9 @@ export async function generateTaxReport(
   doc.addPage();
   addKontoReferenceSection(doc);
 
-  // Add page footers to all pages
-  addPageFooters(doc, year);
+  // Decorate every page (logo + footer)
+  addPageDecorations(doc, year, logo);
 
-  doc.save(`steuerbericht_${year}.pdf`);
+  const prefix = sanitizeEmailForFilename(userEmail);
+  doc.save(`${prefix}_steuerbericht_${year}.pdf`);
 }
