@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "../button/Button";
 import { DownloadIcon } from "../icons/DownloadIcon";
 import { useBanner } from "../../context/banner/BannerContext";
+import { useAuth } from "../../context/AuthContext";
 import type { PdfRecord } from "../../hooks/usePdf/types";
 import type { ExpenseRecord } from "../../hooks/useExpenses/types";
 
@@ -18,6 +19,7 @@ export const TaxReportButton = ({
 }: TaxReportButtonProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const { showBanner } = useBanner();
+  const { user } = useAuth();
 
   const handleGenerate = async () => {
     setIsGenerating(true);
@@ -25,7 +27,8 @@ export const TaxReportButton = ({
       const { generateTaxReport } = await import(
         "../../utils/taxReport/generateTaxReport"
       );
-      await generateTaxReport(pdfs, expenses, year);
+      const email = user?.email ?? "benutzer";
+      await generateTaxReport(pdfs, expenses, year, email);
       showBanner("Steuerbericht", "PDF wurde erfolgreich erstellt.", "success");
     } catch {
       showBanner(

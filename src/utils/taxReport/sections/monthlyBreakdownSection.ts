@@ -2,9 +2,10 @@ import type { jsPDF } from "jspdf";
 import type { PdfRecord } from "../../../hooks/usePdf/types";
 import type { ExpenseRecord } from "../../../hooks/useExpenses/types";
 import {
-  PAGE_MARGIN,
+  CONTENT_TOP,
   CONTENT_WIDTH,
   COLORS,
+  TABLE_MARGIN,
   formatCurrency,
   addSectionTitle,
 } from "../helpers";
@@ -19,7 +20,7 @@ export function addMonthlyBreakdownSection(
   pdfs: PdfRecord[],
   expenses: ExpenseRecord[],
 ): number {
-  let y = PAGE_MARGIN;
+  let y = CONTENT_TOP;
 
   // Monthly income
   y = addSectionTitle(doc, "Monatliche Einnahmen", y);
@@ -37,7 +38,7 @@ export function addMonthlyBreakdownSection(
     head: [["Monat", "Betrag"]],
     body: earningsRows,
     theme: "grid",
-    margin: { left: PAGE_MARGIN, right: PAGE_MARGIN },
+    margin: TABLE_MARGIN,
     tableWidth: CONTENT_WIDTH,
     headStyles: {
       fillColor: COLORS.tableHeader,
@@ -73,7 +74,7 @@ export function addMonthlyBreakdownSection(
     head: [["Monat", "Betrag"]],
     body: expenseRows,
     theme: "grid",
-    margin: { left: PAGE_MARGIN, right: PAGE_MARGIN },
+    margin: TABLE_MARGIN,
     tableWidth: CONTENT_WIDTH,
     headStyles: {
       fillColor: COLORS.tableHeader,

@@ -1,9 +1,10 @@
 import type { jsPDF } from "jspdf";
 import type { ExpenseRecord, StoredProduct } from "../../../hooks/useExpenses/types";
 import {
-  PAGE_MARGIN,
+  CONTENT_TOP,
   CONTENT_WIDTH,
   COLORS,
+  TABLE_MARGIN,
   formatCurrency,
   addSectionTitle,
 } from "../helpers";
@@ -13,7 +14,7 @@ export function addExpenseDetailSection(
   doc: jsPDF,
   expenses: ExpenseRecord[],
 ): number {
-  let y = PAGE_MARGIN;
+  let y = CONTENT_TOP;
 
   y = addSectionTitle(doc, "Einzelaufstellung Ausgaben", y);
 
@@ -51,7 +52,7 @@ export function addExpenseDetailSection(
     head: [["Datum", "Lieferant", "Produkt", "Kategorie", "Konto", "Betrag"]],
     body: rows,
     theme: "grid",
-    margin: { left: PAGE_MARGIN, right: PAGE_MARGIN },
+    margin: TABLE_MARGIN,
     tableWidth: CONTENT_WIDTH,
     headStyles: {
       fillColor: COLORS.tableHeader,

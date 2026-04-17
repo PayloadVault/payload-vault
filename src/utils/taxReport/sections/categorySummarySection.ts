@@ -2,9 +2,9 @@ import type { jsPDF } from "jspdf";
 import type { PdfRecord } from "../../../hooks/usePdf/types";
 import type { ExpenseRecord, StoredProduct } from "../../../hooks/useExpenses/types";
 import {
-  PAGE_MARGIN,
   CONTENT_WIDTH,
   COLORS,
+  TABLE_MARGIN,
   formatCurrency,
   addSectionTitle,
 } from "../helpers";
@@ -38,7 +38,7 @@ export function addCategorySummarySection(
     head: [["Kategorie", "Konto", "Betrag"]],
     body: incomeRows,
     theme: "grid",
-    margin: { left: PAGE_MARGIN, right: PAGE_MARGIN },
+    margin: TABLE_MARGIN,
     tableWidth: CONTENT_WIDTH,
     headStyles: {
       fillColor: COLORS.tableHeader,
@@ -90,7 +90,7 @@ export function addCategorySummarySection(
     head: [["Kategorie", "Konto", "Betrag"]],
     body: expenseRows,
     theme: "grid",
-    margin: { left: PAGE_MARGIN, right: PAGE_MARGIN },
+    margin: TABLE_MARGIN,
     tableWidth: CONTENT_WIDTH,
     headStyles: {
       fillColor: COLORS.tableHeader,
