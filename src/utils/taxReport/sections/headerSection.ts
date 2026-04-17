@@ -5,6 +5,7 @@ import {
   PAGE_MARGIN,
   CONTENT_WIDTH,
   COLORS,
+  TABLE_MARGIN,
   formatCurrency,
   addSectionTitle,
 } from "../helpers";
@@ -15,23 +16,49 @@ export function addHeaderSection(
   year: number,
   pdfs: PdfRecord[],
   expenses: ExpenseRecord[],
+  userEmail: string,
 ): number {
-  let y = PAGE_MARGIN;
+  let y = PAGE_MARGIN + 10;
 
   // Title
   doc.setFontSize(22);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(COLORS.title);
   doc.text(`STEUERBERICHT ${year}`, PAGE_MARGIN, y + 10);
-  y += 18;
 
-  // Generation date
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(COLORS.subtle);
+  // Primary accent bar under title
+  doc.setDrawColor(COLORS.primary);
+  doc.setLineWidth(1.2);
+  doc.line(PAGE_MARGIN, y + 13, PAGE_MARGIN + 55, y + 13);
+  y += 20;
+
+  // Meta info block (email + generation date)
   const today = formatDate(new Date().toISOString().slice(0, 10));
-  doc.text(`Erstellt am: ${today}`, PAGE_MARGIN, y);
-  y += 6;
+
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(COLORS.sectionHeader);
+  doc.text("Benutzer:", PAGE_MARGIN, y);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(COLORS.text);
+  doc.text(userEmail, PAGE_MARGIN + 22, y);
+  y += 5;
+
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(COLORS.sectionHeader);
+  doc.text("Erstellt am:", PAGE_MARGIN, y);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(COLORS.text);
+  doc.text(today, PAGE_MARGIN + 22, y);
+  y += 5;
+
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(COLORS.sectionHeader);
+  doc.text("Berichtsjahr:", PAGE_MARGIN, y);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(COLORS.text);
+  doc.text(String(year), PAGE_MARGIN + 22, y);
+  y += 8;
 
   // Horizontal line
   doc.setDrawColor(COLORS.border);
@@ -57,7 +84,7 @@ export function addHeaderSection(
     head: [["Position", "Wert"]],
     body: summaryData,
     theme: "grid",
-    margin: { left: PAGE_MARGIN, right: PAGE_MARGIN },
+    margin: TABLE_MARGIN,
     tableWidth: CONTENT_WIDTH,
     headStyles: {
       fillColor: COLORS.tableHeader,

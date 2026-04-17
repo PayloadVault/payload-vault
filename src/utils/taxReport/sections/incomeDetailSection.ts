@@ -1,9 +1,10 @@
 import type { jsPDF } from "jspdf";
 import type { PdfRecord } from "../../../hooks/usePdf/types";
 import {
-  PAGE_MARGIN,
+  CONTENT_TOP,
   CONTENT_WIDTH,
   COLORS,
+  TABLE_MARGIN,
   formatCurrency,
   addSectionTitle,
 } from "../helpers";
@@ -13,7 +14,7 @@ export function addIncomeDetailSection(
   doc: jsPDF,
   pdfs: PdfRecord[],
 ): number {
-  let y = PAGE_MARGIN;
+  let y = CONTENT_TOP;
 
   y = addSectionTitle(doc, "Einzelaufstellung Einnahmen", y);
 
@@ -44,7 +45,7 @@ export function addIncomeDetailSection(
     head: [["Datum", "Dateiname", "Kategorie", "Konto", "Betrag"]],
     body: rows,
     theme: "grid",
-    margin: { left: PAGE_MARGIN, right: PAGE_MARGIN },
+    margin: TABLE_MARGIN,
     tableWidth: CONTENT_WIDTH,
     headStyles: {
       fillColor: COLORS.tableHeader,
