@@ -8,9 +8,9 @@ const supabase = createClient(
 );
 
 const genAI = new GoogleGenerativeAI(Deno.env.get("GOOGLE_API_KEY") ?? "");
-const geminiModel = genAI.getGenerativeModel({
-  model: "gemini-2.5-flash",
-});
+
+const MODEL_CHAIN = ["gemini-2.5-flash", "gemini-2.5-flash-lite"] as const;
+const MAX_ATTEMPTS_PER_MODEL = 2;
 
 // ---------- Types ----------
 
@@ -246,6 +246,49 @@ function checkRateLimit(userId: string): boolean {
   return true;
 }
 
+// ---------- Gemini call with retry + fallback ----------
+
+type GeminiPart =
+  | { text: string }
+  | { inlineData: { data: string; mimeType: string } };
+
+type GeminiResult =
+  | { ok: true; text: string }
+  | { ok: false; kind: "unavailable" | "fatal"; message: string };
+
+function isTransientError(error: unknown): boolean {
+  const msg = error instanceof Error ? error.message : String(error);
+  return /\[(5\d{2}|429)\s/.test(msg);
+}
+
+async function callGeminiWithFallback(parts: GeminiPart[]): Promise<GeminiResult> {
+  let lastError: unknown;
+
+  for (const modelName of MODEL_CHAIN) {
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS_PER_MODEL; attempt++) {
+      const model = genAI.getGenerativeModel({ model: modelName });
+      try {
+        const result = await model.generateContent(parts);
+        console.log(`Gemini success: ${modelName} (attempt ${attempt}/${MAX_ATTEMPTS_PER_MODEL})`);
+        return { ok: true, text: result.response.text() };
+      } catch (err) {
+        lastError = err;
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error(
+          `Gemini ${modelName} attempt ${attempt}/${MAX_ATTEMPTS_PER_MODEL} failed:`,
+          msg,
+        );
+        if (!isTransientError(err)) {
+          return { ok: false, kind: "fatal", message: msg };
+        }
+      }
+    }
+  }
+
+  const message = lastError instanceof Error ? lastError.message : String(lastError);
+  return { ok: false, kind: "unavailable", message };
+}
+
 // ---------- Handler ----------
 
 Deno.serve(async (req: Request) => {
@@ -273,6 +316,7 @@ Deno.serve(async (req: Request) => {
 
   // Rate limiting
   if (!checkRateLimit(user.id)) {
+    console.warn(`Rate limit exceeded for user ${user.id}`);
     return new Response(JSON.stringify({ error: "Too many requests" }), {
       status: 429,
       headers: { ...corsHeaders(req), "Content-Type": "application/json" },
@@ -319,32 +363,42 @@ Deno.serve(async (req: Request) => {
       .from("expense_invoices")
       .download(filePath);
 
-    if (downloadError) throw downloadError;
+    if (downloadError) {
+      console.error(`Storage download failed: ${downloadError.message}`);
+      throw downloadError;
+    }
 
     const arrayBuffer = await fileBlob.arrayBuffer();
     const base64Data = toBase64(arrayBuffer);
     const mimeType = getMimeType(filePath, fileBlob.type);
+    console.log(`File downloaded: ${arrayBuffer.byteLength} bytes, mime=${mimeType}`);
 
-    // Call Gemini — wrapped in its own try/catch so mock data is still returned during testing
-    let aiParsed: ExtractedAIData | null = null;
-    try {
-      const result = await geminiModel.generateContent([
-        { text: EXPENSE_RECEIPT_EXTRACTION_PROMPT },
+    const geminiResult = await callGeminiWithFallback([
+      { text: EXPENSE_RECEIPT_EXTRACTION_PROMPT },
+      { inlineData: { data: base64Data, mimeType } },
+    ]);
+
+    if (!geminiResult.ok && geminiResult.kind === "unavailable") {
+      console.error("Gemini unavailable after all retries — returning 503 to client");
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error:
+            "Der KI-Service ist momentan nicht verfügbar. Bitte versuchen Sie es in wenigen Minuten erneut.",
+        }),
         {
-          inlineData: {
-            data: base64Data,
-            mimeType,
-          },
+          headers: { ...corsHeaders(req), "Content-Type": "application/json" },
+          status: 503,
         },
-      ]);
+      );
+    }
 
-      const responseText = result.response.text();
-      aiParsed = sanitizeAIResponse(responseText);
+    const aiParsed: ExtractedAIData | null = geminiResult.ok
+      ? sanitizeAIResponse(geminiResult.text)
+      : null;
 
-      // AI response logging omitted in production for data privacy
-    } catch (aiError) {
-      const msg = aiError instanceof Error ? aiError.message : String(aiError);
-      console.error("Gemini API error (returning mock data):", msg);
+    if (geminiResult.ok && !aiParsed) {
+      console.warn("Gemini response did not parse as JSON");
     }
 
     const normalizedProducts = buildProducts(aiParsed);
@@ -369,7 +423,7 @@ Deno.serve(async (req: Request) => {
           "Dieses Dokument konnte nicht als gültiger Beleg identifiziert werden. Bitte stellen Sie sicher, dass Sie einen Kassenbon oder eine Rechnung hochladen.",
       };
 
-    // Extracted data logging omitted in production for data privacy
+    console.log(`Extraction done: success=${hasProducts}, products=${normalizedProducts.length}`);
 
     return new Response(JSON.stringify(extractedData), {
       headers: { ...corsHeaders(req), "Content-Type": "application/json" },
