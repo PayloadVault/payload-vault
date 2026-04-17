@@ -126,16 +126,14 @@ function buildProducts(aiParsed: ExtractedAIData | null): ExtractedProduct[] {
           category?: unknown;
         };
 
-        const amount =
-          parseAmount(candidate.amount) ??
+        const amount = parseAmount(candidate.amount) ??
           parseAmount(candidate.total) ??
           parseAmount(candidate.price);
 
         if (!amount) return null;
 
-        const productName =
-          (typeof candidate.product_name === "string" &&
-            candidate.product_name.trim()) ||
+        const productName = (typeof candidate.product_name === "string" &&
+          candidate.product_name.trim()) ||
           (typeof candidate.name === "string" && candidate.name.trim()) ||
           (typeof candidate.description === "string" &&
             candidate.description.trim()) ||
@@ -154,8 +152,7 @@ function buildProducts(aiParsed: ExtractedAIData | null): ExtractedProduct[] {
     }
   }
 
-  const fallbackAmount =
-    parseAmount(aiParsed.total_amount) ??
+  const fallbackAmount = parseAmount(aiParsed.total_amount) ??
     parseAmount(aiParsed.total) ??
     parseAmount(aiParsed.amount) ??
     parseAmount(aiParsed.gross_total) ??
@@ -214,13 +211,23 @@ function toBase64(buffer: ArrayBuffer): string {
 
 // ---------- CORS ----------
 
-const allowedOrigin = Deno.env.get("APP_ORIGIN") ?? "";
-const corsHeaders = {
-  "Access-Control-Allow-Origin": allowedOrigin,
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+const allowedOrigins = new Set(
+  (Deno.env.get("APP_ORIGIN") ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
+);
+
+function corsHeaders(req: Request) {
+  const origin = req.headers.get("Origin") ?? "";
+  return {
+    "Access-Control-Allow-Origin": allowedOrigins.has(origin) ? origin : "",
+    "Vary": "Origin",
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
+}
 
 // Simple in-memory rate limiter (per warm instance)
 const requestCounts = new Map<string, { count: number; resetAt: number }>();
@@ -243,7 +250,7 @@ function checkRateLimit(userId: string): boolean {
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { headers: corsHeaders(req) });
   }
 
   // Validate JWT — ensure caller is an authenticated user
@@ -251,7 +258,7 @@ Deno.serve(async (req: Request) => {
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders(req), "Content-Type": "application/json" },
     });
   }
   const { data: { user }, error: authError } = await supabase.auth.getUser(
@@ -260,7 +267,7 @@ Deno.serve(async (req: Request) => {
   if (authError || !user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders(req), "Content-Type": "application/json" },
     });
   }
 
@@ -268,7 +275,7 @@ Deno.serve(async (req: Request) => {
   if (!checkRateLimit(user.id)) {
     return new Response(JSON.stringify({ error: "Too many requests" }), {
       status: 429,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders(req), "Content-Type": "application/json" },
     });
   }
 
@@ -280,7 +287,7 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({ success: false, error: "No filePath provided" }),
         {
           status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...corsHeaders(req), "Content-Type": "application/json" },
         },
       );
     }
@@ -297,13 +304,13 @@ Deno.serve(async (req: Request) => {
     ) {
       return new Response(JSON.stringify({ error: "Invalid file path" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...corsHeaders(req), "Content-Type": "application/json" },
       });
     }
     if (!normalizedPath.startsWith(`${user.id}/`)) {
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...corsHeaders(req), "Content-Type": "application/json" },
       });
     }
 
@@ -345,37 +352,39 @@ Deno.serve(async (req: Request) => {
 
     const extractedData: ExtractionResponse = hasProducts
       ? {
-          success: true,
-          expense_date: normalizeExpenseDate(aiParsed?.expense_date),
-          vendor_name: normalizeVendorName(aiParsed?.vendor_name),
-          image_url: filePath,
-          products: normalizedProducts,
-        }
+        success: true,
+        expense_date: normalizeExpenseDate(aiParsed?.expense_date),
+        vendor_name: normalizeVendorName(aiParsed?.vendor_name),
+        image_url: filePath,
+        products: normalizedProducts,
+      }
       : {
-          success: false,
-          expense_date: normalizeExpenseDate(aiParsed?.expense_date),
-          vendor_name: normalizeVendorName(aiParsed?.vendor_name),
-          image_url: filePath,
-          products: [],
-          rejection_reason:
-            (typeof aiParsed?.rejection_reason === "string" &&
-              aiParsed.rejection_reason) ||
-            "Dieses Dokument konnte nicht als gültiger Beleg identifiziert werden. Bitte stellen Sie sicher, dass Sie einen Kassenbon oder eine Rechnung hochladen.",
-        };
+        success: false,
+        expense_date: normalizeExpenseDate(aiParsed?.expense_date),
+        vendor_name: normalizeVendorName(aiParsed?.vendor_name),
+        image_url: filePath,
+        products: [],
+        rejection_reason: (typeof aiParsed?.rejection_reason === "string" &&
+          aiParsed.rejection_reason) ||
+          "Dieses Dokument konnte nicht als gültiger Beleg identifiziert werden. Bitte stellen Sie sicher, dass Sie einen Kassenbon oder eine Rechnung hochladen.",
+      };
 
     // Extracted data logging omitted in production for data privacy
 
     return new Response(JSON.stringify(extractedData), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders(req), "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error("Edge function error:", message);
     return new Response(
-      JSON.stringify({ success: false, error: "Verarbeitung fehlgeschlagen. Bitte erneut versuchen." }),
+      JSON.stringify({
+        success: false,
+        error: "Verarbeitung fehlgeschlagen. Bitte erneut versuchen.",
+      }),
       {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...corsHeaders(req), "Content-Type": "application/json" },
         status: 500,
       },
     );
