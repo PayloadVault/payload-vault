@@ -23,6 +23,8 @@ import { ImpressumPage } from "./pages/impressum/ImpressumPage";
 import { DatenschutzPage } from "./pages/datenschutz/DatenschutzPage";
 import { StatisticsPage } from "./pages/statistics/StatisticsPage";
 import { AnalyticsPage } from "./pages/analytics/AnalyticsPage";
+import { PwaInstallPrompt } from "./components/pwa/PwaInstallPrompt";
+import { PwaUpdateToast } from "./components/pwa/PwaUpdateToast";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +46,8 @@ export default function App() {
         <YearProvider>
           <BannerProvider>
             <ModalProvider>
+              <PwaInstallPrompt />
+              <PwaUpdateToast />
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignUpPage />} />
