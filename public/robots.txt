@@ -1,0 +1,14 @@
+# Profina Payload Vault is a private, authenticated application.
+# Only the legally required public pages should be indexed.
+User-agent: *
+Allow: /$
+Allow: /impressum
+Allow: /datenschutz
+Disallow: /login
+Disallow: /signup
+Disallow: /passwort-zurucksetzen
+Disallow: /update-passwort
+Disallow: /einnahmen
+Disallow: /steuerrelevante-ausgaben
+Disallow: /statistiken
+Disallow: /analysen

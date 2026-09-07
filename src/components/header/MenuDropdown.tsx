@@ -38,7 +38,32 @@ export const MenuDropdown = ({
     }
   }, [isOpen]);
 
-  const handleChangePassword = async (newPassword: string) => {
+  const handleChangePassword = async (
+    newPassword: string,
+    currentPassword: string,
+  ) => {
+    // Re-authenticate before changing the password. Without this, anyone
+    // holding a live session (borrowed device, stolen token) could take the
+    // account over and lock the owner out without knowing the old password.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user?.email) {
+      throw new Error(
+        "Sitzung abgelaufen. Bitte melden Sie sich erneut an.",
+      );
+    }
+
+    const { error: reauthError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword,
+    });
+
+    if (reauthError) {
+      throw new Error("Das aktuelle Passwort ist nicht korrekt.");
+    }
+
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
     });

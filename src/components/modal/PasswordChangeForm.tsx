@@ -7,12 +7,13 @@ import { Banner } from "../banner/Banner";
 
 interface PasswordChangeFormProps {
   onCancel: () => void;
-  onSave: (newPassword: string) => Promise<void>;
+  onSave: (newPassword: string, currentPassword: string) => Promise<void>;
 }
 export const PasswordChangeForm = ({
   onCancel,
   onSave,
 }: PasswordChangeFormProps) => {
+  const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -26,6 +27,11 @@ export const PasswordChangeForm = ({
       repeatPassword,
     });
 
+    if (!currentPassword) {
+      setError("Bitte geben Sie Ihr aktuelles Passwort ein");
+      return;
+    }
+
     if (!result.success) {
       const firstError = result.error.issues[0]?.message;
       setError(firstError);
@@ -34,7 +40,7 @@ export const PasswordChangeForm = ({
 
     setIsLoading(true);
     try {
-      await onSave(result.data.password);
+      await onSave(result.data.password, currentPassword);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -51,6 +57,11 @@ export const PasswordChangeForm = ({
       <div className="w-full sm:w-70">
         {error && <Banner bannerType="error" description="" title={error} />}
       </div>
+      <PasswordInput
+        label="Aktuelles Passwort"
+        value={currentPassword}
+        onChange={setCurrentPassword}
+      />
       <PasswordInput
         label="Neues Passwort"
         value={password}

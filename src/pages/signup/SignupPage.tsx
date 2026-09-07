@@ -57,10 +57,20 @@ export const SignUpPage = () => {
     });
 
     if (signUpError) {
+      // The database rejects addresses that are not on the server-side
+      // allowlist; GoTrue surfaces that as a generic "Database error saving
+      // new user". Keep the wording generic so the allowlist itself is not
+      // probeable from the outside.
+      const isRejectedByServer =
+        signUpError.status === 500 ||
+        signUpError.message.toLowerCase().includes("database error");
+
       setError(
         signUpError.message.includes("User already registered")
           ? "Ein Konto mit dieser E-Mail-Adresse existiert bereits."
-          : "Registrierung fehlgeschlagen. Bitte versuchen Sie es später erneut.",
+          : isRejectedByServer
+            ? "Registrierung mit dieser E-Mail-Adresse ist nicht möglich. Bitte wenden Sie sich an Ihren Administrator."
+            : "Registrierung fehlgeschlagen. Bitte versuchen Sie es später erneut.",
       );
     } else if (
       data.user?.identities?.length === 0 ||

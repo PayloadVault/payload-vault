@@ -3,6 +3,7 @@ import { z } from "zod";
 const strongPassword = z
   .string()
   .min(8, "Passwort muss mindestens 8 Zeichen lang sein")
+  .max(72, "Passwort darf höchstens 72 Zeichen lang sein")
   .regex(/[A-Z]/, "Passwort muss mindestens einen Großbuchstaben enthalten")
   .regex(
     /[^A-Za-z0-9]/,

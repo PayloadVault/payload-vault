@@ -2,7 +2,7 @@ import { PasswordChangeForm } from "../../components/modal/PasswordChangeForm";
 import { useModal } from "../../context/modal/ModalContext";
 
 type UsePasswordChangeProps = {
-  onSave: (newPassword: string) => Promise<void>;
+  onSave: (newPassword: string, currentPassword: string) => Promise<void>;
 };
 
 export const useChangePasswordModal = ({ onSave }: UsePasswordChangeProps) => {

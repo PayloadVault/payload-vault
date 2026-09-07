@@ -11,6 +11,7 @@ const genAI = new GoogleGenerativeAI(Deno.env.get("GOOGLE_API_KEY") ?? "");
 
 const MODEL_CHAIN = ["gemini-2.5-flash", "gemini-2.5-flash-lite"] as const;
 const MAX_ATTEMPTS_PER_MODEL = 2;
+const MAX_FILE_BYTES = 5 * 1024 * 1024;
 
 // ---------- Types ----------
 
@@ -229,21 +230,61 @@ function corsHeaders(req: Request) {
   };
 }
 
-// Simple in-memory rate limiter (per warm instance)
+// ---------- Rate limiting ----------
+//
+// Authoritative limit lives in Postgres (consume_ai_extraction_quota) because
+// edge functions run across many isolates — an in-memory Map only limits a
+// single warm instance and is trivially bypassed by opening new connections.
+// The local counter is kept purely as a cheap first line of defence and as a
+// fallback if the RPC itself is unavailable.
+
+const RATE_LIMIT_PER_MINUTE = 10;
+const RATE_LIMIT_PER_DAY = 200;
+
 const requestCounts = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 10;
 const WINDOW_MS = 60_000;
 
-function checkRateLimit(userId: string): boolean {
+const MAX_TRACKED_USERS = 5_000;
+
+function checkLocalRateLimit(userId: string): boolean {
   const now = Date.now();
+
+  // Bound the map so it cannot grow without limit inside a long-lived isolate.
+  if (requestCounts.size > MAX_TRACKED_USERS) {
+    for (const [key, value] of requestCounts) {
+      if (now > value.resetAt) requestCounts.delete(key);
+    }
+    if (requestCounts.size > MAX_TRACKED_USERS) requestCounts.clear();
+  }
+
   const entry = requestCounts.get(userId);
   if (!entry || now > entry.resetAt) {
     requestCounts.set(userId, { count: 1, resetAt: now + WINDOW_MS });
     return true;
   }
-  if (entry.count >= RATE_LIMIT) return false;
+  if (entry.count >= RATE_LIMIT_PER_MINUTE) return false;
   entry.count++;
   return true;
+}
+
+async function checkRateLimit(userId: string): Promise<boolean> {
+  const withinLocalBudget = checkLocalRateLimit(userId);
+  if (!withinLocalBudget) return false;
+
+  const { data, error } = await supabase.rpc("consume_ai_extraction_quota", {
+    p_user_id: userId,
+    p_minute_limit: RATE_LIMIT_PER_MINUTE,
+    p_day_limit: RATE_LIMIT_PER_DAY,
+  });
+
+  if (error) {
+    // Shared counter unreachable (e.g. migration not applied yet) — fall back
+    // to the per-isolate limit rather than failing every upload.
+    console.error("Rate-limit RPC failed, falling back to local counter:", error.message);
+    return withinLocalBudget;
+  }
+
+  return data === true;
 }
 
 // ---------- Gemini call with retry + fallback ----------
@@ -315,7 +356,7 @@ Deno.serve(async (req: Request) => {
   }
 
   // Rate limiting
-  if (!checkRateLimit(user.id)) {
+  if (!(await checkRateLimit(user.id))) {
     console.warn(`Rate limit exceeded for user ${user.id}`);
     return new Response(JSON.stringify({ error: "Too many requests" }), {
       status: 429,
@@ -369,6 +410,23 @@ Deno.serve(async (req: Request) => {
     }
 
     const arrayBuffer = await fileBlob.arrayBuffer();
+
+    // The bucket caps uploads at 5 MB, but never trust that a stored object
+    // still matches the bucket policy — base64 inflates by ~4/3 and the whole
+    // payload is held in memory before being sent to Gemini.
+    if (arrayBuffer.byteLength > MAX_FILE_BYTES) {
+      console.warn(
+        `Rejected oversized file for user ${user.id}: ${arrayBuffer.byteLength} bytes`,
+      );
+      return new Response(
+        JSON.stringify({ success: false, error: "Datei ist zu groß." }),
+        {
+          status: 413,
+          headers: { ...corsHeaders(req), "Content-Type": "application/json" },
+        },
+      );
+    }
+
     const base64Data = toBase64(arrayBuffer);
     const mimeType = getMimeType(filePath, fileBlob.type);
     console.log(`File downloaded: ${arrayBuffer.byteLength} bytes, mime=${mimeType}`);

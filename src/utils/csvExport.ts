@@ -42,6 +42,49 @@ export function formatAmount(value: number): string {
   return value.toFixed(2).replace(".", ",");
 }
 
+const CSV_DELIMITER = ";";
+
+// A value that is entirely a number (including a negative amount such as
+// "-1234,50") is data, not a formula, and must stay numeric for the
+// accounting import.
+const NUMERIC_VALUE = /^[+-]?\d+(?:[.,]\d+)?$/;
+
+/**
+ * Renders one CSV field safely.
+ *
+ * Two separate problems are handled here:
+ *  1. Structure — vendor/product/file names are free text and may contain the
+ *     delimiter, quotes or newlines, which would otherwise shift every
+ *     following column (RFC 4180 quoting).
+ *  2. Formula injection — a value starting with = + - @ or a control character
+ *     is executed as a formula when the export is opened in Excel/LibreOffice
+ *     or imported into accounting software. Prefixing with a single quote
+ *     keeps the value visible but inert.
+ */
+export function escapeCsvField(
+  value: string | number | null | undefined,
+): string {
+  if (value === null || value === undefined) return "";
+
+  let text = String(value).replace(/[\r\n\t]+/g, " ");
+
+  // Leading whitespace is stripped by spreadsheet importers, so "\t=cmd" is
+  // just as dangerous as "=cmd".
+  if (!NUMERIC_VALUE.test(text) && /^\s*[=+\-@]/.test(text)) {
+    text = `'${text}`;
+  }
+
+  if (text.includes(CSV_DELIMITER) || text.includes('"')) {
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+
+  return text;
+}
+
+function csvRow(fields: Array<string | number | null | undefined>): string {
+  return fields.map(escapeCsvField).join(CSV_DELIMITER);
+}
+
 function getGermanMonth(dateStr: string): string {
   const month = new Date(dateStr).getMonth();
   return GERMAN_MONTHS[month];
@@ -75,13 +118,25 @@ export function generateExpenseCsv(
       for (const product of relevantProducts) {
         const konto = EXPENSE_KONTO[product.category] ?? 4900;
         rows.push(
-          `${formatDate(expense.expense_date)};${formatAmount(product.amount)};${product.category};${konto};${expense.vendor_name}`,
+          csvRow([
+            formatDate(expense.expense_date),
+            formatAmount(product.amount),
+            product.category,
+            konto,
+            expense.vendor_name,
+          ]),
         );
       }
     } else {
       const konto = EXPENSE_KONTO[expense.category] ?? 4900;
       rows.push(
-        `${formatDate(expense.expense_date)};${formatAmount(expense.amount)};${expense.category};${konto};${expense.vendor_name}`,
+        csvRow([
+          formatDate(expense.expense_date),
+          formatAmount(expense.amount),
+          expense.category,
+          konto,
+          expense.vendor_name,
+        ]),
       );
     }
   }
@@ -105,16 +160,40 @@ export function generateIncomeCsv(pdfs: PdfRecord[]): string {
       const mainKonto = INCOME_KONTO[pdf.category] ?? 8300;
 
       rows.push(
-        `${datum};${formatAmount(mainAmount)};EUR;${mainKonto};1200;${belegfeld1};${buchungstext}`,
+        csvRow([
+          datum,
+          formatAmount(mainAmount),
+          "EUR",
+          mainKonto,
+          1200,
+          belegfeld1,
+          buchungstext,
+        ]),
       );
 
       rows.push(
-        `${datum};${formatAmount(pdf.general_grant)};EUR;8400;1200;${belegfeld1};${buchungstext}`,
+        csvRow([
+          datum,
+          formatAmount(pdf.general_grant),
+          "EUR",
+          8400,
+          1200,
+          belegfeld1,
+          buchungstext,
+        ]),
       );
     } else {
       const konto = INCOME_KONTO[pdf.category] ?? 8300;
       rows.push(
-        `${datum};${formatAmount(pdf.profit)};EUR;${konto};1200;${belegfeld1};${buchungstext}`,
+        csvRow([
+          datum,
+          formatAmount(pdf.profit),
+          "EUR",
+          konto,
+          1200,
+          belegfeld1,
+          buchungstext,
+        ]),
       );
     }
   }
@@ -138,8 +217,16 @@ export function downloadCsv(csvContent: string, fileName: string): void {
 }
 
 export function buildCsvFileName(parts: (string | null)[]): string {
+  // Keep path separators and other filesystem-significant characters out of
+  // the suggested download name (umlauts and other letters are preserved).
   const slugify = (value: string) =>
-    value.toLowerCase().trim().replace(/\s+/g, "_");
+    value
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "_")
+      // eslint-disable-next-line no-control-regex
+      .replace(/[/\\:*?"<>|\u0000-\u001f]/g, "_")
+      .slice(0, 80);
 
   return parts
     .filter((v): v is string => Boolean(v))
